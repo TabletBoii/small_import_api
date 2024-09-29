@@ -48,7 +48,6 @@ class ClaimsImport:
         self.dates = dates
         self.__imported_data = None
         self.KOMPAS_DB_SERVER = get_data("KOMPAS_DB_SERVER")
-
         self.KOMPAS_DB_USERNAME = get_data("KOMPAS_DB_USERNAME")
         self.KOMPAS_DB_PASSWORD = get_data("KOMPAS_DB_PASSWORD")
         self.KOMPAS_DB_NAME = get_data("KOMPAS_DB_NAME")
