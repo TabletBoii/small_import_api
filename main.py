@@ -5,10 +5,13 @@ from fastapi.security.api_key import APIKeyHeader, APIKeyQuery, APIKey
 import os
 from dotenv import load_dotenv
 
+from callers.agg_import_caller import get_agg_import
+from middlewares.cancelled_middleware import RequestCancelledMiddleware
 from utils.agg_import import AggImport
 from utils.claims_import import ClaimsImport
 
 app = FastAPI()
+# app.add_middleware(RequestCancelledMiddleware)
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(
@@ -61,12 +64,10 @@ async def import_claim_data(date_from: str, date_till: str, api_key: str = Depen
 
 
 @app.get('/plan_import/', response_class=UJSONResponse)
-async def import_plan_data(year_from: str, api_key: str = Depends(get_api_key)):
-    aggregated_import = AggImport(year_from=year_from)
-    imported_data = await aggregated_import.run()
-    json_compatible_data = jsonable_encoder(imported_data)
+async def import_plan_data(year_from: str, agg_import: AggImport = Depends(get_agg_import), api_key: str = Depends(get_api_key)):
+    imported_data = await agg_import.run()
     return JSONResponse(
-        content=json_compatible_data,
+        content=imported_data,
         media_type="application/json; charset=utf-8"
     )
 

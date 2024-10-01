@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import asyncio
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
 from datetime import datetime
 from sqlalchemy import create_engine, text
@@ -40,7 +41,7 @@ class AggImport:
         self.KOMPAS_DB_PASSWORD = get_data("KOMPAS_DB_PASSWORD")
         self.KOMPAS_DB_NAME = get_data("KOMPAS_DB_NAME")
         self.connection_string = f"mssql+aioodbc://{self.KOMPAS_DB_USERNAME}:{self.KOMPAS_DB_PASSWORD}@{self.KOMPAS_DB_SERVER}:1433/{self.KOMPAS_DB_NAME}?driver={self.__odbc_driver}"
-
+        self.engine = None
 
     def __format_selected_rows(self):
         selected_df = self.__imported_data.loc[:, list(field_names.keys())]
@@ -86,44 +87,30 @@ class AggImport:
 
             import_query = f"""
                 SET NOCOUNT ON;
-                EXEC	{get_data("PROCEDURE_NAME")}
+                EXEC	{get_data("PLAN_PROCEDURE_NAME")}
                 @cdate_from = N'{date_period[0]}',
                 @cdate_till = N'{date_period[1]}'
             """
             import_queries.append(import_query)
-        print(import_queries)
         await self.__fetch_and_append_data(import_queries)
-        # print(self.__imported_data)
-            # self.__execute_query(
-            #     query=import_query
-            # )
 
     async def __process_imported_data(self):
-        self.__imported_data = self.__imported_data[self.__imported_data['claim$status'].isin([1, 2])]
-        print("FILTERED")
-        self.__imported_data['year'] = pd.DatetimeIndex(self.__imported_data['claim$cdate']).year
-        print("created column")
         pivot_imported_data = self.__imported_data.pivot_table(
-            index=['partner$inc', 'partner$name', 'partner$town$name', 'partner$adate', 'partner$internet', 'partner$parttype$name', 'pc$name', 'supervisor$name'],  # Columns to group by
-            columns='year',
-            values='all_pax',
+            index=['partner_inc', 'partner_name', 'partner$town$name', 'partner$adate', 'partner$internet', 'partner$parttype$name', 'pc$name', 'supervisor_name'],  # Columns to group by
+            columns='claim_cdate_year',
+            values='Pax',
             aggfunc='sum',
             fill_value=0
         ).reset_index()
-        print("created")
-        # pivot_imported_data.to_excel('processed.xlsx')
         return pivot_imported_data.to_dict(orient='records')
+
+    async def dispose_engine(self):
+        if self.engine:
+            await self.engine.dispose()
 
     async def run(self):
         self.__get_date_periods()
         await self.__fetch_kompas_data()
         processed_data = await self.__process_imported_data()
-        return processed_data
-        # self.__imported_data.to_csv('output_mock.csv')
-        # print(self.__imported_data)
-        # print("processing")
-        # df = pd.read_csv('output_mock.csv')
-        # self.__imported_data = df
-        #
-
-
+        resulted_data = jsonable_encoder(processed_data)
+        return resulted_data

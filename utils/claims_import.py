@@ -73,7 +73,7 @@ class ClaimsImport:
 
         import_query = f"""
             SET NOCOUNT ON;
-            EXEC	{get_data("PROCEDURE_NAME")}
+            EXEC	{get_data("CUSTOM_PROCEDURE_NAME")}
             @cdate_from = N'{self.dates[0]}',
             @cdate_till = N'{self.dates[1]}'
         """
