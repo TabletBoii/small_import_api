@@ -31,8 +31,9 @@ convert_timestamp_to_str_list = ['claim$cdatetime', 'claim$datebeg', 'claim$date
 
 
 class AggImport:
-    def __init__(self, year_from: str):
+    def __init__(self, year_from: str, state_inc: str):
         self.year_from: int = int(year_from)
+        self.state_inc: int = int(state_inc) if state_inc else None
         self.date_period_list = []
         self.__imported_data = pd.DataFrame()
         self.__odbc_driver = "ODBC Driver 17 for SQL Server"
@@ -77,19 +78,21 @@ class AggImport:
 
     def __get_date_periods(self):
         current_year = datetime.now().year
-        year_diffence = current_year - self.year_from
+        year_diffence = current_year - self.year_from + 1
         for i in range(0, year_diffence):
             self.date_period_list.append([f'{self.year_from+i}0101', f'{self.year_from+i}1231'])
 
     async def __fetch_kompas_data(self):
         import_queries = []
+        print(self.date_period_list)
         for date_period in self.date_period_list:
 
             import_query = f"""
                 SET NOCOUNT ON;
                 EXEC	{get_data("PLAN_PROCEDURE_NAME")}
                 @cdate_from = N'{date_period[0]}',
-                @cdate_till = N'{date_period[1]}'
+                @cdate_till = N'{date_period[1]}',
+                {f'@state_inc = {self.state_inc}' if self.state_inc else ''}
             """
             import_queries.append(import_query)
         await self.__fetch_and_append_data(import_queries)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI, Depends, HTTPException, Security
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, UJSONResponse
@@ -64,7 +66,7 @@ async def import_claim_data(date_from: str, date_till: str, api_key: str = Depen
 
 
 @app.get('/plan_import/', response_class=UJSONResponse)
-async def import_plan_data(year_from: str, agg_import: AggImport = Depends(get_agg_import), api_key: str = Depends(get_api_key)):
+async def import_plan_data(year_from: str, state_inc: Optional[str] = None, agg_import: AggImport = Depends(get_agg_import), api_key: str = Depends(get_api_key)):
     imported_data = await agg_import.run()
     return JSONResponse(
         content=imported_data,
