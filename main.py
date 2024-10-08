@@ -7,10 +7,11 @@ from fastapi.security.api_key import APIKeyHeader, APIKeyQuery, APIKey
 import os
 from dotenv import load_dotenv
 
-from callers.agg_import_caller import get_agg_import
+from callers.import_caller import get_agg_import, get_partner_directory_import
 from middlewares.cancelled_middleware import RequestCancelledMiddleware
 from utils.agg_import import AggImport
 from utils.claims_import import ClaimsImport
+from utils.partner_directory_import import PartnerDirectoryImport
 
 app = FastAPI()
 # app.add_middleware(RequestCancelledMiddleware)
@@ -68,6 +69,15 @@ async def import_claim_data(date_from: str, date_till: str, api_key: str = Depen
 @app.get('/plan_import/', response_class=UJSONResponse)
 async def import_plan_data(year_from: str, state_inc: Optional[str] = None, agg_import: AggImport = Depends(get_agg_import), api_key: str = Depends(get_api_key)):
     imported_data = await agg_import.run()
+    return JSONResponse(
+        content=imported_data,
+        media_type="application/json; charset=utf-8"
+    )
+
+
+@app.get('/partner_directory/', response_class=UJSONResponse)
+async def import_partner_directory(state_inc: Optional[str] = None, plan_directory: PartnerDirectoryImport = Depends(get_partner_directory_import), api_key: str = Depends(get_api_key)):
+    imported_data = await plan_directory.run()
     return JSONResponse(
         content=imported_data,
         media_type="application/json; charset=utf-8"
