@@ -64,8 +64,11 @@ class PartnerDirectoryImport:
         # processed_data = await self.__process_imported_data()
         self.__imported_data = self.__imported_data.where(pd.notnull(self.__imported_data), None)
         self.__imported_data = self.__imported_data.replace(np.nan, None)
-        self.__imported_data[convert_timestamp_to_str_list] = self.__imported_data[convert_timestamp_to_str_list].apply(
-            lambda x: x.str.replace('T', ' '))
+        self.__imported_data[convert_timestamp_to_str_list] = self.__imported_data[
+            convert_timestamp_to_str_list].astype(str)
+        self.__imported_data[convert_timestamp_to_str_list] = self.__imported_data[convert_timestamp_to_str_list].apply(lambda x: x.str.replace('T', ' '))
+        for col in convert_timestamp_to_str_list:
+            self.__imported_data[col] = pd.to_datetime(self.__imported_data[col], errors='coerce').dt.date
         self.__imported_data = self.__imported_data.to_dict(orient='records')
         resulted_data = jsonable_encoder(self.__imported_data)
         return resulted_data
