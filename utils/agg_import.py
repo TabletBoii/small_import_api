@@ -105,6 +105,8 @@ class AggImport:
             aggfunc='sum',
             fill_value=0
         ).reset_index()
+        pivot_imported_data['partner$adate'] = pivot_imported_data['partner$adate'].apply(
+            lambda x: x.str.replace('T', ' '))
         return pivot_imported_data.to_dict(orient='records')
 
     async def dispose_engine(self):
