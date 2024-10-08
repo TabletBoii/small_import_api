@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
 from sqlalchemy import text
 from utils.utils import get_data
 
+
+convert_timestamp_to_str_list = ['partner_adate', 'partner_edate', 'partner_stopdate']
+
+
 class PartnerDirectoryImport:
     def __init__(self, state_inc: str):
         self.state_inc: int = int(state_inc) if state_inc else None
@@ -60,6 +64,8 @@ class PartnerDirectoryImport:
         # processed_data = await self.__process_imported_data()
         self.__imported_data = self.__imported_data.where(pd.notnull(self.__imported_data), None)
         self.__imported_data = self.__imported_data.replace(np.nan, None)
+        self.__imported_data[convert_timestamp_to_str_list] = self.__imported_data[convert_timestamp_to_str_list].apply(
+            lambda x: x.str.replace('T', ' '))
         self.__imported_data = self.__imported_data.to_dict(orient='records')
         resulted_data = jsonable_encoder(self.__imported_data)
         return resulted_data
