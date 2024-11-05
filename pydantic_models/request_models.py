@@ -12,3 +12,10 @@ class PlanValuesModel(BaseModel):
     supervisor_name: str | None = None
     partner_parttype_name: str | None = None
     plan_value: int | None = 0
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)
