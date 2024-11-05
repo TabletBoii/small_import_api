@@ -3,7 +3,7 @@ import pandas as pd
 import asyncio
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection, async_sessionmaker, AsyncSession
 from sqlalchemy import text
 from utils.utils import get_data
 
@@ -13,6 +13,7 @@ convert_timestamp_to_str_list = ['partner_adate', 'partner_edate', 'partner_stop
 
 class PartnerDirectoryImport:
     def __init__(self, state_inc: str):
+        self.session = None
         self.state_inc: int = int(state_inc) if state_inc else None
         self.__imported_data = pd.DataFrame()
         self.__odbc_driver = "ODBC Driver 17 for SQL Server"
@@ -34,6 +35,9 @@ class PartnerDirectoryImport:
             raise e
         finally:
             await engine.dispose()
+
+    def get_session(self, session):
+        self.session = session
 
     async def __execute_query(self, db_conn: AsyncConnection, query: str):
         try:

@@ -1,8 +1,8 @@
 import asyncio
 from typing import Optional
 
-from utils.agg_import import AggImport
-from utils.partner_directory_import import PartnerDirectoryImport
+from controllers.agg_import import AggImport
+from controllers.partner_directory_import import PartnerDirectoryImport
 
 
 async def get_agg_import(year_from: str, state_inc: Optional[str] = None) -> AggImport:
@@ -18,7 +18,6 @@ async def get_agg_import(year_from: str, state_inc: Optional[str] = None) -> Agg
 
 
 async def get_partner_directory_import(state_inc: Optional[str] = None) -> PartnerDirectoryImport:
-
     partner_directory_import = PartnerDirectoryImport(state_inc=state_inc)
     try:
         yield partner_directory_import
