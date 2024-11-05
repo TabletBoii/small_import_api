@@ -1,3 +1,4 @@
+import sys
 from typing import Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Security
@@ -14,6 +15,8 @@ from controllers.claims_import import ClaimsImport
 from controllers.partner_directory_import import PartnerDirectoryImport
 from dependencies.import_partner_directory_dependency import PartnerDirectoryImportDependency
 from pydantic_models.request_models import PlanValuesModel
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 app = FastAPI()
 # app.add_middleware(RequestCancelledMiddleware)
