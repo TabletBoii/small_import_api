@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import datetime
 
 
 class PlanValuesModel(BaseModel):
@@ -6,7 +7,7 @@ class PlanValuesModel(BaseModel):
     partner_town_name: str
     partner_name: str
     partner_category_name: str | None = None
-    partner_add_date: str
+    partner_add_date: datetime.date
     partner_internet: bool
     supervisor_name: str | None = None
     partner_parttype_name: str | None = None
