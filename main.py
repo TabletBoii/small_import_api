@@ -95,12 +95,9 @@ async def import_partner_directory(plan_directory: PartnerDirectoryImport = Depe
     )
 
 
-@app.post('/upload_plan_values', response_class=UJSONResponse)
+@app.post('/upload_plan_values')
 async def upload_plan_values(plan_data: list[PlanValuesModel]):
-    return JSONResponse(
-        content=plan_data,
-        media_type="application/json; charset=utf-8"
-    )
+    return plan_data
 
 
 @app.get("/public-data")
