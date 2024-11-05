@@ -96,7 +96,8 @@ async def import_partner_directory(plan_directory: PartnerDirectoryImport = Depe
 
 
 @app.post('/upload_plan_values')
-async def upload_plan_values(plan_data: list[PlanValuesModel]):
+async def upload_plan_values(plan_data: list[PlanValuesModel], api_key: str = Depends(get_api_key)):
+    print(plan_data)
     return plan_data
 
 
