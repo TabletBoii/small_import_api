@@ -16,7 +16,7 @@ async def get_agg_import_class(year_from: str, state_inc: Optional[str] = None) 
         await agg_import_instance.dispose_engine()
         raise "Cancelling request due to disconnect"
     finally:
-        await agg_import_instance.dispose_engine()
+        print(f"{agg_import_instance} closed successfully")
 
 
 async def get_partner_directory_import_class(state_inc: Optional[str] = None) -> PartnerDirectoryImport:
