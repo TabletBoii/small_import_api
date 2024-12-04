@@ -1,10 +1,11 @@
 import asyncio
-from typing import Optional
+from typing import Optional, List
 
 from controllers.agg_import import AggImport
 from controllers.partner_directory_import import PartnerDirectoryImport
+from controllers.upload_budget import UploadBudgetData
 from controllers.upload_plan import UploadPlanData
-from pydantic_models.request_models import PlanValuesModel
+from pydantic_models.request_models import PlanValuesModel, BudgetValuesModel
 
 
 async def get_agg_import_class(year_from: str, state_inc: Optional[str] = None) -> AggImport:
@@ -29,7 +30,7 @@ async def get_partner_directory_import_class(state_inc: Optional[str] = None) ->
         print(f"{partner_directory_import} closed successfully")
 
 
-async def get_upload_plan_class(plan_data: list[PlanValuesModel]) -> PartnerDirectoryImport:
+async def get_upload_plan_class(plan_data: list[PlanValuesModel]) -> UploadPlanData:
     upload_plan_data = UploadPlanData(plan_data=plan_data)
     try:
         yield upload_plan_data
@@ -37,3 +38,13 @@ async def get_upload_plan_class(plan_data: list[PlanValuesModel]) -> PartnerDire
         raise "Cancelling request due to disconnect"
     finally:
         print(f"{upload_plan_data} closed successfully")
+
+
+async def get_upload_budget_class(budget_data: List[BudgetValuesModel]) -> UploadBudgetData:
+    upload_budget_data = UploadBudgetData(budget_data=budget_data)
+    try:
+        yield upload_budget_data
+    except asyncio.CancelledError:
+        raise "Cancelling request due to disconnect"
+    finally:
+        print(f"{upload_budget_data} closed successfully")

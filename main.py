@@ -4,6 +4,8 @@ from typing import Optional
 import os
 from dotenv import load_dotenv
 
+from controllers.upload_budget import UploadBudgetData
+
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(
     dotenv_path=dotenv_path
@@ -17,7 +19,8 @@ from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
 from controllers.upload_plan import UploadPlanData
 from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE, KOMPAS_SESSION_FACTORY, PLAN_SESSION_FACTORY
 
-from callers.import_caller import get_agg_import_class, get_partner_directory_import_class, get_upload_plan_class
+from callers.import_caller import get_agg_import_class, get_partner_directory_import_class, get_upload_plan_class, \
+    get_upload_budget_class
 from controllers.agg_import import AggImport
 from controllers.claims_import import ClaimsImport
 from controllers.partner_directory_import import PartnerDirectoryImport
@@ -106,6 +109,14 @@ async def upload_plan_values(upload_plan: UploadPlanData = Depends(get_upload_pl
                              api_key: str = Depends(get_api_key)):
     upload_plan.set_session(session_factory=PLAN_SESSION_FACTORY)
     await upload_plan.run()
+    return "Uploaded"
+
+
+@app.post('/upload_budget_values')
+async def upload_plan_values(upload_budget: UploadBudgetData = Depends(get_upload_budget_class),
+                             api_key: str = Depends(get_api_key)):
+    upload_budget.set_session(session_factory=PLAN_SESSION_FACTORY)
+    await upload_budget.run()
     return "Uploaded"
 
 
