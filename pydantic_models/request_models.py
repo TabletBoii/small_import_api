@@ -47,3 +47,16 @@ class BudgetValuesModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model):
         return cls.from_orm(orm_model)
+
+
+class BudgetCurrencyModel(BaseModel):
+    date: str
+    currency: str
+    value: int
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)

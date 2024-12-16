@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from controllers.upload_budget import UploadBudgetData
+from controllers.upload_budget_curreny_data import UploadBudgetCurrencyData
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(
@@ -20,12 +21,11 @@ from controllers.upload_plan import UploadPlanData
 from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE, KOMPAS_SESSION_FACTORY, PLAN_SESSION_FACTORY
 
 from callers.import_caller import get_agg_import_class, get_partner_directory_import_class, get_upload_plan_class, \
-    get_upload_budget_class
+    get_upload_budget_class, get_upload_budget_currency_class
 from controllers.agg_import import AggImport
 from controllers.claims_import import ClaimsImport
 from controllers.partner_directory_import import PartnerDirectoryImport
-from dependencies.import_partner_directory_dependency import PartnerDirectoryImportDependency
-from pydantic_models.request_models import PlanValuesModel
+
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -117,6 +117,14 @@ async def upload_plan_values(upload_budget: UploadBudgetData = Depends(get_uploa
                              api_key: str = Depends(get_api_key)):
     upload_budget.set_session(session_factory=PLAN_SESSION_FACTORY)
     await upload_budget.run()
+    return "Uploaded"
+
+
+@app.post('/upload_budget_currency')
+async def upload_budget_currency_values(upload_budget_currency: UploadBudgetCurrencyData = Depends(get_upload_budget_currency_class),
+                                        api_key: str = Depends(get_api_key)):
+    upload_budget_currency.set_session(session_factory=PLAN_SESSION_FACTORY)
+    await upload_budget_currency.run()
     return "Uploaded"
 
 

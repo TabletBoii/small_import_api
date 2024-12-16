@@ -1,4 +1,4 @@
-from sqlalchemy import String, Column, Integer, UniqueConstraint, TIMESTAMP, DOUBLE_PRECISION, DateTime, Boolean, Float
+from sqlalchemy import String, Column, Integer, UniqueConstraint, TIMESTAMP, DOUBLE_PRECISION, DateTime, Boolean, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -39,3 +39,12 @@ class BudgetData(Base):
     overtime_in_hands = Column('overtime_in_hands', Float)
     bonus_in_hands = Column('bonus_in_hands', Float)
     total_in_hands = Column('total_in_hands', Float)
+
+
+class BudgetCurrencyData(Base):
+    __tablename__ = "budget_currency"
+
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    date = Column('id', Date)
+    currency = Column('id', String)
+    value = Column('id', Integer)
