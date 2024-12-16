@@ -1,4 +1,5 @@
-from sqlalchemy import String, Column, Integer, UniqueConstraint, TIMESTAMP, DOUBLE_PRECISION, DateTime, Boolean, Float, Date
+from sqlalchemy import String, Column, Integer, UniqueConstraint, TIMESTAMP, DOUBLE_PRECISION, DateTime, Boolean, Float, \
+    Date, Unicode
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -25,7 +26,7 @@ class BudgetData(Base):
     id = Column('id', Integer, primary_key=True, autoincrement=True)
     department = Column('department', String)
     date = Column('date', String)
-    manager = Column('manager', String)
+    manager = Column('manager', Unicode(200))
     state = Column('state', String)
     markdep = Column('markdep', String)
     standard_days = Column('standard_days', Integer)
