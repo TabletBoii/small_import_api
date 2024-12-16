@@ -47,4 +47,4 @@ class BudgetCurrencyData(Base):
     id = Column('id', Integer, primary_key=True, autoincrement=True)
     date = Column('date', Date)
     currency = Column('currency', String)
-    value = Column('value', Integer)
+    value = Column('value', Float)

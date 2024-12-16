@@ -52,7 +52,7 @@ class BudgetValuesModel(BaseModel):
 class BudgetCurrencyModel(BaseModel):
     date: str
     currency: str
-    value: int
+    value: float
 
     class Config:
         orm_mode = True
