@@ -60,3 +60,20 @@ class BudgetCurrencyModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model):
         return cls.from_orm(orm_model)
+
+
+class BudgetPlanModel(BaseModel):
+    manager: str
+    job_title: str
+    currency: str
+    salary_hand: int
+    oper_kpi: int
+    finance_kpi: int
+    total_salary: int
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)

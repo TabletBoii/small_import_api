@@ -37,3 +37,6 @@ class UploadBudgetCurrencyData:
         #         await session.execute(text("TRUNCATE TABLE plan_data"))
         #
         await self.insert_pydantic_model()
+
+    def __repr__(self):
+        return f"{self.currency_data}"

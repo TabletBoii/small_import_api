@@ -3,10 +3,11 @@ from typing import Optional, List
 
 from controllers.agg_import import AggImport
 from controllers.partner_directory_import import PartnerDirectoryImport
-from controllers.upload_budget import UploadBudgetData
-from controllers.upload_budget_curreny_data import UploadBudgetCurrencyData
+from controllers.budget_upload import UploadBudgetData
+from controllers.upload_budget_currency_data import UploadBudgetCurrencyData
+from controllers.upload_budget_plan import UploadBudgetPlanData
 from controllers.upload_plan import UploadPlanData
-from pydantic_models.request_models import PlanValuesModel, BudgetValuesModel, BudgetCurrencyModel
+from pydantic_models.request_models import PlanValuesModel, BudgetValuesModel, BudgetCurrencyModel, BudgetPlanModel
 
 
 async def get_agg_import_class(year_from: str, state_inc: Optional[str] = None) -> AggImport:
@@ -39,23 +40,3 @@ async def get_upload_plan_class(plan_data: list[PlanValuesModel]) -> UploadPlanD
         raise "Cancelling request due to disconnect"
     finally:
         print(f"{upload_plan_data} closed successfully")
-
-
-async def get_upload_budget_class(budget_data: List[BudgetValuesModel]) -> UploadBudgetData:
-    upload_budget_data = UploadBudgetData(budget_data=budget_data)
-    try:
-        yield upload_budget_data
-    except asyncio.CancelledError:
-        raise "Cancelling request due to disconnect"
-    finally:
-        print(f"{upload_budget_data} closed successfully")
-
-
-async def get_upload_budget_currency_class(currency_data: List[BudgetCurrencyModel]) -> UploadBudgetCurrencyData:
-    upload_budget_currency_data = UploadBudgetCurrencyData(currency_data=currency_data)
-    try:
-        yield upload_budget_currency_data
-    except asyncio.CancelledError:
-        raise "Cancelling request due to disconnect"
-    finally:
-        print(f"{upload_budget_currency_data} closed successfully")
