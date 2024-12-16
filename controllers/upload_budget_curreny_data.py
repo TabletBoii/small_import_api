@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from models.models import PlanData, BudgetData, BudgetCurrencyData
+from models.models import BudgetCurrencyData
 from pydantic_models.request_models import BudgetCurrencyModel
 
 

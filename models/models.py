@@ -45,6 +45,6 @@ class BudgetCurrencyData(Base):
     __tablename__ = "budget_currency"
 
     id = Column('id', Integer, primary_key=True, autoincrement=True)
-    date = Column('id', Date)
-    currency = Column('id', String)
-    value = Column('id', Integer)
+    date = Column('date', Date)
+    currency = Column('currency', String)
+    value = Column('value', Integer)
