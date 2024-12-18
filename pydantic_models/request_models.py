@@ -77,3 +77,16 @@ class BudgetPlanModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model):
         return cls.from_orm(orm_model)
+
+
+class PlanPercentModel(BaseModel):
+    date: str
+    state: int
+    percent: float
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)

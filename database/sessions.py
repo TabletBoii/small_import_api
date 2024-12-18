@@ -14,14 +14,6 @@ PLAN_DB_PASSWORD = get_data("PLAN_DB_PASSWORD")
 PLAN_DB_NAME = get_data("PLAN_DB_NAME")
 
 
-print(
-    PLAN_DB_SERVER,
-    PLAN_DB_USERNAME,
-    PLAN_DB_PASSWORD,
-    PLAN_DB_NAME,
-)
-
-
 samotour_db_connection_string = f"mssql+aioodbc://{KOMPAS_DB_USERNAME}:{KOMPAS_DB_PASSWORD}@{KOMPAS_DB_SERVER}:1433/{KOMPAS_DB_NAME}?driver={ODBC_DRIVER}"
 plan_db_connection_string = f"mssql+aioodbc://{PLAN_DB_USERNAME}:{PLAN_DB_PASSWORD}@{PLAN_DB_SERVER}:1433/{PLAN_DB_NAME}?driver={ODBC_DRIVER}"
 
