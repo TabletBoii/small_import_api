@@ -90,3 +90,14 @@ class PlanPercentModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model):
         return cls.from_orm(orm_model)
+
+
+class UpdateObOpModel(BaseModel):
+    last_claim_id: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)

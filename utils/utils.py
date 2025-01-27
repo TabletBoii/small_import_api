@@ -5,7 +5,6 @@ from fastapi import HTTPException, Security
 
 from utils.constants import API_KEY, API_KEY_HEADER, API_KEY_QUERY
 
-
 def get_data(key: str) -> any:
     return os.environ.get(key)
 

@@ -1,7 +1,7 @@
 import sys
 import env_setup
 
-from routers import budget, plan, default
+from routers import budget, plan, default, office
 
 from fastapi import FastAPI
 from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE
@@ -13,6 +13,7 @@ app = FastAPI()
 app.include_router(budget.router)
 app.include_router(plan.router)
 app.include_router(default.router)
+app.include_router(office.router)
 
 # app.add_middleware(RequestCancelledMiddleware)
 

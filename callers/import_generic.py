@@ -12,7 +12,7 @@ def build_body_list_dependency(
     param_name: str,
     body_model: Type[ModelT],
     constructor_cls: Type[ClassT],
-    **fixed_kwargs: Any  # Additional fixed constructor arguments
+    **fixed_kwargs: Any
 ) -> Callable[[], Callable[..., ClassT]]:
     def _factory():
         @asynccontextmanager

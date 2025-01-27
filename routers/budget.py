@@ -37,7 +37,7 @@ async def upload_plan_values(
 
 @router.post('/upload_budget_values')
 @unified_response
-async def upload_plan_values(
+async def upload_budget_values(
     cls_factory: UploadBudgetData = Depends(
         build_body_list_dependency(
             param_name="budget_data",
