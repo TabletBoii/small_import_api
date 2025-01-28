@@ -4,6 +4,7 @@ import os
 from fastapi import HTTPException, Security
 
 from utils.constants import API_KEY, API_KEY_HEADER, API_KEY_QUERY
+from datetime import datetime
 
 def get_data(key: str) -> any:
     return os.environ.get(key)
@@ -37,3 +38,8 @@ async def get_api_key(api_key_header: str = Security(API_KEY_HEADER),
             status_code=401,
             detail="Unauthorized: Invalid or missing API Key",
         )
+
+
+def convert_iso_string_to_datetime(iso_string: str) -> datetime:
+    dt = datetime.fromisoformat(iso_string.replace("Z", "+00:00"))
+    return dt

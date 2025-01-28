@@ -93,7 +93,8 @@ class PlanPercentModel(BaseModel):
 
 
 class UpdateObOpModel(BaseModel):
-    last_claim_id: Optional[int]
+    # last_claim_id: Optional[int]
+    last_claim_conf_date: str
 
     class Config:
         orm_mode = True
