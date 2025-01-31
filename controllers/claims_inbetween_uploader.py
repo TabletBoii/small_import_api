@@ -19,7 +19,8 @@ field_names = {
     'tilldate$begin': 'Дней до начала тура',
     'partner$phone': 'Контактное лицо',
     'claim$datebeg': 'Дата начала тура',
-    'claim$confirmeddate': 'Дата подтверждения/неподтверждения'
+    'claim$confirmeddate': 'Дата подтверждения/неподтверждения',
+    'confimredstatus$name': 'Статус'
 }
 
 
