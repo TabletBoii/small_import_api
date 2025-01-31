@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import UJSONResponse
+from fastapi.responses import JSONResponse, UJSONResponse
 
 from callers.import_generic import build_body_list_dependency
 from controllers.claims_inbetween_uploader import ClaimsInBetweenUploader
@@ -28,6 +28,4 @@ async def update_ob_op(
 ):
     async with cls_factory as instance:
         instance.set_session(session_factory=KOMPAS_SESSION_FACTORY)
-        await instance.run()
-        return "Uploaded"
-
+        return await instance.run()

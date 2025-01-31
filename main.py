@@ -1,4 +1,7 @@
 import sys
+
+import uvicorn
+
 import env_setup
 
 from routers import budget, plan, default, office
@@ -23,3 +26,7 @@ async def shutdown_event():
     print("Application closes")
     await KOMPAS_ENGINE.dispose()
     await PLAN_ENGINE.dispose()
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
