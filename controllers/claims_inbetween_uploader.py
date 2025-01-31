@@ -9,6 +9,7 @@ from pydantic_models.request_models import UpdateObOpModel
 from datetime import datetime
 
 from utils.utils import convert_iso_string_to_datetime, get_data
+import pytz
 
 field_names = {
     'state$name': 'Основная страна пребывания',
@@ -71,7 +72,10 @@ class ClaimsInBetweenUploader:
         # self.last_claim_conf_date = "2025-01-26T10:33:00.000Z"
         self.last_claim_conf_date = convert_iso_string_to_datetime(self.last_claim_conf_date)
         formated_from_date = self.last_claim_conf_date.strftime("%Y-%m-%d %H:%M")
-        formated_till_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        timezone = pytz.timezone("Asia/Karachi")
+
+        formated_till_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M")
 
         unconfirmed_claims_query = self.get_formated_query(formated_from_date, formated_till_date)
         fetched_data = await self.__execute_query(unconfirmed_claims_query)
