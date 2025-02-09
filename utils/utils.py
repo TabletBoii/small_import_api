@@ -41,5 +41,7 @@ async def get_api_key(credentials: HTTPAuthorizationCredentials = Security(secur
 
 
 def convert_iso_string_to_datetime(iso_string: str) -> datetime:
-    dt = datetime.fromisoformat(iso_string.replace("Z", "+00:00"))
+    date_str_clean = iso_string.split(" (")[0]
+
+    dt = datetime.strptime(date_str_clean, "%a %b %d %Y %H:%M:%S GMT%z")
     return dt
