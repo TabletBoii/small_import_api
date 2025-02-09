@@ -17,7 +17,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["/https\:\/\/[^\.]+\.officescripts\.microsoftusercontent\.com/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,6 +27,7 @@ app.include_router(budget.router)
 app.include_router(plan.router)
 app.include_router(default.router)
 app.include_router(office.router)
+
 
 # app.add_middleware(RequestCancelledMiddleware)
 
