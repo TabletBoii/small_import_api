@@ -13,18 +13,11 @@ from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "https://kompastourcom-my.sharepoint.com/",
-    # Add more allowed origins if needed.
-]
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
