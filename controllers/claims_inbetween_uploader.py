@@ -78,5 +78,4 @@ class ClaimsInBetweenUploader:
         formated_till_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M")
         unconfirmed_claims_query = self.get_formated_query(formated_from_date, formated_till_date)
         fetched_data = await self.__execute_query(unconfirmed_claims_query)
-        print(fetched_data)
         return self.process_result_data(fetched_data)
