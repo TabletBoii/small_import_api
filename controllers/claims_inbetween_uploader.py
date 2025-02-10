@@ -39,7 +39,8 @@ class ClaimsInBetweenUploader:
             EXEC	{get_data("CUSTOM_PROCEDURE_NAME")}
             @confirmeddate_from = N'{date_from}',
             @confirmeddate_till = N'{date_till}',
-		    @confirmedstatus_value = 1
+		    @confirmedstatus_value = 1,
+		    @paidstatus_value = 1
         """
         return import_query
 
