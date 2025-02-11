@@ -16,7 +16,7 @@ field_names = {
     'claim$inc': 'Заявка №',
     'partner$name': 'Заказчик',
     'claim$privatecomment': 'Внутреннее примечание',
-    'town$name': 'Город',
+    'partner$town$name': 'Город',
     'tilldate$begin': 'Дней до начала тура',
     'partner$phone': 'Контактное лицо',
     'claim$datebeg': 'Дата начала тура',
