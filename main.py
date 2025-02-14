@@ -30,7 +30,7 @@ app.include_router(office.router)
 
 
 # app.add_middleware(RequestCancelledMiddleware)
-
+# ЯКОВ, ИДИ УЧИ УРОКИ СУКА
 
 @app.on_event("shutdown")
 async def shutdown_event():
