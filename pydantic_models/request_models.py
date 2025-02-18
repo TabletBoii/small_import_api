@@ -102,3 +102,15 @@ class UpdateObOpModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model):
         return cls.from_orm(orm_model)
+
+
+class StatusRefreshObOpModel(BaseModel):
+    # last_claim_id: Optional[int]
+    claim_id: int
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)
