@@ -21,7 +21,9 @@ field_names = {
     'partner$phone': 'Контактное лицо',
     'claim$datebeg': 'Дата начала тура',
     'claim$confirmeddate': 'Дата подтверждения/неподтверждения',
-    'confimredstatus$name': 'Статус'
+    'confimredstatus$name': 'Статус',
+    'partner$inc': 'ID партнера',
+    'partner$category$color': 'Подсветка партнера'
 }
 
 
