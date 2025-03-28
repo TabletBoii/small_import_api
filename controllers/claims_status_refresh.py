@@ -14,7 +14,7 @@ class ClaimStatusRefresh:
 
     def get_formated_query(self) -> str:
         import_query = f"""
-            SELECT inc, confirmed_full FROM claim WHERE inc IN {tuple(self.claim_list)};
+            SELECT inc, confirmed_full, status FROM claim WHERE inc IN {tuple(self.claim_list)};
         """
         return import_query
 
