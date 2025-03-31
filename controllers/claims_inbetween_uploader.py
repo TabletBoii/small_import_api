@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from pydantic_models.request_models import UpdateObOpModel
 from datetime import datetime
 
-from utils.utils import convert_iso_string_to_datetime, get_data
+from utils.utils import convert_iso_string_to_datetime, get_data, process_result_data
 import pytz
 
 field_names = {
@@ -61,14 +61,6 @@ class ClaimsInBetweenUploader:
     def get_ongoing_claim_data(self):
         pass
 
-    def process_result_data(self, fetched_data: DataFrame):
-        fetched_data = fetched_data.loc[:, list(field_names.keys())]
-        fetched_data = fetched_data.replace(np.nan, None)
-        fetched_data = fetched_data.rename(columns=field_names)
-        fetched_data = fetched_data.to_dict(orient='records')
-        resulted_data = jsonable_encoder(fetched_data)
-        return resulted_data
-
     async def run(self):
         if self.last_claim_conf_date is None:
             pass
@@ -81,4 +73,4 @@ class ClaimsInBetweenUploader:
         formated_till_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M")
         unconfirmed_claims_query = self.get_formated_query(formated_from_date, formated_till_date)
         fetched_data = await self.__execute_query(unconfirmed_claims_query)
-        return self.process_result_data(fetched_data)
+        return process_result_data(fetched_data, field_names)
