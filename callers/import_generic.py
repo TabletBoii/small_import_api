@@ -9,7 +9,7 @@ ClassT = TypeVar("ClassT")
 
 
 def build_body_list_dependency(
-    param_name: Optional[str],
+        param_name: Optional[str],
     constructor_cls: Type[ClassT],
     body_model: Type[ModelT] = None,
     **fixed_kwargs: Any

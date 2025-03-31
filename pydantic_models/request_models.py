@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any, Self
 
 from pydantic import BaseModel, RootModel
 import datetime
@@ -113,4 +113,19 @@ class StatusRefreshObOpModel(BaseModel):
 
     @classmethod
     def from_orm(cls, orm_model):
+        return cls.from_orm(orm_model)
+
+
+class ClaimsBonusSystemModel(BaseModel):
+    condition_name: str
+    date_periods: list
+    conditions: list
+    conv_units: list
+
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model) -> Self:
         return cls.from_orm(orm_model)
