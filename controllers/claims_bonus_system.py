@@ -1,11 +1,19 @@
 import pandas as pd
-from pandas import DataFrame
+import operator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from pydantic_models.request_models import ClaimsBonusSystemModel
 from utils.utils import process_result_data, find_min_date, find_max_date
 
+ops = {
+    "=": operator.eq,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+    "<>": operator.not_
+}
 
 class ClaimsBonusSystem:
     def __init__(self, condition_data: list[ClaimsBonusSystemModel]):
@@ -49,18 +57,19 @@ class ClaimsBonusSystem:
             uni_condition_value = condition["value"]
             uni_condition_value2 = condition["value2"]
             uni_condition_value_list = condition["value_list"]
-            if uni_condition_sign == "=":
-                initial_df = initial_df[initial_df[uni_condition_name] == uni_condition_value]
-            elif uni_condition_sign == ">":
-                initial_df = initial_df[initial_df[uni_condition_name] > uni_condition_value]
-            elif uni_condition_sign == ">=":
-                initial_df = initial_df[initial_df[uni_condition_name] >= uni_condition_value]
-            elif uni_condition_sign == "<":
-                initial_df = initial_df[initial_df[uni_condition_name] < uni_condition_value]
-            elif uni_condition_sign == "<=":
-                initial_df = initial_df[initial_df[uni_condition_name] <= uni_condition_value]
+
+            if uni_condition_sign in ops:
+                op_func = ops[uni_condition_sign]
+                initial_df = initial_df[op_func(initial_df[uni_condition_name], uni_condition_value)]
             elif uni_condition_sign == "Between":
-                initial_df = initial_df[(initial_df[uni_condition_name] >= uni_condition_value) & (initial_df[uni_condition_name] <= uni_condition_value2)]
+                initial_df = initial_df[
+                    (initial_df[uni_condition_name] >= uni_condition_value) &
+                    (initial_df[uni_condition_name] <= uni_condition_value2)
+                    ]
+            elif uni_condition_sign == "In":
+                if uni_condition_sign == "In":
+                    initial_df = initial_df[initial_df[uni_condition_name].isin(uni_condition_value_list)]
+
         initial_df["Условия"] = condition_data.condition_name
         for unit in condition_data.conv_units:
             initial_df[unit["name"]] = unit["value"]
