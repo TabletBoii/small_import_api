@@ -13,8 +13,9 @@ class ClaimStatusRefresh:
         self.session_factory = session_factory
 
     def get_formated_query(self) -> str:
+        ids_str = ", ".join(str(x) for x in self.claim_list)
         import_query = f"""
-            SELECT inc, confirmed_full, status FROM claim WHERE inc IN {tuple(self.claim_list)};
+            SELECT inc, confirmed_full, status FROM claim WHERE inc IN ({ids_str});
         """
         return import_query
 

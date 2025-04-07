@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import operator
 from sqlalchemy import text
@@ -14,6 +15,10 @@ ops = {
     "<=": operator.le,
     "<>": operator.not_
 }
+
+custom_column_list = [
+    "PaymentDateDiff", "PricePerPax"
+]
 
 class ClaimsBonusSystem:
     def __init__(self, condition_data: list[ClaimsBonusSystemModel]):
@@ -98,6 +103,7 @@ class ClaimsBonusSystem:
         claim_list_by_claim_date = await self.__execute_query(claim_list_by_claim_date_query)
         print("Query proceeded")
         df_list = []
+        await self.add_custom_columns(claim_list_by_claim_date)
         for condition in self.condition_data:
             df_cond = await self.apply_conditions(claim_list_by_claim_date, condition)
             df_list.append(df_cond)
