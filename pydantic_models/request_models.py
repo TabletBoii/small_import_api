@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List, Any, Self
+from typing import Optional, Dict, List, Any, Self, Tuple
 
 from pydantic import BaseModel, RootModel
 import datetime
@@ -122,6 +122,17 @@ class ClaimsBonusSystemModel(BaseModel):
     conditions: list
     conv_units: list
 
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model) -> Self:
+        return cls.from_orm(orm_model)
+
+
+class AvgTimeReportModel(BaseModel):
+    date_periods: List[str]
+    department_list: List
 
     class Config:
         orm_mode = True

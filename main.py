@@ -4,7 +4,7 @@ import uvicorn
 
 import env_setup
 
-from routers import budget, plan, default, office
+from routers import budget, plan, default, office, avg_time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,10 +23,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 app.include_router(budget.router)
 app.include_router(plan.router)
 app.include_router(default.router)
 app.include_router(office.router)
+app.include_router(avg_time.router)
 
 
 # app.add_middleware(RequestCancelledMiddleware)

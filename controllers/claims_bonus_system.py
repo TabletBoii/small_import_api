@@ -20,6 +20,7 @@ custom_column_list = [
     "PaymentDateDiff", "PricePerPax"
 ]
 
+
 class ClaimsBonusSystem:
     def __init__(self, condition_data: list[ClaimsBonusSystemModel]):
         self.session_factory: async_sessionmaker = None
