@@ -1,5 +1,8 @@
+import logging.config
 import os
 import sys
+
+import yaml
 
 import env_setup
 
@@ -19,6 +22,10 @@ from routers.web_router import web
 from utils.utils import get_data
 
 sys.stdout.reconfigure(encoding='utf-8')
+
+with open("logging.yaml", "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+logging.config.dictConfig(config)
 
 middleware_list = [
     Middleware(
