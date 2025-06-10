@@ -140,3 +140,16 @@ class AvgTimeReportModel(BaseModel):
     @classmethod
     def from_orm(cls, orm_model) -> Self:
         return cls.from_orm(orm_model)
+
+
+class CreateUserModel(BaseModel):
+    name: str
+    password: str
+    description: str
+
+    class Config:
+        orm_mode = True
+
+    @classmethod
+    def from_orm(cls, orm_model) -> Self:
+        return cls.from_orm(orm_model)

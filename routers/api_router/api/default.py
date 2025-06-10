@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/check-api-key")
+@router.get("/check-api_router-key")
 async def check_api_key():
     return JSONResponse(
         content={

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+
+<section class="item-grid">
+  <article class="item-card">
+    <h2><a href="{{ url_for('reports') }}">Отчеты</a></h2>
+    <p>Здесь указаны все доступные отчеты</p>
+  </article>
+</section>
+{% endblock %}

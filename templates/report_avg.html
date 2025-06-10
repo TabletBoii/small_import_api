@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Отчет по среднему времени ответа{% endblock %}
+
+{% block content %}
+  <h1>Отчет: Среднее время ответа</h1>
+
+  <form method="post" action="/web/report_avg">
+    <div class="form-group">
+      <label for="start_date">Дата начала</label>
+      <input
+              type="date"
+              id="start_date"
+              name="date_from"
+              {% if selected_date_from %}
+                value="{{ selected_date_from }}"
+              {% endif %}
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="end_date">Дата окончания</label>
+      <input
+              type="date"
+              id="end_date"
+              name="date_till"
+              {% if selected_date_till %}
+                value="{{ selected_date_till }}"
+              {% endif %}
+      >
+    </div>
+
+    <div class="form-group">
+      <p>Департаменты:</p>
+      {% for department in departments %}
+        <div class="checkbox-item">
+          <input
+                  type="checkbox"
+                  id="item_{{ loop.index }}"
+                  name="departments"
+                  value="{{ department }}"
+                  {% if department in selected_departments %}
+                    checked
+                  {% endif %}
+          > <label for="item_{{ loop.index }}">{{ department }}</label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      <p>Тип отчёта:</p>
+      {% for rpt in report_types %}
+        <div class="radio-item">
+          <input
+                  type="radio"
+                  id="rpt_{{ loop.index }}"
+                  name="report_type"
+                  value="{{ rpt }}"
+                  {% if rpt == selected_report_type %}
+                    checked
+                  {% endif %}
+          >
+          <label for="rpt_{{ loop.index }}">{{ rpt }}</label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn">Сформировать отчёт</button>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+  </form>
+{% endblock %}

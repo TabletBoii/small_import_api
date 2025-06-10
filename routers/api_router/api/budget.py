@@ -1,15 +1,15 @@
 from fastapi import APIRouter
 
 from callers.import_generic import build_body_list_dependency
-from controllers.budget_upload import UploadBudgetData
-from controllers.upload_budget_currency_data import UploadBudgetCurrencyData
-from controllers.upload_budget_plan import UploadBudgetPlanData
+from controllers.budget.budget_upload import UploadBudgetData
+from controllers.budget.upload_budget_currency_data import UploadBudgetCurrencyData
+from controllers.budget.upload_budget_plan import UploadBudgetPlanData
 from decorators.response import unified_response
 from pydantic_models.request_models import BudgetCurrencyModel, BudgetPlanModel, BudgetValuesModel, PlanValuesModel
 
 from fastapi import Depends
 
-from controllers.upload_plan import UploadPlanData
+from controllers.budget.upload_plan import UploadPlanData
 from database.sessions import PLAN_SESSION_FACTORY
 from utils.utils import get_api_key
 

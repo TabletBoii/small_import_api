@@ -71,6 +71,3 @@ class PlanPercentData(Base):
     date = Column('date', Date)
     state = Column('state', Integer)
     percent = Column('state_percent', Float)
-
-
-

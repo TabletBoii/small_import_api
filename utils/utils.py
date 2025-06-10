@@ -1,11 +1,13 @@
 import sys
 import os
+from pathlib import Path
 
 import numpy as np
 from fastapi import HTTPException, Security
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials
 from pandas import DataFrame
+from starlette.requests import Request
 
 from utils.constants import API_KEY, API_KEY_HEADER, security
 from datetime import datetime
@@ -75,3 +77,18 @@ def find_min_date(dates_raw):
 def find_max_date(dates_raw):
 
     return max(format_dates_for_functions(dates_raw)).strftime('%Y-%m-%d')
+
+
+def require_user(request: Request):
+    if "user" not in request.session:
+        raise HTTPException(
+            status_code=302,
+            detail="Redirect to login",
+            headers={"Location": "/web/login"}
+        )
+    return request.session["user"]
+
+
+def get_root_path():
+    project_root = Path.cwd()
+    return project_root

@@ -1,10 +1,7 @@
 from fastapi import APIRouter
 
-import os
-from dotenv import load_dotenv
-
 from callers.import_generic import build_body_list_dependency
-from controllers.upload_plan_percent import UploadPlanPercentData
+from controllers.plan.upload_plan_percent import UploadPlanPercentData
 from decorators.response import unified_response
 from pydantic_models.request_models import PlanPercentModel
 from utils.utils import get_api_key
@@ -16,9 +13,9 @@ from fastapi.responses import JSONResponse, UJSONResponse
 from database.sessions import KOMPAS_SESSION_FACTORY, PLAN_SESSION_FACTORY
 
 from callers.import_caller import get_agg_import_class, get_partner_directory_import_class
-from controllers.agg_import import AggImport
-from controllers.claims_import import ClaimsImport
-from controllers.partner_directory_import import PartnerDirectoryImport
+from controllers.plan.agg_import import AggImport
+from controllers.plan.claims_import import ClaimsImport
+from controllers.plan.partner_directory_import import PartnerDirectoryImport
 
 router = APIRouter(
     dependencies=[Depends(get_api_key)]

@@ -33,10 +33,10 @@ async def get_by_date_period(session: AsyncSession, date_period: Tuple[datetime,
 
 
 async def get_by_claims_and_period_and_department(
-    session: AsyncSession,
-    claim_list: List[int],
-    date_period: List[datetime],
-    department_id: int
+        session: AsyncSession,
+        claim_list: List[int],
+        date_period: List[datetime],
+        department_id: int
 ) -> list[tuple[ClaimID, Sender, Recipient, MsgDate]]:
     jt = join(
         Message, MessageType,
@@ -134,11 +134,70 @@ async def get_by_department_and_date(
     return result.scalars().all()
 
 
-async def get_first_claims_message(session: AsyncSession, claim_list: List[int], department_id: int):
+async def get_first_claims_message(session: AsyncSession, department_id: int, date_period):
     stmt = text(
         """
-        WITH FirstMsg AS (
-          SELECT
+            WITH FirstMsg AS (
+              SELECT
+                m.claim,
+                m.author,
+                au.name        AS author_name,
+                m.[user],
+                uu.name        AS user_name,
+                mt.department,
+                mt.inc         AS messagetype_inc,
+                mt.name        AS messagetype_name,
+                ROW_NUMBER() OVER (
+                  PARTITION BY m.claim
+                  ORDER BY m.adate ASC
+                ) AS rn
+              FROM dbo.message    AS m
+              INNER JOIN dbo.messagetype AS mt
+                ON mt.inc = m.messagetype
+               AND mt.department = :dept_id
+              LEFT JOIN dbo.usnames AS au
+                ON au.code = m.author
+              LEFT JOIN dbo.usnames AS uu
+                ON uu.code = m.[user]
+              WHERE m.claim IN (
+				SELECT DISTINCT msg_inner.claim
+				FROM message as msg_inner
+				LEFT JOIN messagetype as mtype_inner ON mtype_inner.inc = msg_inner.messagetype
+				LEFT JOIN department as dept_inner ON dept_inner.inc = mtype_inner.department
+				WHERE dept_inner.inc = :dept_id AND msg_inner.adate BETWEEN :date_beg AND :date_end
+			  )
+            )
+            SELECT
+              claim,
+              author,
+              author_name,
+              [user],
+              user_name,
+              department,
+              messagetype_inc,
+              messagetype_name
+            FROM FirstMsg
+            WHERE rn = 1
+            ORDER BY claim;
+        """
+    ).execution_options(caller="message.message.get_first_claims_message").bindparams(
+        bindparam("date_beg"),
+        bindparam("date_end"),
+        bindparam("dept_id"),
+    )
+
+    result = await session.execute(
+        stmt,
+        {"date_beg": date_period[0], "date_end": date_period[1], "dept_id": department_id},
+    )
+    return result.all()
+
+
+async def get_raw_msg_list(session: AsyncSession, department_id: int, date_period):
+    stmt = text(
+        """
+            WITH FirstMsg AS (
+            SELECT
             m.claim,
             m.author,
             au.name        AS author_name,
@@ -148,40 +207,52 @@ async def get_first_claims_message(session: AsyncSession, claim_list: List[int],
             mt.inc         AS messagetype_inc,
             mt.name        AS messagetype_name,
             ROW_NUMBER() OVER (
-              PARTITION BY m.claim
-              ORDER BY m.adate ASC
+                PARTITION BY m.claim
+                ORDER BY m.adate ASC
             ) AS rn
-          FROM dbo.message    AS m
-          INNER JOIN dbo.messagetype AS mt
+            FROM dbo.message    AS m
+            INNER JOIN dbo.messagetype AS mt
             ON mt.inc = m.messagetype
-           AND mt.department = :dept_id
-          LEFT JOIN dbo.usnames AS au
+            AND mt.department = :dept_id
+            LEFT JOIN dbo.usnames AS au
             ON au.code = m.author
-          LEFT JOIN dbo.usnames AS uu
+            LEFT JOIN dbo.usnames AS uu
             ON uu.code = m.[user]
-          WHERE m.claim IN :claims
+            WHERE m.claim IN (
+                SELECT DISTINCT msg_inner.claim
+                FROM message as msg_inner
+                LEFT JOIN messagetype as mtype_inner ON mtype_inner.inc = msg_inner.messagetype
+                LEFT JOIN department as dept_inner ON dept_inner.inc = mtype_inner.department
+                WHERE dept_inner.inc = :dept_id AND msg_inner.adate BETWEEN :date_beg AND :date_end
+            )
         )
-        SELECT
-          claim,
-          author,
-          author_name,
-          [user],
-          user_name,
-          department,
-          messagetype_inc,
-          messagetype_name
-        FROM FirstMsg
-        WHERE rn = 1
-        ORDER BY claim;
+        
+        SELECT msg_final.claim, msg_final.author, msg_final.[user], msg_final.adate
+        FROM message AS msg_final
+        LEFT JOIN messagetype as msg_type_final ON msg_type_final.inc = msg_final.messagetype
+        LEFT JOIN department as dpt_final ON dpt_final.inc = msg_type_final.department
+        WHERE  dpt_final.inc = :dept_id
+        AND msg_final.claim IN (
+            SELECT
+                claim
+            FROM FirstMsg
+            WHERE rn = 1 AND author_name LIKE '%INTERNET%'
+        )
+        AND
+        msg_final.adate BETWEEN :date_beg AND :date_end
+        
+        
+        ORDER BY msg_final.adate ASC
 
-        """
+        """  # TODO: Здесь прописаны только INTERNET
     ).execution_options(caller="message.message.get_first_claims_message").bindparams(
-        bindparam("claims", expanding=True),  # превращает IN (:claims_1, :claims_2,…)
+        bindparam("date_beg"),
+        bindparam("date_end"),
         bindparam("dept_id"),
     )
 
     result = await session.execute(
         stmt,
-        {"claims": claim_list, "dept_id": department_id},
+        {"date_beg": date_period[0], "date_end": date_period[1], "dept_id": department_id},
     )
     return result.all()
