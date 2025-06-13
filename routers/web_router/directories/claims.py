@@ -1,9 +1,11 @@
+import os
 from typing import Optional, Dict, List
 
 from fastapi import Depends, Form
 from starlette.requests import Request
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, FileResponse
 
+from controllers.web.directories.ClaimDirectoryController import ClaimDirectoryController
 from dao.claim_procedure import ClaimProcedure, title_alias_dict
 from database.sessions import KOMPAS_SESSION_FACTORY
 from routers.web_router.web import jinja_router, templates
@@ -154,20 +156,24 @@ async def directory_claims_form(
             },
             status_code=422
         )
-    # controller = WebAvgTimeReport(
-    #     date_from=date_from,
-    #     date_till=date_till,
-    #     departments=departments,
-    #     report_type=report_type,
-    # )
-    # controller.set_session(KOMPAS_SESSION_FACTORY)
-    #
-    # excel_filepath = await controller.run()
-    #
-    # if not os.path.exists(excel_filepath):
-    #     return {"error": "File not found"}
-    # return FileResponse(
-    #     excel_filepath,
-    #     filename="downloaded_file.xlsx"
-    # )
+    controller = ClaimDirectoryController(
 
+        date_beg_from=date_beg_from,
+        date_beg_till=date_beg_till,
+        claim_create_date_from=claim_create_date_from,
+        claim_create_date_till=claim_create_date_till,
+        confirm_date_from=confirm_date_from,
+        confirm_date_till=confirm_date_till,
+        r_date_from=r_date_from,
+        r_date_till=r_date_till,
+        field_list=field_list,
+    )
+    controller.set_session(KOMPAS_SESSION_FACTORY)
+    resulted_file_path = await controller.run()
+
+    if not os.path.exists(resulted_file_path):
+        return {"error": "File not found"}
+    return FileResponse(
+        resulted_file_path,
+        filename="downloaded_file.xlsx"
+    )

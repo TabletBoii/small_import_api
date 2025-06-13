@@ -292,13 +292,13 @@ class ClaimProcedure:
                 where
                     {f"{self.claim_inc} = c.inc and" if self.claim_inc is not None else ""}
                   
-                    {f"c.datebeg between '{self.date_begin_tuple[0]}' and '{self.date_begin_tuple[1]}' {"and" if await self.is_other_dates_not_empty("date_begin_tuple") else ""}" if self.date_begin_tuple is not None else ""} 
+                    {f"c.datebeg between '{self.date_begin_tuple[0].replace("-", "")}' and '{self.date_begin_tuple[1].replace("-", "")}' {"and" if await self.is_other_dates_not_empty("date_begin_tuple") else ""}" if self.date_begin_tuple is not None else ""} 
                     
-                    {f"c.cdate between '{self.claim_create_date_tuple[0]} and '{self.claim_create_date_tuple[1]}' {'and' if await self.is_other_dates_not_empty("claim_create_date_tuple") else ""}" if self.claim_create_date_tuple is not None else ""}
+                    {f"c.cdate between '{self.claim_create_date_tuple[0].replace("-", "")}' and '{self.claim_create_date_tuple[1].replace("-", "")}' {'and' if await self.is_other_dates_not_empty("claim_create_date_tuple") else ""}" if self.claim_create_date_tuple is not None else ""}
                     
-                    {f"c.confirmeddate between '{self.confirm_date_tuple[0]}' and '{self.confirm_date_tuple[1]}' {'and' if await self.is_other_dates_not_empty("confirm_date_tuple") else ""}" if self.confirm_date_tuple is not None else ""}
+                    {f"c.confirmeddate between '{self.confirm_date_tuple[0].replace("-", "")}' and '{self.confirm_date_tuple[1].replace("-", "")}' {'and' if await self.is_other_dates_not_empty("confirm_date_tuple") else ""}" if self.confirm_date_tuple is not None else ""}
                     
-                    {f"c.rdate between '{self.r_date_tuple[0]}' and '{self.r_date_tuple[1]}'" if self.r_date_tuple is not None else ""}
+                    {f"c.rdate between '{self.r_date_tuple[0].replace("-", "")}' and '{self.r_date_tuple[1].replace("-", "")}'" if self.r_date_tuple is not None else ""}
             """
         )
         print(stmt)

@@ -7,7 +7,7 @@ from fastapi import Depends, Form
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse, StreamingResponse, Response, FileResponse
 
-from controllers.web.reports.avg_time_report import WebAvgTimeReport
+from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
 from dao.department_dao import get
 from database.sessions import KOMPAS_SESSION_FACTORY
 from routers.web_router.web import jinja_router, templates
