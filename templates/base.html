@@ -18,8 +18,12 @@
       <ul>
         <li>
           <a href="{{ url_for('reports') }}"
-             class="{% if request.url.path == '/web/reports' %}active{% endif %}">
+             class="home_header_item {% if request.url.path == '/web/reports' %}active{% endif %}">
              Отчеты
+          </a>
+          <a href="{{ url_for('directories') }}"
+             class="home_header_item {% if request.url.path == '/web/directories' %}active{% endif %}">
+             Справочники
           </a>
         </li>
       </ul>

@@ -6,7 +6,7 @@ from controllers.office.claims_inbetween_uploader import ClaimsInBetweenUploader
 from controllers.office.claims_status_refresh import ClaimStatusRefresh
 from database.sessions import KOMPAS_SESSION_FACTORY
 from decorators.response import unified_response
-from pydantic_models.request_models import UpdateObOpModel, ClaimsBonusSystemModel
+from pydantic_models.request_models import UpdateObOpModel, ClaimsBonusSystemModel, StatusRefreshObOpModel
 from utils.utils import get_api_key
 
 from fastapi import Depends
@@ -38,7 +38,8 @@ async def status_refresh_ob_op(
     cls_factory: ClaimStatusRefresh = Depends(
         build_body_list_dependency(
             param_name="",
-            constructor_cls=ClaimStatusRefresh
+            constructor_cls=ClaimStatusRefresh,
+            body_model=StatusRefreshObOpModel
         )()
     )
 ):

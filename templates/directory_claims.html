@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Справочник: Заявки{% endblock %}
+
+{% block content %}
+  <h1>Справочник: Заявки</h1>
+  <form method="post" action="/web/directory_claims">
+    <div class="form-group">
+      <label for="date_beg_from">Дата начала тура: </label>
+      <input
+              type="date"
+              id="date_beg_from"
+              name="date_beg_from"
+              {% if selected_date_beg_from %}
+                value="{{ selected_date_beg_from }}"
+              {% endif %}
+      >
+
+      <input
+              type="date"
+              id="date_beg_till"
+              name="date_beg_till"
+              {% if selected_date_beg_till %}
+                value="{{ selected_date_beg_till }}"
+              {% endif %}
+      >
+    </div>
+
+
+    <div class="form-group">
+      <label for="claim_create_date_from">Дата расчета заявки: </label>
+      <input
+              type="date"
+              id="claim_create_date_from"
+              name="claim_create_date_from"
+              {% if selected_claim_create_date_from %}
+                value="{{ selected_claim_create_date_from }}"
+              {% endif %}
+      >
+      <input
+              type="date"
+              id="claim_create_date_till"
+              name="claim_create_date_till"
+              {% if selected_claim_create_date_till %}
+                value="{{ selected_claim_create_date_till }}"
+              {% endif %}
+      >
+    </div>
+
+
+    <div class="form-group">
+      <label for="confirm_date_from">Дата подтверждения заявки: </label>
+      <input
+              type="date"
+              id="confirm_date_from"
+              name="confirm_date_from"
+              {% if selected_confirm_date_from %}
+                value="{{ selected_confirm_date_from }}"
+              {% endif %}
+      >
+      <input
+              type="date"
+              id="confirm_date_till"
+              name="confirm_date_till"
+              {% if selected_confirm_date_till %}
+                value="{{ selected_confirm_date_till }}"
+              {% endif %}
+      >
+    </div>
+
+
+    <div class="form-group">
+      <label for="r_date_from">Дата создания заявки: </label>
+      <input
+              type="date"
+              id="r_date_from"
+              name="r_date_from"
+              {% if selected_r_date_from %}
+                value="{{ selected_r_date_from }}"
+              {% endif %}
+      >
+      <input
+              type="date"
+              id="r_date_till"
+              name="r_date_till"
+              {% if selected_r_date_till %}
+                value="{{ selected_r_date_till }}"
+              {% endif %}
+      >
+    </div>
+
+    <div class="form-group">
+      <input
+        type="text"
+        id="fieldSearch"
+        placeholder="Поиск по полям…"
+        style="margin-bottom:1em;padding:0.5em;width:100%;"
+        onkeydown="if(event.key==='Enter'){ event.preventDefault(); }"
+      />
+      <p>Поля:</p>
+      <div id="fieldContainer" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      {% for chunk in field_list|batch(20, none) %}
+        {%- set outer_idx = loop.index0 -%}
+        <div class="field-block">
+          {% for field in chunk %}
+            {% if field is not none %}
+              {% set uid = outer_idx * 20 + loop.index0 %}
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="item_{{ uid }}"
+                  name="field_list"
+                  value="{{ field }}"
+                  {% if field in selected_field_list %}checked{% endif %}
+                >
+                <label for="item_{{ uid }}">{{ field }}</label>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn">Сформировать отчёт</button>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('fieldSearch');
+      const container   = document.getElementById('fieldContainer');
+
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+        }
+      });
+
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.trim().toLowerCase();
+        for (const item of container.querySelectorAll('.checkbox-item')) {
+          const label = item.querySelector('label').textContent.toLowerCase();
+          item.style.display = label.includes(term) ? '' : 'none';
+        }
+      });
+    });
+  </script>
+{% endblock %}

@@ -6,6 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
 from datetime import datetime
 from sqlalchemy import create_engine, text
+from starlette.responses import Response
+
 from utils.utils import get_data
 
 
@@ -118,4 +120,7 @@ class AggImport:
         await self.__fetch_kompas_data()
         processed_data = await self.__process_imported_data()
         resulted_data = jsonable_encoder(processed_data)
-        return resulted_data
+        return Response(
+            content=resulted_data,
+            status_code=200
+        )

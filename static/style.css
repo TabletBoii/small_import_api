@@ -53,11 +53,16 @@ h1,h2{
 }
 
 header {
+    position: sticky;
+  top: 0;
+  left: 0;
   background: var(--primary);
   color: var(--header-text);
   padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 header .logo {
@@ -78,6 +83,7 @@ header nav a {
   padding: 0.5rem;
   border-radius: 4px;
   transition: background 0.2s;
+  margin-right: 5px;
 }
 
 header nav a.active,
@@ -165,6 +171,7 @@ input[type="date"] {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  margin-bottom: 5px;
 }
 
 .btn:hover {
@@ -180,4 +187,11 @@ input[type="date"] {
   border-radius: 4px;
   margin-bottom: 1rem;
   font-size: 0.9rem;
+}
+
+#fieldContainer {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 200px;
+  gap: 1rem;
 }

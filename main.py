@@ -1,12 +1,11 @@
-import logging.config
 import os
 import sys
-
 import yaml
-
+import uvicorn
 import env_setup
 
-import uvicorn
+import logging.config
+
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -23,7 +22,10 @@ from utils.utils import get_data
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-with open("logging.yaml", "r", encoding="utf-8") as f:
+env_status = os.getenv("APP_ENV", "dev")
+logging_path = f"logging.{env_status}.yaml"
+
+with open(logging_path, "r", encoding="utf-8") as f:
     config = yaml.safe_load(f)
 logging.config.dictConfig(config)
 
@@ -60,3 +62,7 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+# TODO: Создать admin панель
+# TODO: Добавить в web загрузку при обработке отчета, справочника т.д.
+

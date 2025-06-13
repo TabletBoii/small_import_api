@@ -20,7 +20,7 @@ def build_body_list_dependency(
         async def _dependency(
             items: List[body_model] | List[int] | List[str] | body_model = Body(..., alias=param_name) if param_name else Body(...),
         ):
-            if isinstance(items, list) and issubclass(body_model, BaseModel):
+            if isinstance(items, list) and all(isinstance(item, dict) for item in items):
                 formatted_items = [body_model.parse_obj(item) for item in items]
             elif isinstance(items, body_model) and issubclass(body_model, BaseModel):
                 formatted_items = items
