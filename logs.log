@@ -1,0 +1,196 @@
+2025-06-13 19:14:02 INFO uvicorn.error Started server process [22244]
+2025-06-13 19:14:02 INFO uvicorn.error Waiting for application startup.
+2025-06-13 19:14:02 INFO uvicorn.error Application startup complete.
+2025-06-13 19:14:05 INFO watchfiles.main 1 change detected
+2025-06-13 19:14:46 INFO watchfiles.main 1 change detected
+2025-06-13 19:14:47 INFO watchfiles.main 1 change detected
+2025-06-13 19:14:50 INFO watchfiles.main 1 change detected
+2025-06-13 19:15:04 INFO watchfiles.main 1 change detected
+2025-06-13 19:15:08 INFO uvicorn.access 127.0.0.1:57836 - "POST /web/directory_claims HTTP/1.1" 200
+2025-06-13 19:15:08 INFO watchfiles.main 1 change detected
+2025-06-13 19:17:14 INFO uvicorn.access 127.0.0.1:58225 - "POST /web/directory_claims HTTP/1.1" 500
+2025-06-13 19:17:14 ERROR uvicorn.error Exception in ASGI application
+Traceback (most recent call last):
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 71, in execute
+    return self.await_(self._execute_async(operation, parameters))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 80, in _execute_async
+    result = await self._cursor.execute(operation, parameters or ())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\aioodbc\cursor.py", line 132, in execute
+    await self._run_operation(self._impl.execute, sql, *params)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\aioodbc\cursor.py", line 30, in _run_operation
+    result = await self._conn._execute(func, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pyodbc.ProgrammingError: ('42000', '[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]The multi-part identifier "pc.color" could not be bound. (4104) (SQLExecDirectW)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 401, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\sessions.py", line 85, in __call__
+    await self.app(scope, receive, send_wrapper)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 185, in __call__
+    with collapse_excgroups():
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 187, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\middlewares\webauth_middleware.py", line 17, in dispatch
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 163, in call_next
+    raise app_exc
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\starlette\routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\routers\web_router\directories\claims.py", line 172, in directory_claims_form
+    resulted_file_path = await controller.run()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\controllers\web\directories\ClaimDirectoryController.py", line 70, in run
+    claim_result = await self.claim_procedure_data()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\controllers\web\directories\ClaimDirectoryController.py", line 65, in claim_procedure_data
+    result = await inst.get_claims()
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\dao\claim_procedure.py", line 388, in get_claims
+    result = await self.execute_procedure_select()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\dao\claim_procedure.py", line 364, in execute_procedure_select
+    result = await self.session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2256, in _execute_internal
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 71, in execute
+    return self.await_(self._execute_async(operation, parameters))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 80, in _execute_async
+    result = await self._cursor.execute(operation, parameters or ())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\aioodbc\cursor.py", line 132, in execute
+    await self._run_operation(self._impl.execute, sql, *params)
+  File "E:\python\kompas_importer_backend\venv\Lib\site-packages\aioodbc\cursor.py", line 30, in _run_operation
+    result = await self._conn._execute(func, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.ProgrammingError: (pyodbc.ProgrammingError) ('42000', '[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]The multi-part identifier "pc.color" could not be bound. (4104) (SQLExecDirectW)')
+[SQL: select c.inc, c.status, case 
+        when c.status = 1 then 'Оплачена'
+        when c.status = 2 and c.partpayment = 1 then 'Частично оплачена'
+        when c.status = 2 and c.partpayment = 0 then 'Не оплачена'        
+        when c.status = 3 then 'Отменена'
+        end claim$paidstatus
+    , p.inc, p.name, p.adate, p.internet, p.phones, pc.color, stw.name, ptw.inc, ptw.name, t.name, c.rdate, c.cdate, c.cdatetime, c.datebeg, c.dateend, c.nights, c.confirmeddate, ccr.net, ccr.anet, ccr.paidnet, ccr.debtnet, ccr.cost, ccr.paidcost, ccr.debtcost, ccr.clientcost, ccr.clientdebt, ccr.mediatorsum, ccr.fixcommiss, ccr.commiss, ccr.earlycommiss, ccr.discount, ccr.discommiss, ccr.supplement, ccr.suppcommiss, ccr.common_commiss, ccr.total_commiss, ccr.tax, ccr.amount_to_pay, ccr.kickback, ccr.profit, ccr.aprofit, ccr.cost_with_commiss, ccr.precision, ccur.alias, cd.note, cd.comment, cd.privatecomment, cd.partnercomment, pt.name, getdate() current$date, CAST(DATEDIFF(DAY, GETDATE(), c.datebeg) AS INT) tilldate$begin, ss.employee, sup.name, tw.inc, tw.name, vc.inc, vc.name, us.name, c.commission, c.ctype, ctype.name, st.inc, st.name, stf.inc, stf.name, (select count(*) from people p where p.claim = c.inc and p.human in ('MR', 'MRS')) adl_count, (select count(*) from people p where p.claim = c.inc and p.human in ('CHD')) chd_count, (select count(*) from people p where p.claim = c.inc and p.human in ('MR', 'MRS', 'CHD')) all_pax, dept.inc, dept.name, deps.inc, deps.name, tt.inc, tt.name, ptype.inc, ptype.name from claim c join partner p on c.partner = p.inc left join town ptw on p.town = ptw.inc left join state stw on stw.inc = ptw.state join tour t on t.inc = c.tour join #cca_result ccr on c.inc = ccr.claim join currency ccur on c.currencyclaim = ccur.inc join claim_detail cd on cd.claim = c.inc left join parttype pt on p.parttype = pt.inc outer apply (select top 1 employee from supervisor s where s.partner = c.partner) ss left join usnames sup on sup.code = ss.employee left join town tw on t.town = tw.inc join v_claim_confirmed_title vc on c.confirmed_full = vc.inc left join usnames us on [us].code = c.[user] left join ctype on c.ctype = ctype.inc join state st on t.state = st.inc join state stf on t.stateFrom = stf.inc left join route r on r.tour = t.inc and r.routeindex = 1 left join town dept on r.town = dept.inc left join state deps on deps.inc = dept.state left join tourtype tt on tt.inc = t.tourtype  left join spog on c.spog = spog.inc left join ptype on spog.ptype = ptype.inc]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-13 19:18:24 INFO watchfiles.main 10 changes detected
+2025-06-13 19:18:26 INFO uvicorn.error Shutting down
+2025-06-13 19:18:26 INFO uvicorn.error Waiting for application shutdown.
+2025-06-13 19:18:26 INFO uvicorn.error Application shutdown complete.
+2025-06-13 19:18:26 INFO uvicorn.error Finished server process [22244]
+2025-06-13 19:18:30 INFO uvicorn.error Started server process [22120]
+2025-06-13 19:18:30 INFO uvicorn.error Waiting for application startup.
+2025-06-13 19:18:30 INFO uvicorn.error Application startup complete.
+2025-06-13 19:18:30 INFO uvicorn.access 127.0.0.1:58546 - "GET /web/directory_claims HTTP/1.1" 200
+2025-06-13 19:19:27 INFO watchfiles.main 1 change detected
+2025-06-13 19:19:28 INFO watchfiles.main 1 change detected
+2025-06-13 19:19:29 INFO watchfiles.main 1 change detected
+2025-06-13 19:19:49 INFO watchfiles.main 3 changes detected
+2025-06-13 19:19:51 INFO uvicorn.access 127.0.0.1:58544 - "POST /web/directory_claims HTTP/1.1" 200
+2025-06-13 19:20:39 INFO uvicorn.error Shutting down

@@ -63,7 +63,6 @@ class ClaimDirectoryController:
                 selected_fields_list=self.field_list
             )
             result = await inst.get_claims()
-            print(result)
         return result
 
     async def run(self):
