@@ -28,9 +28,9 @@ field_names = {
 
 
 class ClaimsInBetweenUploader:
-    def __init__(self, last_claim_data: list[UpdateObOpModel]):
+    def __init__(self, last_claim_data: UpdateObOpModel):
         self.session_factory: async_sessionmaker = None
-        self.last_claim_conf_date = last_claim_data[0].last_claim_conf_date
+        self.last_claim_conf_date = last_claim_data
 
     def set_session(self, session_factory):
         self.session_factory = session_factory
@@ -65,7 +65,7 @@ class ClaimsInBetweenUploader:
         if self.last_claim_conf_date is None:
             pass
         # self.last_claim_conf_date = "2025-01-26T10:33:00.000Z"
-        self.last_claim_conf_date = convert_iso_string_to_datetime(self.last_claim_conf_date)
+        self.last_claim_conf_date = convert_iso_string_to_datetime(self.last_claim_conf_date.last_claim_conf_date)
         formated_from_date = self.last_claim_conf_date.strftime("%Y-%m-%d %H:%M")
 
         timezone = pytz.timezone("Asia/Karachi")

@@ -21,7 +21,7 @@ router = APIRouter(
 async def update_ob_op(
     cls_factory: ClaimsInBetweenUploader = Depends(
         build_body_list_dependency(
-            param_name="plan_data",
+            param_name="",
             body_model=UpdateObOpModel,
             constructor_cls=ClaimsInBetweenUploader
         )()
