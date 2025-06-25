@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from dao.web_direction_list import get_all, delete_by_direction, create_or_update
+from dao.web_direction_list import get_all_without_id, delete_by_direction, create_or_update, get_all
 from database.sessions import WEB_SESSION_FACTORY
 from routers.web_router.web import jinja_router, templates
 from utils.utils import require_user
@@ -45,6 +45,8 @@ async def get_form_context():
     for row in table_data:
         table_data_dict = {}
         for column in row.__table__.columns:
+            if column.name == "inc":
+                continue
             table_data_dict[column.name] = str(getattr(row, column.name))
         table_data_list.append(table_data_dict)
 
@@ -53,6 +55,8 @@ async def get_form_context():
     if len(table_data_list) == 0:
         table_data_list.append({})
         for name, info in fields.items():
+            if name == "inc":
+                continue
             table_data_list[0][name] = None
 
     return {
@@ -101,7 +105,7 @@ async def directory_direction_form(
         all_direction_records = await get_all(session)
 
         existing_map = {
-            (obj.town_of_departure_alias, obj.town_of_arrival_alias, obj.airline_alias): obj
+            (obj.town_of_departure_alias, obj.town_of_arrival_alias, obj.airline_alias, obj.status, obj.flight_alias): obj
             for obj in all_direction_records
         }
         existing_keys = set(existing_map.keys())
