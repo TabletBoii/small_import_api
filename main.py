@@ -25,9 +25,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 env_status = os.getenv("APP_ENV", "dev")
 logging_path = f"logging.{env_status}.yaml"
 
-with open(logging_path, "r", encoding="utf-8") as f:
-    config = yaml.safe_load(f)
-logging.config.dictConfig(config)
+if env_status != "dev":
+    with open(logging_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    logging.config.dictConfig(config)
 
 middleware_list = [
     Middleware(

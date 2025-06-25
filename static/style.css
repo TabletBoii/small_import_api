@@ -25,6 +25,11 @@ body {
   min-height: 100vh;
 }
 
+input[type="checkbox"]{
+  width: 16px;
+  height: 16px;
+}
+
 h1,h2{
   margin:0 0 .5rem;
 }
@@ -53,7 +58,7 @@ h1,h2{
 }
 
 header {
-    position: sticky;
+  position: sticky;
   top: 0;
   left: 0;
   background: var(--primary);
@@ -94,9 +99,16 @@ header nav a:hover {
 
 
 .container{
-  max-width:1080px;
+  max-width:100%;
+
   padding:0 1rem;
   margin:0 auto;
+}
+
+.center_container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .site-footer{
@@ -113,9 +125,10 @@ section {
 
 .item-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:1.5rem;
-  margin-top:2rem;
+  grid-template-columns: repeat(2, 560px);
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 2rem 0;
 }
 
 .item-card{
@@ -171,13 +184,33 @@ input[type="date"] {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 5px;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .btn:hover {
   background: var(--primary-light);
   color: #000;
-  border: 1px solid black;
+  outline: 1px solid black;
+}
+
+.btn_block {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 98vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: content-box;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.excel {
+    background: #1D6F42;
 }
 
 .error {
@@ -195,3 +228,107 @@ input[type="date"] {
   grid-auto-columns: 200px;
   gap: 1rem;
 }
+
+.collapsible-header {
+    cursor: pointer;
+    padding: 0.5em;
+    background: #f0f0f0;
+}
+
+.arrow {
+    display: inline-block;
+    transform: rotate(0);
+    transition: transform 0.2s ease;
+}
+
+.collapsible-content {
+    display: none;
+    padding: 0.5em 1em;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.collapsible-content.show {
+    display: flex;
+}
+
+.collapsible-header.open .arrow {
+    transform: rotate(90deg);
+}
+
+.button_block {
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+.table-wrapper {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  padding: 1rem 0;
+  box-sizing: content-box;
+  background: var(--white);
+}
+
+.editable-table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.editable-table thead {
+  background: var(--primary);
+}
+
+.editable-table thead th {
+  color: var(--white);
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 2px solid var(--accent);
+}
+
+.editable-table tbody td {
+  background: var(--white);
+  color: var(--text);
+  padding: 0.5rem;
+  text-align: left;
+  border-top: 1px solid var(--accent);
+}
+
+.editable-table tbody tr:nth-child(even) td {
+  background: var(--bg);
+}
+
+.editable-table tbody tr:nth-last-child() td {
+  background: var(--bg);
+}
+
+.editable-table input[type="text"],
+.editable-table input[type="number"] {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.editable-table button.delete-row {
+  background: transparent;
+  color: #d11a2a;
+  border: 1px solid #d11a2a;
+  padding: 0.3rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.editable-table button.delete-row:hover {
+  background: #d11a2a;
+  color: var(--white);
+  border-color: var(--white);
+}
+
+

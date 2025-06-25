@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+{% if table_data %}
+  {% set headers = table_data[0].keys() | list %}
+  {% set thead_headers = table_keys %}
+  <div class="btn_block">
+    <button id="save-btn" class="btn">
+      <i class="fa-solid fa-floppy-disk"></i> Сохранить
+    </button>
+    <button type="button" class="btn excel" id="import-excel">
+      <i class="fa-regular fa-file-excel"></i> Выгрузить из Excel
+    </button>
+    <input type="file" id="excel-file" accept=".xlsx,.xls" style="display:none;">
+  </div>
+
+  <div class="table-wrapper">
+    <table id="data-table" class="editable-table">
+      <thead>
+        <tr>
+          {% for h in thead_headers %}
+            <th>{{ h }}</th>
+          {% endfor %}
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table_data %}
+          {% set i = loop.index0 %}
+          <tr data-index="{{ i }}">
+            {% for h in headers %}
+              <td>
+                <input
+                  type="text"
+                  name="{{ h }}"
+                  value="{{ row[h] }}"
+                >
+              </td>
+            {% endfor %}
+            <td>
+              <button type="button" class="btn delete-row">Удалить</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>Данных нет.</p>
+{% endif %}
+
+<button type="button" class="btn" id="add-row"><i class="fa-solid fa-plus"></i>  Добавить строку</button>
+
+
+<script>
+
+  const headers = {{ headers | tojson }};
+  const thead_headers = {{ thead_headers | tojson }};
+
+  document.getElementById('import-excel').addEventListener('click', () => {
+    document.getElementById('excel-file').click();
+  });
+
+  document.getElementById('excel-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, {type: 'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+
+    const rows = XLSX.utils.sheet_to_json(ws, {
+      header: headers,
+      range: 1,
+      defval: ''
+    });
+
+    const tbody = document.querySelector('.editable-table tbody');
+    let rowCount = tbody.rows.length;
+    console.log(rows);
+    rows.forEach(record => {
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-index', rowCount);
+      tr.innerHTML = headers.map(h => `
+        <td>
+          <input
+            type="text"
+            name="${h}"
+            value="${ record[h] ?? '' }"
+          >
+        </td>
+      `).join('') + `
+        <td>
+          <button type="button" class="btn delete-row">Удалить</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      rowCount++;
+    });
+
+    e.target.value = '';
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.matches('.delete-row')) {
+      e.target.closest('tr').remove();
+    }
+  });
+
+  document.getElementById('add-row').addEventListener('click', () => {
+    const tbody = document.querySelector('.editable-table tbody');
+    const rowCount = tbody.rows.length;
+
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-index', rowCount);
+
+    tr.innerHTML = headers.map(h => `
+      <td><input type="text" name="${h}" value=""></td>
+    `).join('') + `
+      <td><button type="button" class="btn delete-row">Удалить</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('save-btn').addEventListener('click', async () => {
+  const rows = Array.from(document.querySelectorAll('#data-table > tbody > tr')).map(table_row => ({
+    airline_name:  table_row.querySelector('input[name="airline_name"]').value,
+    country_of_departure:  table_row.querySelector('input[name="country_of_departure"]').value,
+    country_of_arrival:  table_row.querySelector('input[name="country_of_arrival"]').value,
+    town_of_departure:  table_row.querySelector('input[name="town_of_departure"]').value,
+    town_of_arrival:  table_row.querySelector('input[name="town_of_arrival"]').value,
+    town_of_departure_alias:  table_row.querySelector('input[name="town_of_departure_alias"]').value,
+    town_of_arrival_alias:  table_row.querySelector('input[name="town_of_arrival_alias"]').value,
+    airline_alias:  table_row.querySelector('input[name="airline_alias"]').value,
+    status:  table_row.querySelector('input[name="status"]').value,
+    flight_alias:  table_row.querySelector('input[name="flight_alias"]').value
+  }));
+
+  try {
+    const resp = await fetch('/web/save_direction_list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rows)
+    });
+    if (!resp.ok) {
+      throw new Error(`Ошибка ${resp.status}`);
+    }
+    const data = await resp.json();
+  } catch (err) {
+    console.error(err);
+    alert('Ошибка при сохранении, смотрите консоль');
+  }
+  });
+</script>
+{% endblock %}

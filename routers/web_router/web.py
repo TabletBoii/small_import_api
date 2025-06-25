@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse
 
 from utils.utils import require_user
+from .template import router
 
 templates = Jinja2Templates(directory="templates")
 
@@ -11,6 +12,8 @@ jinja_router = APIRouter(
     prefix="/web",
     tags=["web"]
 )
+
+jinja_router.include_router(router)
 
 
 @jinja_router.get("/")
@@ -33,5 +36,6 @@ async def directories(request: Request, user: str = Depends(require_user)):
 
 from .reports import avg_time_report
 from .directories import claims
+from .directories import direction
 from . import auth
 

@@ -42,3 +42,21 @@ CREATE TABLE dbo.web_access (
         ON DELETE CASCADE
 );
 GO
+
+CREATE TABLE web_template(
+	inc int PRIMARY KEY IDENTITY(1,1),
+	name text NOT NULL,
+	web_resource_inc int NOT NULL,
+	user_inc int NOT NULL,
+	FOREIGN KEY (web_resource_inc) REFERENCES web_resource(inc),
+	FOREIGN KEY (user_inc) REFERENCES web_user(inc)
+);
+GO
+
+CREATE TABLE web_template_items(
+	inc int PRIMARY KEY IDENTITY(1,1),
+	field text NOT NULL,
+	web_template int NOT NULL,
+	FOREIGN KEY (web_template) REFERENCES web_template(inc)
+);
+GO
