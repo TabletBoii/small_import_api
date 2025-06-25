@@ -212,6 +212,7 @@ async def directory_claims_form(
             },
             status_code=422
         )
+
     controller = ClaimDirectoryController(
 
         date_beg_from=date_beg_from,

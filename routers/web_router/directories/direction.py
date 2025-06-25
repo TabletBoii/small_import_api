@@ -71,7 +71,6 @@ async def directory_direction(
         user: str = Depends(require_user),
         form_ctx: Dict[str, List[str]] = Depends(get_form_context),
 ):
-    print(form_ctx)
     return templates.TemplateResponse(
         "directory_direction.html",
         {
@@ -146,3 +145,5 @@ async def directory_direction_form(
         ]
 
         await create_or_update(session=session, new_rows=new_rows)
+
+# TODO: Доделать дизайн модального окна таблицы

@@ -18,7 +18,8 @@
       <thead>
         <tr>
           {% for h in thead_headers %}
-            <th>{{ h }}</th>
+            <th class="th-with-menu" data-col-index="{{ loop.index0 }}">{{ h }}<span class="menu-btn">☰</span><div class="filter-menu"></div>
+            </th>
           {% endfor %}
           <th>Действия</th>
         </tr>
@@ -52,103 +53,188 @@
 
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const headers = {{ headers|tojson }};
 
-  const headers = {{ headers | tojson }};
-  const thead_headers = {{ thead_headers | tojson }};
-
-  document.getElementById('import-excel').addEventListener('click', () => {
-    document.getElementById('excel-file').click();
-  });
-
-  document.getElementById('excel-file').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const data = await file.arrayBuffer();
-    const wb = XLSX.read(data, {type: 'array'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-
-    const rows = XLSX.utils.sheet_to_json(ws, {
-      header: headers,
-      range: 1,
-      defval: ''
+    document.querySelectorAll('.th-with-menu').forEach(th => {
+      const colIdx = +th.dataset.colIndex;
+      const btn    = th.querySelector('.menu-btn');
+      const menu   = th.querySelector('.filter-menu');
+      menu.classList.remove('show');
+      menu.addEventListener('click', e => e.stopPropagation());
+      initFilterMenu(colIdx, menu);
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.filter-menu.show').forEach(m => m.classList.remove('show'));
+        menu.classList.toggle('show');
+      });
     });
 
-    const tbody = document.querySelector('.editable-table tbody');
-    let rowCount = tbody.rows.length;
-    console.log(rows);
-    rows.forEach(record => {
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.filter-menu.show').forEach(m => m.classList.remove('show'));
+    });
+
+    document.getElementById('import-excel').addEventListener('click', () => {
+      document.getElementById('excel-file').click();
+    });
+
+    document.getElementById('excel-file').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const data = await file.arrayBuffer();
+      const wb   = XLSX.read(data, {type:'array'});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:headers,range:1,defval:''});
+      const tbody = document.querySelector('#data-table tbody');
+      let rowCount = tbody.rows.length;
+      rows.forEach(record => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-index', rowCount++);
+        tr.innerHTML = headers.map(h => `<td><input type="text" name="${h}" value="${record[h] ?? ''}"></td>`).join('') + `<td><button type="button" class="btn delete-row">Удалить</button></td>`;
+        tbody.appendChild(tr);
+      });
+      e.target.value = '';
+    });
+
+    document.addEventListener('click', e => {
+      if (e.target.matches('.delete-row')) {
+        e.target.closest('tr').remove();
+      }
+    });
+
+    document.getElementById('add-row').addEventListener('click', () => {
+      const tbody = document.querySelector('#data-table tbody');
+      const rowCount = tbody.rows.length;
       const tr = document.createElement('tr');
       tr.setAttribute('data-index', rowCount);
-      tr.innerHTML = headers.map(h => `
-        <td>
-          <input
-            type="text"
-            name="${h}"
-            value="${ record[h] ?? '' }"
-          >
-        </td>
-      `).join('') + `
-        <td>
-          <button type="button" class="btn delete-row">Удалить</button>
-        </td>
-      `;
+      tr.innerHTML = headers.map(h => `<td><input type="text" name="${h}" value=""></td>`).join('') + `<td><button type="button" class="btn delete-row">Удалить</button></td>`;
       tbody.appendChild(tr);
-      rowCount++;
     });
 
-    e.target.value = '';
-  });
-
-  document.addEventListener('click', e => {
-    if (e.target.matches('.delete-row')) {
-      e.target.closest('tr').remove();
-    }
-  });
-
-  document.getElementById('add-row').addEventListener('click', () => {
-    const tbody = document.querySelector('.editable-table tbody');
-    const rowCount = tbody.rows.length;
-
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-index', rowCount);
-
-    tr.innerHTML = headers.map(h => `
-      <td><input type="text" name="${h}" value=""></td>
-    `).join('') + `
-      <td><button type="button" class="btn delete-row">Удалить</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById('save-btn').addEventListener('click', async () => {
-  const rows = Array.from(document.querySelectorAll('#data-table > tbody > tr')).map(table_row => ({
-    airline_name:  table_row.querySelector('input[name="airline_name"]').value,
-    country_of_departure:  table_row.querySelector('input[name="country_of_departure"]').value,
-    country_of_arrival:  table_row.querySelector('input[name="country_of_arrival"]').value,
-    town_of_departure:  table_row.querySelector('input[name="town_of_departure"]').value,
-    town_of_arrival:  table_row.querySelector('input[name="town_of_arrival"]').value,
-    town_of_departure_alias:  table_row.querySelector('input[name="town_of_departure_alias"]').value,
-    town_of_arrival_alias:  table_row.querySelector('input[name="town_of_arrival_alias"]').value,
-    airline_alias:  table_row.querySelector('input[name="airline_alias"]').value,
-    status:  table_row.querySelector('input[name="status"]').value,
-    flight_alias:  table_row.querySelector('input[name="flight_alias"]').value
-  }));
-
-  try {
-    const resp = await fetch('/web/save_direction_list', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(rows)
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      const rows = Array.from(document.querySelectorAll('#data-table tbody tr')).map(tr => {
+        const obj = {};
+        headers.forEach(h => {
+          const inp = tr.querySelector(`input[name="${h}"]`);
+          obj[h] = inp ? inp.value : '';
+        });
+        return obj;
+      });
+      const resp = await fetch('/web/save_direction_list', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(rows)
+      });
+      if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
+      const data = await resp.json();
+      alert(`Сохранено ${data.saved_count} строк`);
     });
-    if (!resp.ok) {
-      throw new Error(`Ошибка ${resp.status}`);
-    }
-    const data = await resp.json();
-  } catch (err) {
-    console.error(err);
-    alert('Ошибка при сохранении, смотрите консоль');
+  });
+
+  function initFilterMenu(colIdx, menu) {
+    const separator = document.createElement('hr');
+    const separator1 = document.createElement('hr');
+    const separator2 = document.createElement('hr');
+
+    menu.innerHTML = '';
+
+    const search = document.createElement('input');
+    search.type = 'text';
+    search.placeholder = 'Поиск…';
+    search.style.width = '100%';
+    search.style.marginBottom = '0.5rem';
+    search.style.marginTop = '0.5rem';
+
+    const allDiv = document.createElement('div');
+    allDiv.style.marginBottom = '0.3rem';
+    allDiv.style.marginTop = '0.3rem';
+
+    const allCb = document.createElement('input');
+    allCb.type = 'checkbox';
+    allCb.checked = true;
+    allCb.id = `select-all-${colIdx}`;
+
+    const allLbl = document.createElement('label');
+    allLbl.htmlFor = allCb.id;
+    allLbl.textContent = 'Выбрать все';
+    allDiv.append(allCb, ' ', allLbl);
+    allDiv.style.padding = '3px 3px 3px 3px';
+
+    const sortAsc = document.createElement('div');
+    const sortDesc = document.createElement('div');
+    sortAsc.textContent = 'Сортировка по возрастанию ↑';
+    sortDesc.textContent = 'Сортировка по убыванию ↓';
+    sortAsc.style.cursor = 'pointer';
+    sortDesc.style.cursor = 'pointer';
+    sortAsc.style.padding = '3px 3px 3px 3px';
+    sortDesc.style.padding = '3px 3px 3px 3px';
+
+    menu.append(separator);
+    [sortAsc, sortDesc].forEach(d => menu.append(d));
+    menu.append(separator1);
+    menu.append(search);
+    menu.append(separator);
+    menu.append(allDiv);
+    menu.append(separator2);
+    sortAsc.addEventListener('click', () => sortTable(colIdx, 'asc'));
+    sortDesc.addEventListener('click', () => sortTable(colIdx, 'desc'));
+    const values = Array.from(document.querySelectorAll('#data-table tbody tr'))
+      .map(tr => tr.cells[colIdx].querySelector('input').value)
+      .filter((v,i,a) => a.indexOf(v)===i)
+      .sort((a,b) => a.localeCompare(b,'ru',{numeric:true}));
+    values.forEach(val => {
+      const row = document.createElement('div');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = val;
+      cb.checked = true;
+      cb.id = `f-${colIdx}-${val}`;
+      const lbl = document.createElement('label');
+      lbl.htmlFor = cb.id;
+      lbl.textContent = val;
+      row.append(cb, ' ', lbl);
+      row.style.padding = '2px 2px 2px 2px';
+      menu.append(row);
+      cb.addEventListener('change', () => applyFilter(colIdx));
+    });
+    search.addEventListener('input', () => {
+      const term = search.value.trim().toLowerCase();
+      menu.querySelectorAll('div').forEach(div => {
+        const label = div.querySelector('label');
+        if (!label) return;
+        div.style.display = label.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    });
+    allCb.addEventListener('change', () => {
+      const checked = allCb.checked;
+      menu.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        if (cb !== allCb) cb.checked = checked;
+      });
+      applyFilter(colIdx);
+    });
   }
-  });
+
+  function applyFilter(colIdx) {
+    const menu = document.querySelector(`.th-with-menu[data-col-index="${colIdx}"] .filter-menu`);
+    const checked = Array.from(menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx}):checked`)).map(c => c.value);
+    document.querySelectorAll('#data-table tbody tr').forEach(tr => {
+      const cell = tr.cells[colIdx].querySelector('input').value;
+      tr.style.display = checked.includes(cell) ? '' : 'none';
+    });
+  }
+
+  function sortTable(colIdx, direction) {
+    const tbody = document.querySelector('#data-table tbody');
+    Array.from(tbody.rows)
+      .filter(r => r.style.display !== 'none')
+      .sort((a, b) => {
+        const va = a.cells[colIdx].querySelector('input').value.toLowerCase();
+        const vb = b.cells[colIdx].querySelector('input').value.toLowerCase();
+        return direction === 'asc'
+          ? va.localeCompare(vb,'ru',{numeric:true})
+          : vb.localeCompare(va,'ru',{numeric:true});
+      })
+      .forEach(r => tbody.appendChild(r));
+  }
 </script>
 {% endblock %}

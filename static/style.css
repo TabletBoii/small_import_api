@@ -213,6 +213,11 @@ input[type="date"] {
     background: #1D6F42;
 }
 
+.sort {
+    width: 1px;
+    height: 1px;
+}
+
 .error {
   color: #d8000c;
   background: #ffd2d2;
@@ -268,6 +273,7 @@ input[type="date"] {
   padding: 1rem 0;
   box-sizing: content-box;
   background: var(--white);
+  overflow: visible !important;
 }
 
 .editable-table {
@@ -330,5 +336,35 @@ input[type="date"] {
   color: var(--white);
   border-color: var(--white);
 }
+.th-with-menu {
+  position: relative;
+}
+
+.menu-btn {
+  margin-left: 0.3em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--white);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px rgba(0,0,0,.1);
+  padding: .5rem;
+  z-index: 10;
+  max-height: 500px;
+  height: 300px;
+  width: 300px;
+  overflow-y: auto;
+  color: #000;
+}
 
 
+.filter-menu.show {
+  display: block;
+}
