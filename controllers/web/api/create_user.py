@@ -19,6 +19,7 @@ class CreateUser:
         user_model_instance = WebUser()
         user_model_instance.name = self.user.name
         user_model_instance.hashed_password = Hasher().get_password_hash(self.user.password)
+        user_model_instance.description = self.user.description
         try:
             async with self.session_factory() as session:
                 await create_user(session, user_model_instance)

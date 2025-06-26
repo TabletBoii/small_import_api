@@ -34,6 +34,7 @@ KOMPAS_ENGINE = create_async_engine(
     max_overflow=0,
     pool_pre_ping=True,
     pool_recycle=3600,
+    pool_timeout=30,
 )
 PLAN_ENGINE = create_async_engine(
     plan_db_connection_string,
@@ -41,6 +42,7 @@ PLAN_ENGINE = create_async_engine(
     max_overflow=0,
     pool_pre_ping=True,
     pool_recycle=3600,
+    pool_timeout=30,
 )
 WEB_DEV_ENGINE = create_async_engine(
     dev_web_db_connection_string,
@@ -48,6 +50,7 @@ WEB_DEV_ENGINE = create_async_engine(
     max_overflow=0,
     pool_pre_ping=True,
     pool_recycle=3600,
+    pool_timeout=30,
 )
 WEB_ENGINE = create_async_engine(
     web_db_connection_string,
@@ -55,6 +58,7 @@ WEB_ENGINE = create_async_engine(
     max_overflow=0,
     pool_pre_ping=True,
     pool_recycle=3600,
+    pool_timeout=30,
 )
 
 KOMPAS_SESSION_FACTORY = async_sessionmaker(bind=KOMPAS_ENGINE, expire_on_commit=False)

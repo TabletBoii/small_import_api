@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 from typing import Tuple
 
@@ -20,10 +21,11 @@ class GetFullMonitor:
     async def __execute_query(self, query: str):
         try:
             async with self.session_factory() as session:
+                logging.info(f"Начат запрос: {query}")
                 result = await session.execute(text(query))
 
                 mappings = result.mappings().all()
-
+                logging.info(f"Запрос {query} завершен")
                 return [dict(row) for row in mappings]
         except Exception as e:
             raise e
@@ -89,6 +91,8 @@ class GetFullMonitor:
             self.model_instance.date_beg_till,
             batch_months=batch_month
         )
+        logging.info("Получены date batches")
         query_list = [await self.generate_monitor_query(date_batch) for date_batch in date_batch_list]
+        logging.info("Сформированы запросы")
         result = await self.__fetch_and_append_data(query_list)
         return result

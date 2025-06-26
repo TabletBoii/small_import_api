@@ -152,7 +152,6 @@ class CreateUserModel(BaseModel):
     password: str
     description: str
 
-
     class Config:
         orm_mode = True
 

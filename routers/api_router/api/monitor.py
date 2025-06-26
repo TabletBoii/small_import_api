@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -19,7 +20,7 @@ router = APIRouter(
 async def get_full_monitor(
     query_items: Annotated[GetFullMonitorParams, Depends()]
 ):
-
+    logging.info()
     cls_instance = GetFullMonitor(model=query_items)
     cls_instance.set_session(session_factory=KOMPAS_SESSION_FACTORY)
     result = await cls_instance.run()
