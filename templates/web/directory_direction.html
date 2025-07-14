@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% import "macros/table.html" as table_macros %}
+
+{% block content %}
+  {{ table_macros.render_table(
+       "direction_table",
+       table_data,
+       table_keys,
+       '/web/save_direction_list'
+     ) }}
+{% endblock %}

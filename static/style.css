@@ -209,6 +209,33 @@ input[type="date"] {
   z-index: 1;
 }
 
+.sidebar-trigger {
+  position: fixed;
+  bottom: 20px;
+  right: 0;
+  width: 20px;
+  height: 50px;
+  z-index: 999;
+  cursor: pointer;
+}
+
+.btn-add-row-fixed {
+  position: fixed;
+  bottom: 20px;
+  right: 0;
+  width: 120px;
+  transform: translateX(calc(100% - 20px));
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar-trigger:hover + .btn-add-row-fixed,
+.btn-add-row-fixed:hover {
+  transform: translateX(0);
+  background: var(--primary);
+  color: var(--white);
+}
+
 .excel {
     background: #1D6F42;
 }
@@ -304,6 +331,7 @@ input[type="date"] {
 }
 
 .editable-table tbody tr:nth-child(even) td {
+
   background: var(--bg);
 }
 
@@ -331,11 +359,27 @@ input[type="date"] {
   font-size: 0.85rem;
 }
 
+.editable-table button.duplicate-row {
+  background: transparent;
+  color: #BE8044;
+  border: 1px solid #BE8044;
+  padding: 0.3rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
 .editable-table button.delete-row:hover {
   background: #d11a2a;
   color: var(--white);
   border-color: var(--white);
 }
+
+.editable-table button.duplicate-row:hover {
+  background: #BE8044;
+  color: var(--white);
+  border-color: var(--white);
+}
+
 .th-with-menu {
   position: relative;
 }
@@ -367,4 +411,23 @@ input[type="date"] {
 
 .filter-menu.show {
   display: block;
+}
+
+@keyframes flash-highlight {
+  0%   { background-color: #1b38cf; }
+  70%  { background-color: #536ced; }
+  100% { background-color: var(--white); }
+}
+
+.tr-highlight td {
+  animation: flash-highlight 1s ease-out forwards;
+}
+
+.filter-table-sort-btn {
+
+}
+
+.filter-table-sort-btn:hover {
+    background-color: #000;
+    color: #fff;
 }

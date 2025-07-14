@@ -1,4 +1,6 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from typing import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from utils.utils import get_data
 
@@ -65,3 +67,11 @@ KOMPAS_SESSION_FACTORY = async_sessionmaker(bind=KOMPAS_ENGINE, expire_on_commit
 PLAN_SESSION_FACTORY = async_sessionmaker(bind=PLAN_ENGINE, expire_on_commit=False)
 WEB_DEV_SESSION_FACTORY = async_sessionmaker(bind=WEB_DEV_ENGINE, expire_on_commit=False)
 WEB_SESSION_FACTORY = async_sessionmaker(bind=WEB_ENGINE, expire_on_commit=False)
+
+
+async def get_web_db() -> AsyncGenerator[AsyncSession, None]:
+    async with WEB_SESSION_FACTORY() as session:
+        try:
+            yield session
+        finally:
+            pass

@@ -1,9 +1,9 @@
 from fastapi import Request, Form, Depends, HTTPException, APIRouter
 from fastapi.responses import RedirectResponse
 
-from dao.web_dao import get_user_by_username
-from database.sessions import WEB_DEV_SESSION_FACTORY, WEB_SESSION_FACTORY
-from routers.web_router.web import web_jinja_router, templates
+from dao.admin_dao import get_admin_by_username
+from database.sessions import WEB_SESSION_FACTORY
+from routers.admin_router.admin import admin_jinja_router, templates
 from utils.hashing import Hasher
 
 
@@ -17,21 +17,21 @@ async def validate_input(username: str, password: str) -> [bool, str | None]:
     else:
         ...
     async with WEB_SESSION_FACTORY() as session:
-        user = await get_user_by_username(session, username)
+        user = await get_admin_by_username(session, username)
         if user is None:
             return False, "Invalid credentials"
-        elif not Hasher.verify_password(password, user.hashed_password):
+        elif not Hasher.verify_password(password, user.password_hashed):
             return False, "Invalid credentials"
         else:
             return True, None
 
 
-@web_jinja_router.get("/login")
+@admin_jinja_router.get("/login")
 async def login_get(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("admin/admin_login.html", {"request": request})
 
 
-@web_jinja_router.post("/login")
+@admin_jinja_router.post("/login")
 async def login_post(
     request: Request,
     username: str = Form(...),
@@ -40,16 +40,16 @@ async def login_post(
     validation_result = await validate_input(username, password)
     if not validation_result[0]:
         return templates.TemplateResponse(
-            "login.html",
+            "admin/admin_login.html",
             {"request": request, "error": f"{validation_result[1]}"},
             status_code=401
         )
 
-    request.session["user"] = username
-    return RedirectResponse(url="/web/home", status_code=302)
+    request.session["admin"] = username
+    return RedirectResponse(url="/admin/", status_code=302)
 
 
-# @web_jinja_router.get("/logout")
+# @jinja_router.get("/logout")
 # async def logout(request: Request):
 #     request.session.clear()
 #     return RedirectResponse(url="/login", status_code=302)

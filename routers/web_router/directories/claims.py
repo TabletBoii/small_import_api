@@ -8,7 +8,8 @@ from starlette.responses import HTMLResponse, FileResponse
 from controllers.web.directories.ClaimDirectoryController import ClaimDirectoryController
 from dao.claim_procedure import ClaimProcedure, title_alias_dict
 from database.sessions import KOMPAS_SESSION_FACTORY
-from routers.web_router.web import jinja_router, templates
+from routers.web_router.utils import make_route_permission_deps
+from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user
 
 
@@ -138,7 +139,11 @@ async def validate_avg_report_input(
     return True, None
 
 
-@jinja_router.get("/directory_claims", response_class=HTMLResponse)
+@web_jinja_router.get(
+    "/directory_claims",
+    response_class=HTMLResponse,
+    dependencies=[Depends(make_route_permission_deps("directory_claims"))]
+)
 async def directory_claims(
     request: Request,
     user: str = Depends(require_user),
@@ -164,7 +169,7 @@ async def directory_claims(
     )
 
 
-@jinja_router.post("/directory_claims")
+@web_jinja_router.post("/directory_claims")
 async def directory_claims_form(
     request: Request,
     user: str = Depends(require_user),

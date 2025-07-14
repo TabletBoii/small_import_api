@@ -7,18 +7,16 @@ import env_setup
 import logging.config
 
 from starlette.middleware import Middleware
-from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.staticfiles import StaticFiles
-from middlewares.webauth_middleware import WebAuthMiddleware
 
 from routers.api_router import api_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE
-from routers.web_router import web
-from utils.utils import get_data
+from sub_app.admin_app import admin_app
+from sub_app.web_app import web_app
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -32,12 +30,6 @@ if env_status != "dev":
 
 middleware_list = [
     Middleware(
-        SessionMiddleware,
-        secret_key=get_data("WEB_SECRET_KEY"),
-        max_age=int(get_data("WEB_SESSION_MAX_AGE"))
-    ),
-    Middleware(WebAuthMiddleware),
-    Middleware(
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
@@ -49,9 +41,10 @@ middleware_list = [
 app = FastAPI(middleware=middleware_list)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/admin", admin_app)
+app.mount("/web", web_app)
 
 app.include_router(api_router)
-app.include_router(web.jinja_router)
 
 
 @app.on_event("shutdown")

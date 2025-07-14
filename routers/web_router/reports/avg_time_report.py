@@ -10,7 +10,7 @@ from starlette.responses import HTMLResponse, RedirectResponse, StreamingRespons
 from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
 from dao.department_dao import get
 from database.sessions import KOMPAS_SESSION_FACTORY
-from routers.web_router.web import jinja_router, templates
+from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user
 
 
@@ -57,7 +57,7 @@ async def validate_avg_report_input(
     return True, None
 
 
-@jinja_router.get("/report_avg", response_class=HTMLResponse)
+@web_jinja_router.get("/report_avg", response_class=HTMLResponse)
 async def report_avg(
     request: Request,
     user: str = Depends(require_user),
@@ -78,7 +78,7 @@ async def report_avg(
     )
 
 
-@jinja_router.post("/report_avg")
+@web_jinja_router.post("/report_avg")
 async def report_avg_form(
     request: Request,
     date_from: str = Form(...),

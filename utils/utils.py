@@ -82,7 +82,7 @@ def find_max_date(dates_raw):
 def require_user(request: Request):
     if "user" not in request.session:
         raise HTTPException(
-            status_code=302,
+            status_code=400,
             detail="Redirect to login",
             headers={"Location": "/web/login"}
         )

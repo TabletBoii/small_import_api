@@ -15,7 +15,7 @@
 </head>
 <body>
   <header>
-    <div class="logo"><a href="{{ url_for('home') }}">KOMPAS</a></div>
+    <div class="logo"><a href="{{ url_for('web_home') }}">KOMPAS</a></div>
 
     <nav>
       <ul>
@@ -36,6 +36,9 @@
 
   <main class="container">
     {% block content %}{% endblock %}
+    {% block scripts %}
+      <script src="{{ url_for('static', path='js/table.js') }}"></script>
+    {% endblock %}
   </main>
 
 </body>

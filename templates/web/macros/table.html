@@ -1,0 +1,68 @@
+{% macro render_table(id, table_data, table_keys, save_url) %}
+  {% if table_data %}
+    {% set headers = table_data[0].keys() | list %}
+    <div class="btn_block">
+      <button id="save-btn-{{ id }}" class="btn">
+        <i class="fa-solid fa-floppy-disk"></i> Сохранить
+      </button>
+      <button type="button" class="btn excel" id="import-excel-{{ id }}">
+        <i class="fa-regular fa-file-excel"></i> Выгрузить из Excel
+      </button>
+      <input type="file" id="excel-file-{{ id }}" accept=".xlsx,.xls" style="display:none;">
+    </div>
+
+    <div class="table-wrapper">
+      <table id="{{ id }}" class="editable-table">
+        <thead>
+          <tr>
+            {% for h in table_keys %}
+              <th class="th-with-menu" data-col-index="{{ loop.index0 }}">
+                {{ h }}
+                <span class="menu-btn">☰</span>
+                <div class="filter-menu"></div>
+              </th>
+            {% endfor %}
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table_data %}
+            <tr data-index="{{ loop.index0 }}">
+              {% for h in headers %}
+              {% if h == "inc"%}
+                <td style="display: none;">
+                  <input type="text" name="{{ h }}" value="{{ row[h] }}">
+                </td>
+              {% else %}
+                <td>
+                  <input type="text" name="{{ h }}" value="{{ row[h] }}">
+                </td>
+              {% endif %}
+              {% endfor %}
+              <td>
+                <button type="button" class="btn delete-row">Удалить</button>
+                <button type="button" class="btn duplicate-row">Дубл-ть</button>
+              </td>
+            </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    <div class="sidebar-trigger"></div>
+    <button type="button" class="btn btn-add-row-fixed" id="add-row-{{ id }}">
+      <i class="fa-solid fa-plus"></i> Добавить строку
+    </button>
+
+    <script>
+      window.tableConfig = window.tableConfig || {};
+      window.tableConfig["{{ id }}"] = {
+        headers: {{ headers|tojson }},
+        tableKeys: {{ table_keys|tojson }},
+        saveUrl: "{{ save_url }}"
+      };
+    </script>
+  {% else %}
+    <p>Данных нет.</p>
+  {% endif %}
+{% endmacro %}

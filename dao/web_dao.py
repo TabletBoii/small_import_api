@@ -27,3 +27,6 @@ async def get_web_resource_by_name(session: AsyncSession, web_resource_name: str
     stmt = select(WebResource).where(WebResource.name == web_resource_name)
     result = await session.execute(stmt)
     return result.scalars().first()
+
+
+
