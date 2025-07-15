@@ -69,4 +69,5 @@ async def directories(
 from .reports import avg_time_report
 from .directories import claims
 from .directories import direction
+from .directories import departments
 from . import auth
