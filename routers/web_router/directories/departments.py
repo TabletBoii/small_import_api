@@ -10,17 +10,17 @@ from utils.utils import require_user
 
 
 @web_jinja_router.get(
-    "/department_direction",
+    "/department_directory",
     response_class=HTMLResponse,
-    dependencies=[Depends(make_route_permission_deps("department_direction"))]
+    dependencies=[Depends(make_route_permission_deps("department_directory"))]
 )
-async def department_direction(
+async def department_directory(
         request: Request,
         user: str = Depends(require_user),
         # form_ctx: Dict[str, List[str]] = Depends(get_form_context),
 ):
     return templates.TemplateResponse(
-        "directory_direction.html",
+        "department_directory.html",
         {
             "request": request,
             "user": user,
