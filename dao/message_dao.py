@@ -1,31 +1,31 @@
 from datetime import datetime
-from typing import Sequence, Tuple, List, Dict, Any
+from typing import Sequence, Tuple, List, Dict
 
-from sqlalchemy import select, join, func, literal_column, true, text, bindparam, Row, asc
+from sqlalchemy import select, join, func, text, bindparam, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from custom_types.custom_types import ClaimID, Sender, Recipient, MsgDate
-from models.sqlalchemy_v2.department import Department
-from models.sqlalchemy_v2.message import Message
-from models.sqlalchemy_v2.messagetype import MessageType
+from models.samo.department_model import DepartmentModel
+from models.samo.message_model import MessageModel
+from models.samo.messagetype_model import MessageTypeModel
 
 
-async def get_top_1000(session: AsyncSession) -> Sequence[Message]:
-    stmt = select(Message).limit(1000).execution_options(caller="message.get_top_1000")
+async def get_top_1000(session: AsyncSession) -> Sequence[MessageModel]:
+    stmt = select(MessageModel).limit(1000).execution_options(caller="message.get_top_1000")
     result = await session.execute(stmt)
     return result.scalars().all()
 
 
-async def get_by_claim_inc(session: AsyncSession, claim_inc: int) -> Sequence[Message]:
-    stmt = select(Message).where(Message.claim == claim_inc).execution_options(caller="message.get_by_claim_inc")
+async def get_by_claim_inc(session: AsyncSession, claim_inc: int) -> Sequence[MessageModel]:
+    stmt = select(MessageModel).where(MessageModel.claim == claim_inc).execution_options(caller="message.get_by_claim_inc")
     result = await session.execute(stmt)
     return result.scalars().all()
 
 
-async def get_by_date_period(session: AsyncSession, date_period: Tuple[datetime, datetime]) -> Sequence[Message]:
-    stmt = (select(Message)
-            .where(Message.adate >= date_period[0])
-            .where(Message.adate <= date_period[1])
+async def get_by_date_period(session: AsyncSession, date_period: Tuple[datetime, datetime]) -> Sequence[MessageModel]:
+    stmt = (select(MessageModel)
+            .where(MessageModel.adate >= date_period[0])
+            .where(MessageModel.adate <= date_period[1])
             .execution_options(caller="message.get_by_date_period")
             )
     result = await session.execute(stmt)
@@ -39,21 +39,21 @@ async def get_by_claims_and_period_and_department(
         department_id: int
 ) -> list[tuple[ClaimID, Sender, Recipient, MsgDate]]:
     jt = join(
-        Message, MessageType,
-        Message.messagetype == MessageType.inc
+        MessageModel, MessageTypeModel,
+        MessageModel.messagetype == MessageTypeModel.inc
     )
     jd = join(
-        jt, Department,
-        MessageType.department == Department.inc
+        jt, DepartmentModel,
+        MessageTypeModel.department == DepartmentModel.inc
     )
 
-    stmt = (select(Message.claim, Message.author, Message.user, Message.adate)
+    stmt = (select(MessageModel.claim, MessageModel.author, MessageModel.user, MessageModel.adate)
             .select_from(jd)
-            .where(Department.inc == department_id)
-            .where(Message.adate >= date_period[0])
-            .where(Message.adate <= date_period[1])
-            .where(Message.claim.in_(claim_list))
-            .order_by(asc(Message.adate))
+            .where(DepartmentModel.inc == department_id)
+            .where(MessageModel.adate >= date_period[0])
+            .where(MessageModel.adate <= date_period[1])
+            .where(MessageModel.claim.in_(claim_list))
+            .order_by(asc(MessageModel.adate))
             .execution_options(caller="message.get_by_claims_and_period_and_department")
             )
     result = await session.execute(stmt)
@@ -66,24 +66,24 @@ async def get_claim_count_by_department_and_period(
         date_period: List[datetime]
 ) -> Dict[int, int]:
     jt = join(
-        Message, MessageType,
-        Message.messagetype == MessageType.inc
+        MessageModel, MessageTypeModel,
+        MessageModel.messagetype == MessageTypeModel.inc
     )
     jd = join(
-        jt, Department,
-        MessageType.department == Department.inc
+        jt, DepartmentModel,
+        MessageTypeModel.department == DepartmentModel.inc
     )
 
     stmt = (
         select(
-            Message.claim,
-            func.count(Message.inc).label("cnt")
+            MessageModel.claim,
+            func.count(MessageModel.inc).label("cnt")
         )
         .select_from(jd)
-        .where(Department.inc == department_id)
-        .where(Message.adate.between(date_period[0], date_period[1]))
-        .group_by(Message.claim)
-        .order_by(Message.claim)
+        .where(DepartmentModel.inc == department_id)
+        .where(MessageModel.adate.between(date_period[0], date_period[1]))
+        .group_by(MessageModel.claim)
+        .order_by(MessageModel.claim)
         .execution_options(caller="message.get_claim_count_by_department_and_period")
     )
 
@@ -98,12 +98,12 @@ async def get_overall_claim_count_by_claim_list(
 ) -> Dict[int, int]:
     stmt = (
         select(
-            Message.claim,
-            func.count(Message.inc).label("cnt")
+            MessageModel.claim,
+            func.count(MessageModel.inc).label("cnt")
         )
-        .where(Message.claim.in_(claim_list))
-        .group_by(Message.claim)
-        .order_by(Message.claim)
+        .where(MessageModel.claim.in_(claim_list))
+        .group_by(MessageModel.claim)
+        .order_by(MessageModel.claim)
         .execution_options(caller="message.get_overall_claim_count_by_claim_list")
     )
 
@@ -115,18 +115,18 @@ async def get_by_department_and_date(
         session: AsyncSession,
         department_id: int,
         date_period: Tuple[datetime, datetime]
-) -> Sequence[Message]:
-    jt = join(Message, MessageType,
-              Message.messagetype == MessageType.inc)
-    jd = join(jt, Department,
-              MessageType.department == Department.inc)
+) -> Sequence[MessageModel]:
+    jt = join(MessageModel, MessageTypeModel,
+              MessageModel.messagetype == MessageTypeModel.inc)
+    jd = join(jt, DepartmentModel,
+              MessageTypeModel.department == DepartmentModel.inc)
 
     stmt = (
-        select(Message)
+        select(MessageModel)
         .select_from(jd)
-        .where(Department.inc == department_id)
-        .where(Message.adate.between(date_period[0], date_period[1]))
-        .order_by(Message.inc)
+        .where(DepartmentModel.inc == department_id)
+        .where(MessageModel.adate.between(date_period[0], date_period[1]))
+        .order_by(MessageModel.inc)
         .execution_options(caller="message.message.get_by_department_and_date")
     )
 

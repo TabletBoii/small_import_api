@@ -431,3 +431,38 @@ input[type="date"] {
     background-color: #000;
     color: #fff;
 }
+
+
+.filter-dropdown {
+  position: relative;
+  width: 300px;
+}
+.filter-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+}
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background: #fff;
+  z-index: 1000;
+  display: none;
+  margin-top: 2px;
+}
+.filter-dropdown.open .dropdown-list {
+  display: block;
+}
+.filter-item {
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.filter-item:hover {
+  background: var(--primary);
+  color: var(--white);
+}

@@ -2,24 +2,24 @@ from sqlalchemy import Sequence, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from models.sqlalchemy_v2.department import Department
-from models.sqlalchemy_v2.messagetype import MessageType
+from models.samo.department_model import DepartmentModel
+from models.samo.messagetype_model import MessageTypeModel
 
 
-async def get(session: AsyncSession) -> Sequence[MessageType]:
-    stmt = select(MessageType)
+async def get(session: AsyncSession) -> Sequence[MessageTypeModel]:
+    stmt = select(MessageTypeModel)
     result = await session.execute(stmt)
     return result.scalars().all()
 
 
-async def get_with_department(session: AsyncSession) -> Sequence[MessageType]:
+async def get_with_department(session: AsyncSession) -> Sequence[MessageTypeModel]:
     stmt = (
-        select(MessageType)
+        select(MessageTypeModel)
         .options(
-            joinedload(MessageType.department_field)
-            .load_only(Department.name)
+            joinedload(MessageTypeModel.department_field)
+            .load_only(DepartmentModel.name)
         )
-        .order_by(MessageType.inc)
+        .order_by(MessageTypeModel.inc)
     )
     res = await session.execute(stmt)
     return res.scalars().all()

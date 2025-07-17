@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% import "macros/lazy_filter.html" as filter_macros %}
+{% block title %}Отчет по dmc{% endblock %}
+
+{% block content %}
+  <div class="center_container">
+    <h1>Отчет: DMC</h1>
+
+    <form method="post" action="/web/report_dmc">
+      <div class="form-group">
+        <label for="start_date_p1">Дата начала (Период 1)</label>
+        <input
+                type="date"
+                id="start_date_p1"
+                name="date_from_p1"
+                {% if selected_date_from_p1 %}
+                  value="{{ selected_date_from_p1 }}"
+                {% endif %}
+        >
+
+        <label for="end_date_p1">Дата окончания (Период 1)</label>
+        <input
+                type="date"
+                id="end_date_p1"
+                name="date_till_p1"
+                {% if selected_date_till_p1 %}
+                  value="{{ selected_date_till_p1 }}"
+                {% endif %}
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="start_date_p2">Дата начала (Период 2)</label>
+        <input
+                type="date"
+                id="start_date_p2"
+                name="date_from_p2"
+                {% if selected_date_from_p2 %}
+                  value="{{ selected_date_from_p2 }}"
+                {% endif %}
+        >
+
+        <label for="end_date_p2">Дата окончания (Период 2)</label>
+        <input
+                type="date"
+                id="end_date_p2"
+                name="date_till_p2"
+                {% if selected_date_till_p2 %}
+                  value="{{ selected_date_till_p2 }}"
+                {% endif %}
+        >
+      </div>
+
+      <div class="form-group">
+        {{ filter_macros.lazy_filter(
+             url="/web/report_dmc/items",
+             id_prefix="partnerFilter",
+             placeholder="Выберите партнера...",
+             limit=30
+        ) }}
+      </div>
+
+
+
+      <button type="submit" class="btn">Сформировать отчёт</button>
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+    </form>
+  </div>
+{% endblock %}

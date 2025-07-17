@@ -8,12 +8,11 @@ from typing import List, Dict, Optional
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from custom_types.custom_types import ClaimID
 from dao import message_dao, usnames_dao
 from dao.department_dao import get_departments_by_name, get_department_name_by_id
 from database.sessions import KOMPAS_SESSION_FACTORY
 from dataclasses_custom.schedule import WorkingHours
-from file_export.excel_export import ExportExcel
+from utils.file_export.excel_export import ExportExcel
 
 department_schedule = {
     13: [

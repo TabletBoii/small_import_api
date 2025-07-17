@@ -1,14 +1,13 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.sqlalchemy_v2.web import WebTemplate
-from pydantic_models.template import TemplateCreate
+from models.web.web_template_model import WebTemplateModel
 
 
 async def get_template_list(session: AsyncSession, user_id: int, web_resource_inc: int):
-    stmt = (select(WebTemplate)
-            .where(WebTemplate.user_inc == user_id)
-            .where(WebTemplate.web_resource_inc == web_resource_inc)
+    stmt = (select(WebTemplateModel)
+            .where(WebTemplateModel.user_inc == user_id)
+            .where(WebTemplateModel.web_resource_inc == web_resource_inc)
             )
     result = await session.execute(stmt)
     return result.scalars().all()

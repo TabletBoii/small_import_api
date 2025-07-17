@@ -2,7 +2,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from dao.web_dao import create_user
-from models.sqlalchemy_v2.web import WebUser
+from models.web.web_user_model import WebUserModel
 from pydantic_models.request_models import CreateUserModel
 from utils.hashing import Hasher
 
@@ -16,7 +16,7 @@ class CreateUser:
         self.session_factory = session_factory
 
     async def run(self):
-        user_model_instance = WebUser()
+        user_model_instance = WebUserModel()
         user_model_instance.name = self.user.name
         user_model_instance.hashed_password = Hasher().get_password_hash(self.user.password)
         user_model_instance.description = self.user.description

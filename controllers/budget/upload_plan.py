@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from models.models import PlanData
+from models.ext_db.plan_model import PlanModel
 from pydantic_models.request_models import PlanValuesModel
 
 
@@ -17,13 +17,13 @@ class UploadPlanData:
 
     async def insert_pydantic_model(self):
         if isinstance(self.plan_data, list):
-            user_instances = [PlanData(**model.dict()) for model in self.plan_data]
+            user_instances = [PlanModel(**model.dict()) for model in self.plan_data]
             print(user_instances)
             async with self.session_factory() as session:
                 session.add_all(user_instances)
                 await session.commit()
         else:
-            user_instance = PlanData(**self.plan_data.dict())
+            user_instance = PlanModel(**self.plan_data.dict())
             async with self.session_factory() as session:
                 session.add(user_instance)
                 await session.commit()

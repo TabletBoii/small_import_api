@@ -1,0 +1,97 @@
+{% macro lazy_filter(url, id_prefix='lazyflt', placeholder='Поиск...', limit=20) %}
+  <div class="filter-dropdown" id="{{ id_prefix }}-dropdown">
+    <input
+      type="text"
+      id="{{ id_prefix }}-input"
+      class="filter-input"
+      placeholder="{{ placeholder }}"
+      autocomplete="off"
+    />
+    <div id="{{ id_prefix }}-container" class="dropdown-list"></div>
+  </div>
+
+  <script>
+  (function(){
+    const urlBase    = '{{ url }}';
+    const container  = document.getElementById('{{ id_prefix }}-container');
+    const searchInput= document.getElementById('{{ id_prefix }}-input');
+    const dropdown   = document.getElementById('{{ id_prefix }}-dropdown');
+
+    let skip     = 0;
+    const limit  = {{ limit }};
+    let loading  = false;
+    let hasMore  = true;
+    let queryStr = "";
+
+    async function loadItems(reset = false) {
+      if (loading || (!hasMore && !reset)) return;
+      loading = true;
+
+      if (reset) {
+        skip    = 0;
+        hasMore = true;
+        container.innerHTML = "";
+      }
+
+      const url = `${urlBase}?q=${encodeURIComponent(queryStr)}&skip=${skip}&limit=${limit}`;
+      try {
+        const res   = await fetch(url);
+        const json  = await res.json();
+        const items = json.items;
+        if (items.length < limit) hasMore = false;
+        for (const it of items) {
+          const div = document.createElement('div');
+          div.className   = 'filter-item';
+          div.textContent = it.name;
+          container.appendChild(div);
+        }
+        skip += items.length;
+      } catch (err) {
+        console.error('Ошибка загрузки:', err);
+      } finally {
+        loading = false;
+      }
+    }
+
+    function debounce(fn, delay = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+
+    searchInput.addEventListener('focus', () => {
+      dropdown.classList.add('open');
+    });
+
+    document.addEventListener('click', e => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    searchInput.addEventListener('input', debounce(e => {
+      queryStr = e.target.value.trim();
+      hasMore  = true;
+      loadItems(true);
+    }, 300));
+
+    container.addEventListener('scroll', () => {
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+        loadItems();
+      }
+    });
+
+    container.addEventListener('click', e => {
+      if (e.target.classList.contains('filter-item')) {
+        searchInput.value = e.target.textContent;
+        dropdown.classList.remove('open');
+      }
+    });
+
+    loadItems();
+  })();
+  </script>
+{% endmacro %}

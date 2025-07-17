@@ -10,7 +10,7 @@ from sqlalchemy import (
 )
 
 
-class Department(Base):
+class DepartmentModel(Base):
     __tablename__ = "department"
     inc: Mapped[int] = mapped_column(Integer, primary_key=True, name="inc")
     name: Mapped[str] = mapped_column(String(64), name="name")

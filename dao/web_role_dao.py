@@ -1,13 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dao.web_dao import get_user_by_username
-from models.sqlalchemy_v2.web import WebResource, WebResourceAccess, WebUser
+from models.web.web_resource_access_model import WebResourceAccessModel
+from models.web.web_resource_model import WebResourceModel
+from models.web.web_user_model import WebUserModel
 
 
 async def get_user_permissions(session: AsyncSession, user: str):
     result = await session.execute(
-        select(WebUser).where(WebUser.name == user)
+        select(WebUserModel).where(WebUserModel.name == user)
     )
     user = result.scalar_one_or_none()
     if user is None:
@@ -15,17 +16,17 @@ async def get_user_permissions(session: AsyncSession, user: str):
 
     stmt = (
         select(
-            WebResource.name.label("resource_name"),
-            WebResourceAccess.has_access,
-            WebResource.type.label("resource_type"),
-            WebResource.name_cirill.label("name_cirill"),
-            WebResource.description.label("description"),
+            WebResourceModel.name.label("resource_name"),
+            WebResourceAccessModel.has_access,
+            WebResourceModel.type.label("resource_type"),
+            WebResourceModel.name_cirill.label("name_cirill"),
+            WebResourceModel.description.label("description"),
         )
         .join(
-            WebResource,
-            WebResource.inc == WebResourceAccess.web_resource_inc
+            WebResourceModel,
+            WebResourceModel.inc == WebResourceAccessModel.web_resource_inc
         )
-        .where(WebResourceAccess.user_inc == user.inc)
+        .where(WebResourceAccessModel.user_inc == user.inc)
     )
 
     rows = await session.execute(stmt)

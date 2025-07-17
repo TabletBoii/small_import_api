@@ -3,7 +3,8 @@ from typing import List
 from sqlalchemy import text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from models.models import PlanData, BudgetData
+from models.ext_db.plan_model import PlanModel
+from models.ext_db.budget_model import BudgetModel
 from pydantic_models.request_models import BudgetValuesModel
 
 
@@ -20,19 +21,19 @@ class UploadBudgetData:
     async def delete_old_data(self):
         async with self.session_factory() as session:
             async with session.begin():
-                stmt = delete(BudgetData).where(BudgetData.department == self.budget_data[0].department)
+                stmt = delete(BudgetModel).where(BudgetModel.department == self.budget_data[0].department)
                 await session.execute(stmt)
                 await session.commit()
 
     async def insert_pydantic_model(self):
         if isinstance(self.budget_data, list):
-            user_instances = [BudgetData(**model.dict()) for model in self.budget_data]
+            user_instances = [BudgetModel(**model.dict()) for model in self.budget_data]
             async with self.session_factory() as session:
                 await self.delete_old_data()
                 session.add_all(user_instances)
                 await session.commit()
         else:
-            user_instance = BudgetData(**self.budget_data.dict())
+            user_instance = BudgetModel(**self.budget_data.dict())
             async with self.session_factory() as session:
                 session.add(user_instance)
                 await session.commit()

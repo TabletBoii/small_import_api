@@ -18,9 +18,8 @@ from sqlalchemy.dialects.mssql import (
 )
 
 
-
 # АККУРАТНО ВЫЗЫВАТЬ ЭТУ МОДЕЛЬ - ОЧ МНОГО ДАННЫХ
-class Message(Base):
+class MessageModel(Base):
     __tablename__ = "message"
     inc: Mapped[int] = mapped_column(Integer, primary_key=True, name="inc")
     messagetype: Mapped[int] = mapped_column(Integer, ForeignKey("messagetype.inc"), name="messagetype")

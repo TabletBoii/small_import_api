@@ -1,9 +1,9 @@
 from typing import Sequence, List
 
-from sqlalchemy import select, delete, and_, cast, VARCHAR, insert, update
+from sqlalchemy import select, delete, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.sqlalchemy_v2.web import WebDirectionList
+from models.web import WebDirectionList
 from pydantic_models.web_models import Direction
 
 

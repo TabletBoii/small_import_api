@@ -1,7 +1,7 @@
-from sqlalchemy import insert, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.sqlalchemy_v2.web import AdminAuth
+from models.web import AdminAuth
 
 
 async def get_admin_by_username(session: AsyncSession, username: str) -> AdminAuth:

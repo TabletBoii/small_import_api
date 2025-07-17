@@ -8,7 +8,7 @@ from openpyxl.workbook import Workbook
 from dao import usnames_dao
 from database.session import SessionLocal1
 from dataclasses_custom.dev.user_avg_entries import UserAvgEntryDataclass
-from file_export.excel_export import ExportExcel
+from utils.file_export.excel_export import ExportExcel
 
 
 class AvgTimeExport(ExportExcel):

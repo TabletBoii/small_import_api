@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from models.models import BudgetCurrencyData
+from models.ext_db.budget_currency_model import BudgetCurrencyModel
 from pydantic_models.request_models import BudgetCurrencyModel
 
 
@@ -20,12 +20,12 @@ class UploadBudgetCurrencyData:
     async def truncate_data(self):
         async with self.session_factory() as session:
             async with session.begin():
-                stmt = delete(BudgetCurrencyData)
+                stmt = delete(BudgetCurrencyModel)
                 await session.execute(stmt)
                 await session.commit()
 
     async def insert_pydantic_model(self):
-        instances = [BudgetCurrencyData(**model.dict()) for model in self.currency_data]
+        instances = [BudgetCurrencyModel(**model.dict()) for model in self.currency_data]
         async with self.session_factory() as session:
             await self.truncate_data()
             session.add_all(instances)

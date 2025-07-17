@@ -1,7 +1,8 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from models.models import PlanData, PlanPercentData
+from models.ext_db.plan_percent_model import PlanPercentModel
+from models.ext_db.plan_model import PlanModel
 from pydantic_models.request_models import PlanPercentModel
 
 
@@ -16,7 +17,7 @@ class UploadPlanPercentData:
         self.session_factory = session_factory
 
     async def insert_pydantic_model(self):
-        instances = [PlanPercentData(**model.dict()) for model in self.plan_percent_data]
+        instances = [PlanPercentModel(**model.dict()) for model in self.plan_percent_data]
         print(instances)
         async with self.session_factory() as session:
             session.add_all(instances)

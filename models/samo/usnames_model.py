@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from database.base import Base
 
 
-class Usnames(Base):
+class UsnamesModel(Base):
     __tablename__ = "usnames"
     code: Mapped[int] = mapped_column(SmallInteger, primary_key=True, name="code")
     name: Mapped[str] = mapped_column(String(64), nullable=True, name="name")
