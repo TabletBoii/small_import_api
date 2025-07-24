@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Мои загрузки{% endblock %}
+
+{% block content %}
+<div class="center_container download_content">
+  <h1>Мои загрузки</h1>
+  <table id="downloads-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Ресурс</th>
+        <th>Статус</th>
+        <th>Дата</th>
+        <th>Параметры</th>
+        <th>Ошибка</th>
+        <th class="th-actions">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
+<script>
+  const MAX_PARAMS_VISIBLE = 1;
+  const MAX_ERROR_CHARS    = 10;
+  const expandedDownloads = new Set();
+  const expandedErrors     = new Set();
+  async function fetchDownloads() {
+    const resp = await fetch("/web/get_downloads");
+    const items = await resp.json();
+    items.sort((a, b) => b.id - a.id);
+    const tbody = document.querySelector("#downloads-table tbody");
+    tbody.innerHTML = "";
+
+    items.forEach(d => {
+      const tr = document.createElement("tr");
+
+      const tdDownloadId = document.createElement("td");
+      tdDownloadId.textContent = d.id;
+      tr.append(tdDownloadId);
+
+      const tdResource = document.createElement("td");
+      tdResource.textContent = d["resource_name"];
+      tr.append(tdResource);
+
+      const tdStatus = document.createElement("td");
+      if (d.in_process) {
+        tdStatus.innerHTML = '<span class="in_progress"><span class="spinner"></span> В процессе</span>';
+      } else if (d.has_error) {
+        tdStatus.innerHTML = `<span class="error">Ошибка</span>`;
+      } else {
+        tdStatus.innerHTML = `<span class="success">Готово</span>`;
+      }
+      tr.append(tdStatus);
+
+      const tdDate = document.createElement("td");
+      tdDate.textContent = new Date(d.created_date).toLocaleString();
+      tr.append(tdDate);
+
+      const tdParams = document.createElement("td");
+      tdParams.className = "params";
+
+      let parts = [];
+      if (d.params) {
+        let obj;
+        try {
+          obj = JSON.parse(d.params);
+        } catch {
+          obj = null;
+        }
+        if (obj && typeof obj === "object") {
+          parts = Object.entries(obj)
+            .filter(([k, v]) => v !== "" && v != null)
+            .map(([k, v]) => `<div><strong>${k}</strong>: ${v}</div>`);
+        }
+      }
+
+      if (!parts.length) {
+        tdParams.innerHTML = "<em>—</em>";
+      } else {
+        const isExpanded = expandedDownloads.has(d.id);
+        const visible = (isExpanded || parts.length <= MAX_PARAMS_VISIBLE)
+          ? parts
+          : parts.slice(0, MAX_PARAMS_VISIBLE);
+
+        const container = document.createElement("div");
+        container.innerHTML = visible.join("");
+        tdParams.append(container);
+
+        if (parts.length > MAX_PARAMS_VISIBLE) {
+          const moreCount = parts.length - MAX_PARAMS_VISIBLE;
+          const toggleLink = document.createElement("a");
+          toggleLink.href = "#";
+          toggleLink.className = "params-toggle";
+          toggleLink.textContent = isExpanded
+            ? "Скрыть"
+            : `+${moreCount} ещё`;
+
+          toggleLink.addEventListener("click", e => {
+            e.preventDefault();
+            if (expandedDownloads.has(d.id)) {
+              expandedDownloads.delete(d.id);
+            } else {
+              expandedDownloads.add(d.id);
+            }
+            fetchDownloads();
+          });
+
+          tdParams.append(toggleLink);
+        }
+      }
+
+      tr.append(tdParams);
+
+      const tdErrorMsg = document.createElement("td");
+      const err = d.error_msg || "";
+      if (!err) {
+        tdErrorMsg.innerHTML = "<em>—</em>";
+      } else {
+        const isExpandedError = expandedErrors.has(d.id);
+        const displayText = (isExpandedError || err.length <= MAX_ERROR_CHARS)
+          ? err
+          : err.slice(0, MAX_ERROR_CHARS) + "…";
+
+        tdErrorMsg.textContent = displayText;
+
+        if (err.length > MAX_ERROR_CHARS) {
+          const toggleError = document.createElement("a");
+          toggleError.href = "#";
+          toggleError.className = "error-toggle";
+          toggleError.textContent = isExpandedError
+            ? "Скрыть ошибку"
+            : "Показать ошибку";
+
+          toggleError.addEventListener("click", e => {
+            e.preventDefault();
+            if (expandedErrors.has(d.id)) {
+              expandedErrors.delete(d.id);
+            } else {
+              expandedErrors.add(d.id);
+            }
+            fetchDownloads();
+          });
+
+          tdErrorMsg.append(document.createElement("br")); // перенос
+          tdErrorMsg.append(toggleError);
+        }
+      }
+      tr.append(tdErrorMsg);
+
+      const tdAction = document.createElement("td");
+      if (!d.in_process && !d.has_error) {
+        const btn = document.createElement("a");
+        btn.href = `/web/download_report/${d.id}`;
+        btn.textContent = d.is_downloaded ? "Скачать ещё раз" : "Скачать";
+        btn.className = "btn";
+        tdAction.append(btn);
+      }
+      tr.append(tdAction);
+
+      tbody.append(tr);
+    });
+  }
+
+  fetchDownloads();
+  setInterval(fetchDownloads, 5000);
+</script>
+
+<style>
+  .spinner {
+    display: inline-block;
+    width: 1em; height: 1em;
+    border: 2px solid #ccc;
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 0.3em;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #downloads-table { width: 100%; border-collapse: collapse; }
+  #downloads-table th.th-actions {
+      width: 180px;
+      font-size: 1.1em;
+      text-align: center;
+  }
+  #downloads-table td.params {
+    max-width: 300px;
+    white-space: normal;
+    word-break: break-word;
+    vertical-align: top;
+    font-size: 0.9em;
+    color: #333;
+  }
+  #downloads-table .params-toggle {
+    display: inline-block;
+    padding: 0.5em 0.5em;
+    color: #fff;
+    background-color: #007bff;
+    border: 1px solid #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+  #downloads-table .error-toggle {
+    display: inline-block;
+    padding: 0.5em 0.5em;
+    color: #fff;
+    background-color: #ff3333;
+    border: 1px solid #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+  #downloads-table td.params div {
+    margin-bottom: 0.2em;
+  }
+  #downloads-table th, #downloads-table td { padding: .5em; border: 1px solid #ddd; }
+  .btn { padding: .3em .6em; background: #007bff; color: #fff; text-decoration: none; border-radius: .25em; }
+</style>
+{% endblock %}

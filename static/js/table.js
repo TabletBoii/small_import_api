@@ -121,9 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!resp.ok) {
-        throw new Error(`Ошибка ${resp.status}`);
+        showToast("Ошибка");
       }
       const data = await resp.json();
+      showToast("Успешно сохранено", "suc");
     });
   });
 });

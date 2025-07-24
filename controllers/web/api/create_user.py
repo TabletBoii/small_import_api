@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from dao.web_dao import create_user
+from dao.web.web_dao import create_user
 from models.web.web_user_model import WebUserModel
 from pydantic_models.request_models import CreateUserModel
 from utils.hashing import Hasher

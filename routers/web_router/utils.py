@@ -4,7 +4,7 @@ from fastapi import Depends
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from dao.web_role_dao import get_user_permissions
+from dao.web.web_role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
 from utils.utils import require_user
 

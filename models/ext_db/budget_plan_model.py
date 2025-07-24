@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from models.models import Base
+from models.base import Base
 
 
 class BudgetPlanModel(Base):

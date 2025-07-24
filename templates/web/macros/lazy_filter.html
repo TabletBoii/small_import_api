@@ -1,11 +1,13 @@
-{% macro lazy_filter(url, id_prefix='lazyflt', placeholder='Поиск...', limit=20) %}
+{% macro lazy_filter(url, id_prefix='lazyflt', selected_value=None, placeholder='Поиск...', limit=20) %}
   <div class="filter-dropdown" id="{{ id_prefix }}-dropdown">
     <input
       type="text"
       id="{{ id_prefix }}-input"
       class="filter-input"
+      name="{{ id_prefix }}_input"
       placeholder="{{ placeholder }}"
       autocomplete="off"
+      {% if selected_value %}value="{{ selected_value }}"{% endif %}
     />
     <div id="{{ id_prefix }}-container" class="dropdown-list"></div>
   </div>

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Date, Float
 
-from models.models import Base
+from models.base import Base
 
 
 class PlanPercentModel(Base):

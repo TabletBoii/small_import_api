@@ -111,6 +111,10 @@ header nav a:hover {
   padding: 0 1rem;
 }
 
+.download_content {
+    min-width: 1500px !important;
+}
+
 .site-footer{
   margin-top:4rem;
   padding:1.5rem 0;
@@ -249,6 +253,27 @@ input[type="date"] {
   color: #d8000c;
   background: #ffd2d2;
   padding: 0.5rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.success {
+  color: #008004;
+  background: #2bff32;
+  padding: 0.5rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.in_progress {
+  color: #000000;
+  background: #d2d900;
+  padding: 0.5rem;
+  font-weight: bold;
   border-radius: 4px;
   margin-bottom: 1rem;
   font-size: 0.9rem;
@@ -465,4 +490,23 @@ input[type="date"] {
 .filter-item:hover {
   background: var(--primary);
   color: var(--white);
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.toastify--side {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+
+  top: 100px !important;
+  bottom: auto !important;
+  height: 50px;
+
+  animation: slideInFromRight 0.4s ease-out forwards;
+
+  color: #000;
 }

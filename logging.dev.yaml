@@ -16,7 +16,7 @@ handlers:
   file:
     class: logging.handlers.TimedRotatingFileHandler
     formatter: default
-    level: INFO
+    level:  INFO
     filename: logs.log
     when: midnight
     backupCount: 7

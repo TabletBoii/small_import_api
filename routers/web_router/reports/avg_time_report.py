@@ -1,17 +1,18 @@
+import json
 import os
 from datetime import datetime
-from io import BytesIO
 from typing import List, Dict, Optional
 
-from fastapi import Depends, Form
+from fastapi import Depends, Form, BackgroundTasks
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, RedirectResponse, StreamingResponse, Response, FileResponse
+from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
-from dao.department_dao import get
-from database.sessions import KOMPAS_SESSION_FACTORY
+from dao.samo.department_dao import get
+from dao.web.web_download_list_dao import get_download_id
+from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
 from routers.web_router.web import web_jinja_router, templates
-from utils.utils import require_user
+from utils.utils import require_user, generate_file_path
 
 
 async def get_form_context() -> Dict[str, List[str]]:
@@ -81,6 +82,8 @@ async def report_avg(
 @web_jinja_router.post("/report_avg")
 async def report_avg_form(
     request: Request,
+    background_tasks: BackgroundTasks,
+    resource_name: str = 'report_avg',
     date_from: str = Form(...),
     date_till: str = Form(...),
     departments: List[str] = Form([]),
@@ -105,19 +108,43 @@ async def report_avg_form(
             },
             status_code=422
         )
+    file_path = generate_file_path(resource_name, user, "xlsx").__str__()
+    params_dict = {
+        'date_beg_from': date_from or "",
+        'date_beg_till': date_till or "",
+        'departments': departments or "",
+        'report_type': report_type or "",
+    }
+
+    params_json = json.dumps(params_dict, ensure_ascii=False)
+
+    async with WEB_SESSION_FACTORY() as session:
+        download_id = await get_download_id(
+            session,
+            user,
+            resource_name,
+            file_path,
+            params_json
+        )
     controller = WebAvgTimeReport(
         date_from=date_from,
         date_till=date_till,
         departments=departments,
         report_type=report_type,
+        file_path=file_path,
+        download_id=download_id
     )
     controller.set_session(KOMPAS_SESSION_FACTORY)
 
-    excel_filepath = await controller.run()
+    # excel_filepath = await controller.run()
 
-    if not os.path.exists(excel_filepath):
-        return {"error": "File not found"}
-    return FileResponse(
-        excel_filepath,
-        filename="downloaded_file.xlsx"
+    # if not os.path.exists(excel_filepath):
+    #     return {"error": "File not found"}
+    # return FileResponse(
+    #     excel_filepath,
+    #     filename="downloaded_file.xlsx"
+    # )
+    background_tasks.add_task(
+        controller.run
     )
+    return RedirectResponse(f"/web/download", status_code=303)

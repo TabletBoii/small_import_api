@@ -146,7 +146,9 @@
 
       <button type="submit" class="btn">Сформировать отчёт</button>
       {% if error %}
-        <div class="error">{{ error }}</div>
+        <script>
+            showToast({{ error }});
+        </script>
       {% endif %}
     </form>
 

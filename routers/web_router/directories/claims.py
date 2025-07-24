@@ -1,17 +1,20 @@
+import json
 import os
 from typing import Optional, Dict, List
 
-from fastapi import Depends, Form
+from fastapi import Depends, Form, BackgroundTasks
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, FileResponse
+from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from controllers.web.directories.ClaimDirectoryController import ClaimDirectoryController
-from dao.claim_procedure import ClaimProcedure, title_alias_dict
-from database.sessions import KOMPAS_SESSION_FACTORY
+from dao.samo.claim_procedure import title_alias_dict
+from dao.web.web_dao import get_user_by_username, get_web_resource_by_name
+from dao.web.web_download_list_dao import add_download, get_download_id
+from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
+from models.web.web_download_list_model import WebDownloadListModel
 from routers.web_router.utils import make_route_permission_deps
 from routers.web_router.web import web_jinja_router, templates
-from utils.utils import require_user
-
+from utils.utils import require_user, generate_file_path
 
 main_fields = [
     "Код заказчика",
@@ -172,7 +175,9 @@ async def directory_claims(
 @web_jinja_router.post("/directory_claims")
 async def directory_claims_form(
     request: Request,
+    background_tasks: BackgroundTasks,
     user: str = Depends(require_user),
+    resource_name: str = 'directory_claims',
     form_ctx: Dict[str, List[str]] = Depends(get_form_context),
     date_beg_from: Optional[str] = Form(...),
     date_beg_till: Optional[str] = Form(...),
@@ -217,9 +222,31 @@ async def directory_claims_form(
             },
             status_code=422
         )
+    file_path = generate_file_path(resource_name, user, "xlsx").__str__()
+    params_dict = {
+        'date_beg_from': date_beg_from or "",
+        'date_beg_till': date_beg_till or "",
+        'claim_create_date_from': claim_create_date_from or "",
+        'claim_create_date_till': claim_create_date_till or "",
+        'confirm_date_from': confirm_date_from or "",
+        'confirm_date_till': confirm_date_till or "",
+        'r_date_from': r_date_from or "",
+        'r_date_till': r_date_till or "",
+        'field_list': field_list,
+    }
+
+    params_json = json.dumps(params_dict, ensure_ascii=False)
+
+    async with WEB_SESSION_FACTORY() as session:
+        download_id = await get_download_id(
+            session,
+            user,
+            resource_name,
+            file_path,
+            params_json
+        )
 
     controller = ClaimDirectoryController(
-
         date_beg_from=date_beg_from,
         date_beg_till=date_beg_till,
         claim_create_date_from=claim_create_date_from,
@@ -229,13 +256,15 @@ async def directory_claims_form(
         r_date_from=r_date_from,
         r_date_till=r_date_till,
         field_list=field_list,
+        file_path=file_path,
+        download_id=download_id
     )
     controller.set_session(KOMPAS_SESSION_FACTORY)
-    resulted_file_path = await controller.run()
-
-    if not os.path.exists(resulted_file_path):
-        return {"error": "File not found"}
-    return FileResponse(
-        resulted_file_path,
-        filename="downloaded_file.xlsx"
+    # background_tasks.add_task(
+    #     controller.run
+    # )
+    # await controller.streaming_run()
+    background_tasks.add_task(
+        controller.streaming_run
     )
+    return RedirectResponse(f"/web/download", status_code=303)

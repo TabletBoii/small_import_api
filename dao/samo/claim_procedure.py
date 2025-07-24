@@ -1,5 +1,6 @@
 import asyncio
-from typing import Optional, Tuple, List
+from datetime import timedelta, datetime
+from typing import Optional, Tuple, List, AsyncIterable
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -225,6 +226,7 @@ joins_path = {
     "ptype": "spog",
     "stw": "ptw"
 }
+SEM = asyncio.Semaphore(12)
 
 
 class ClaimProcedure:
@@ -296,7 +298,6 @@ class ClaimProcedure:
                     {f"c.rdate between '{self.r_date_tuple[0].replace("-", "")}' and '{self.r_date_tuple[1].replace("-", "")}'" if self.r_date_tuple is not None else ""}
             """
         )
-        print(stmt)
         await self.session.execute(stmt)
 
     async def exec_amount_calculation(self):
@@ -347,12 +348,10 @@ class ClaimProcedure:
                 query_join_str += f"{join_list[join]}"
             else:
                 query_join_str += f"{join_list[join]} "
-        print(query_join_str)
         return f"""select {query_field_str} from claim c {query_join_str}"""
 
     async def execute_procedure_select(self):
         stmt_str = self.generate_main_select()
-        print(stmt_str)
         stmt = text(
             stmt_str
         )
@@ -384,6 +383,59 @@ class ClaimProcedure:
         await self.drop_cca_claim_temp_table()
         await self.drop_cca_result_temp_table()
         return result
+
+    async def _stream_one_period(self):
+        await self.create_cca_claim_temp_table()
+        await self.create_cca_result_temp_table()
+        await self.insert_into_cca_claim()
+        await self.exec_amount_calculation()
+
+        stmt = text(self.generate_main_select())
+        result = await self.session.stream(
+            stmt,
+            execution_options={"stream_results": True}
+        )
+        async for row in result:
+            yield row
+
+        await self.drop_cca_claim_temp_table()
+        await self.drop_cca_result_temp_table()
+
+    @staticmethod
+    def _split_periods(
+            start: str,
+            end: str,
+            days: int = 90
+    ) -> list[tuple[str, str]]:
+        start_dt = datetime.fromisoformat(start)
+        end_dt = datetime.fromisoformat(end)
+        periods = []
+        cursor = start_dt
+        while cursor <= end_dt:
+            batch_end = cursor + timedelta(days=days - 1)
+            if batch_end > end_dt:
+                batch_end = end_dt
+            periods.append((cursor.date().isoformat(), batch_end.date().isoformat()))
+            cursor = batch_end + timedelta(days=1)
+        return periods
+
+    async def stream_claims_by_batches(self):
+        if not self.date_begin_tuple:
+            async for row in self._stream_one_period():
+                yield row
+            return
+
+        start, end = self.date_begin_tuple
+        batches = self._split_periods(start, end, days=120)
+
+        original = self.date_begin_tuple
+        try:
+            for batch_start, batch_end in batches:
+                self.date_begin_tuple = (batch_start, batch_end)
+                async for row in self._stream_one_period():
+                    yield row
+        finally:
+            self.date_begin_tuple = original
 
 
 class MockSession:

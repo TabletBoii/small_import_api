@@ -1,8 +1,8 @@
-from fastapi import Request, Form, Depends, HTTPException, APIRouter
+from fastapi import Request, Form
 from fastapi.responses import RedirectResponse
 
-from dao.web_dao import get_user_by_username
-from database.sessions import WEB_DEV_SESSION_FACTORY, WEB_SESSION_FACTORY
+from dao.web.web_dao import get_user_by_username
+from database.sessions import WEB_SESSION_FACTORY
 from routers.web_router.web import web_jinja_router, templates
 from utils.hashing import Hasher
 

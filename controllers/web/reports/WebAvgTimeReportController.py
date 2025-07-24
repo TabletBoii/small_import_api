@@ -8,8 +8,9 @@ from typing import List, Dict, Optional
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from dao import message_dao, usnames_dao
-from dao.department_dao import get_departments_by_name, get_department_name_by_id
+from controllers.abstract_file_generator_controller import AbstractFileGeneratorController
+from dao.samo import message_dao, usnames_dao
+from dao.samo.department_dao import get_departments_by_name, get_department_name_by_id
 from database.sessions import KOMPAS_SESSION_FACTORY
 from dataclasses_custom.schedule import WorkingHours
 from utils.file_export.excel_export import ExportExcel
@@ -36,13 +37,18 @@ department_schedule = {
 }
 
 
-class WebAvgTimeReport:
+class WebAvgTimeReport(AbstractFileGeneratorController):
+    async def _streaming_run(self):
+        pass
+
     def __init__(
             self,
             date_from: str,
             date_till: str,
             departments: List[str],
-            report_type: Optional[str]
+            report_type: Optional[str],
+            file_path: str,
+            download_id
     ):
         self.session_factory: async_sessionmaker = None
         self.name_pattern = "INTERNET"  # TODO: это так не должно быть. Нужно понять, что делать с клиентами, которые не INTERNET like
@@ -55,6 +61,8 @@ class WebAvgTimeReport:
         self.report_type = report_type
         self.engine = None
         self.raw_data_per_department = None
+        self.file_path = file_path
+        self.download_id = download_id
 
     def set_session(self, session_factory):
         self.session_factory = session_factory
@@ -191,45 +199,40 @@ class WebAvgTimeReport:
     async def generate_excel_bytes(
             self,
             data,
-            header,
-            filepath
+            header
     ):
         return ExportExcel().export(
             data=data,
             headers=header,
             key_header="Департамент",
             sheet_name="Отчет по среднему времени ответа (агрегированный)",
-            file_path=filepath
+            file_path=self.file_path
         )
 
-    async def run(self):
-        files_directory = "files"
-        if not os.path.isdir(Path.joinpath(Path.cwd(), files_directory)):
-            Path.mkdir(Path.joinpath(Path.cwd(), files_directory))
-        self.department_id_list = await self.get_department_ids(self.department_list)
-        self.raw_data_per_department = await self.report_data_base()
-        match self.report_type:
-            case "Отчет по среднему времени ответа (агрегированный)":
-                report_result = await self.agg_report()
+    async def _run(self):
+        try:
+            self.department_id_list = await self.get_department_ids(self.department_list)
+            self.raw_data_per_department = await self.report_data_base()
+            match self.report_type:
+                case "Отчет по среднему времени ответа (агрегированный)":
+                    report_result = await self.agg_report()
 
-                file_path = Path.joinpath(Path.cwd(), files_directory, f"{self.report_type}-{uuid.uuid4().hex}")
-                await self.generate_excel_bytes(
-                    report_result,
-                    (
-                        "Среднее время ответа, мин",
-                        "Кол-во входящих сообщений",
-                        "Кол-во исходящих сообщений"
-                    ),
-                    file_path
-                )
+                    await self.generate_excel_bytes(
+                        report_result,
+                        (
+                            "Среднее время ответа, мин",
+                            "Кол-во входящих сообщений",
+                            "Кол-во исходящих сообщений"
+                        )
+                    )
 
-                return file_path
+                case "AvgTimeReport":
+                    ...
 
-            case "AvgTimeReport":
-                ...
+                case "AnomalyMsgReport":
+                    ...
 
-            case "AnomalyMsgReport":
-                ...
-
-            case "MoreThanFourHoursAnswerReport":
-                ...
+                case "MoreThanFourHoursAnswerReport":
+                    ...
+        except Exception as e:
+            raise e

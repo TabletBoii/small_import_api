@@ -1,5 +1,6 @@
 import sys
 import os
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +11,7 @@ from pandas import DataFrame
 from starlette.requests import Request
 
 from utils.constants import API_KEY, API_KEY_HEADER, security
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 
 def get_data(key: str) -> any:
@@ -92,3 +93,21 @@ def require_user(request: Request):
 def get_root_path():
     project_root = Path.cwd()
     return project_root
+
+
+def generate_file_path(resource_name, user_name, file_type: str):
+    files_directory = "files"
+    if not os.path.isdir(Path.joinpath(Path.cwd(), files_directory)):
+        Path.mkdir(Path.joinpath(Path.cwd(), files_directory))
+
+    file_path = Path.joinpath(Path.cwd(), files_directory, f"{resource_name}-{user_name}-{uuid.uuid4().hex}.{file_type}")
+
+    return file_path
+
+
+def gen_batches(start: date, end: date, step_days: int = 30):
+    cur = start
+    while cur <= end:
+        nxt = min(end, cur + timedelta(days=step_days - 1))
+        yield cur, nxt
+        cur = nxt + timedelta(days=1)

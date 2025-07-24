@@ -12,6 +12,9 @@
     href="{{ url_for('static', path='style.css') }}"
   />
   <script src="https://kit.fontawesome.com/74b9f45d18.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="/static/js/custom_toast.js"></script>
 </head>
 <body>
   <header>
@@ -27,6 +30,10 @@
           <a href="{{ url_for('directories') }}"
              class="home_header_item {% if request.url.path == '/web/directories' %}active{% endif %}">
              Справочники
+          </a>
+          <a href="{{ url_for('download') }}"
+             class="home_header_item {% if request.url.path == '/web/download' %}active{% endif %}">
+             Загрузки
           </a>
         </li>
       </ul>

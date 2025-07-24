@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from custom_types.custom_types import ClaimID, Sender, Recipient, MsgDate
-from dao import message_dao, usnames_dao
+from dao.samo import message_dao, usnames_dao
 from dataclasses_custom.dev.user_avg_entries import UserAvgEntryDataclass, ClaimDataDataclass, MessageDataclass
 from dataclasses_custom.schedule import WorkingHours
 from pydantic_models.request_models import AvgTimeReportModel

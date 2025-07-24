@@ -1,23 +1,17 @@
 import os
 import sys
-from typing import List
 
-from fastapi import Request, Depends, APIRouter, FastAPI
+from fastapi import Request, Depends, APIRouter
 from fastapi.templating import Jinja2Templates
-from starlette.middleware import Middleware
-from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse
 
-from dao.web_role_dao import get_user_permissions
+from dao.web.web_role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
-from middlewares.webauth_middleware import WebAuthMiddleware
 
-from utils.utils import require_user, get_data
-from .template import router
+from utils.utils import require_user
 
 script_path = os.path.abspath(sys.argv[0])
 script_dir = os.path.dirname(script_path)
-print(script_dir)
 templates = Jinja2Templates(directory="templates/web")
 
 web_jinja_router = APIRouter()
@@ -66,9 +60,13 @@ async def directories(
                                       {"request": request, "user": user, "permissions": permissions})
 
 
+# Не удалять импорты - все маршруты идут от этих импортов
+##################################
 from .reports import avg_time_report
 from .reports import report_dmc
 from .directories import claims
 from .directories import direction
 from .directories import departments
 from . import auth
+from . import download_page
+##################################

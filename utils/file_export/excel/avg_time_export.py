@@ -5,7 +5,7 @@ from typing import Dict, List, Any
 
 from openpyxl.workbook import Workbook
 
-from dao import usnames_dao
+from dao.samo import usnames_dao
 from database.session import SessionLocal1
 from dataclasses_custom.dev.user_avg_entries import UserAvgEntryDataclass
 from utils.file_export.excel_export import ExportExcel

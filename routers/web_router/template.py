@@ -1,12 +1,11 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
-from starlette import status
 
-from dao.web_dao import get_web_resource_by_name, get_user_by_username
-from dao.web_template_dao import get_template_list
+from dao.web.web_dao import get_web_resource_by_name, get_user_by_username
+from dao.web.web_template_dao import get_template_list
 from database.sessions import WEB_SESSION_FACTORY
-from pydantic_models.template import TemplateResponse, TemplateCreate
+from pydantic_models.template import TemplateResponse
 from utils.utils import require_user
 
 router = APIRouter(
