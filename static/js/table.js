@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   Object.entries(window.tableConfig || {}).forEach(([id, cfg]) => {
     const { headers, saveUrl } = cfg;
+    console.log(id)
+    console.log(cfg)
 
     const table   = document.getElementById(id);
     const saveBtn = document.getElementById(`save-btn-${id}`);
@@ -60,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (e.target.matches('.duplicate-row')) {
         const clone = tr.cloneNode(true);
+
+        const incInput = clone.querySelector('input[name="inc"]');
+        if (incInput) incInput.value = '0';
+
         const currentIdx = Number(tr.getAttribute('data-index'));
         const newIdx = currentIdx + 1;
         clone.setAttribute('data-index', newIdx);

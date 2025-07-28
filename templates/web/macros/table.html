@@ -16,11 +16,19 @@
         <thead>
           <tr>
             {% for h in table_keys %}
+              {% if loop.index0 == 0 %}
+              <th class="th-with-menu" data-col-index="{{ loop.index0 }}" style="display: none;">
+                {{ h }}
+                <span class="menu-btn">☰</span>
+                <div class="filter-menu"></div>
+              </th>
+              {% else %}
               <th class="th-with-menu" data-col-index="{{ loop.index0 }}">
                 {{ h }}
                 <span class="menu-btn">☰</span>
                 <div class="filter-menu"></div>
               </th>
+              {% endif %}
             {% endfor %}
             <th>Действия</th>
           </tr>

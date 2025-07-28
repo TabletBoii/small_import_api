@@ -12,6 +12,7 @@ from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user
 
 table_keys = [
+    "ID",
     "Авиакомпания",
     "Страна отправления",
     "Страна прибытия",
