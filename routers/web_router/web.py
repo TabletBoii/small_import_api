@@ -60,6 +60,16 @@ async def directories(
                                       {"request": request, "user": user, "permissions": permissions})
 
 
+@web_jinja_router.get("/power_bi", response_class=HTMLResponse)
+async def power_bi(
+        request: Request,
+        user: str = Depends(require_user),
+        permissions=Depends(make_user_permission_deps(3))
+):
+    return templates.TemplateResponse("power_bi.html",
+                                      {"request": request, "user": user, "permissions": permissions})
+
+
 # Не удалять импорты - все маршруты идут от этих импортов
 ##################################
 from .reports import avg_time_report
@@ -69,4 +79,5 @@ from .directories import direction
 from .directories import departments
 from . import auth
 from . import download_page
+from . import powerbi_base
 ##################################
