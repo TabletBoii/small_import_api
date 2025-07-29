@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Any
 
-from fastapi import Depends, Body
+from fastapi import Depends, Body, APIRouter
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
@@ -52,10 +52,16 @@ async def get_form_context():
     }
 
 
-@web_jinja_router.get(
-    "/directory_direction",
-    response_class=HTMLResponse,
-    dependencies=[Depends(make_route_permission_deps("directory_direction"))]
+direction_router = APIRouter(
+    prefix="/directory_direction",
+    dependencies=[Depends(make_route_permission_deps('directory_direction'))],
+    tags=["Справочник направлений"],
+)
+
+
+@direction_router.get(
+    "",
+    response_class=HTMLResponse
 )
 async def directory_direction(
         request: Request,
@@ -73,8 +79,8 @@ async def directory_direction(
     )
 
 
-@web_jinja_router.post(
-    "/save_direction_list"
+@direction_router.post(
+    ""
 )
 async def directory_direction_form(
         request: Request,
@@ -130,3 +136,6 @@ async def directory_direction_form(
 
         if len(to_insert) != 0:
             await create(session=session, list_to_create=to_insert)
+
+
+web_jinja_router.include_router(direction_router)

@@ -7,6 +7,7 @@ from starlette.responses import HTMLResponse
 
 from dao.web.web_role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
+from enums.user_resource_permission_enum import UserPermissionResourceTypeEnum
 
 from utils.utils import require_user
 
@@ -45,29 +46,55 @@ async def web_home(
 async def reports(
         request: Request,
         user: str = Depends(require_user),
-        permissions=Depends(make_user_permission_deps(1))
+        permissions=Depends(make_user_permission_deps(UserPermissionResourceTypeEnum.REPORT.value))
 ):
-    return templates.TemplateResponse("reports.html", {"request": request, "user": user, "permissions": permissions})
+    return templates.TemplateResponse(
+        "list_page.html",
+        {
+            "request": request,
+            "user": user,
+            "page_title": "Отчеты",
+            "permissions": permissions,
+            "route_name": None
+        }
+    )
+    # return templates.TemplateResponse("reports.html", {"request": request, "user": user, "permissions": permissions})
 
 
 @web_jinja_router.get("/directories", response_class=HTMLResponse)
 async def directories(
         request: Request,
         user: str = Depends(require_user),
-        permissions=Depends(make_user_permission_deps(2))
+        permissions=Depends(make_user_permission_deps(UserPermissionResourceTypeEnum.DIRECTORY.value))
 ):
-    return templates.TemplateResponse("directories.html",
-                                      {"request": request, "user": user, "permissions": permissions})
+    return templates.TemplateResponse(
+        "list_page.html",
+        {
+            "request": request,
+            "user": user,
+            "page_title": "Справочники",
+            "permissions": permissions,
+            "route_name": None
+        }
+    )
 
 
 @web_jinja_router.get("/power_bi", response_class=HTMLResponse)
 async def power_bi(
         request: Request,
         user: str = Depends(require_user),
-        permissions=Depends(make_user_permission_deps(3))
+        permissions=Depends(make_user_permission_deps(UserPermissionResourceTypeEnum.POWER_BI_REPORT.value))
 ):
-    return templates.TemplateResponse("power_bi.html",
-                                      {"request": request, "user": user, "permissions": permissions})
+    return templates.TemplateResponse(
+        "list_page.html",
+        {
+            "request": request,
+            "user": user,
+            "page_title": "Отчеты PowerBI",
+            "permissions": permissions,
+            "route_name": "power_bi_base"
+        }
+    )
 
 
 # Не удалять импорты - все маршруты идут от этих импортов

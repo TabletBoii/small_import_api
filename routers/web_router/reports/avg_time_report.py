@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from typing import List, Dict, Optional
 
-from fastapi import Depends, Form, BackgroundTasks
+from fastapi import Depends, Form, BackgroundTasks, APIRouter
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
@@ -11,6 +11,7 @@ from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
 from dao.samo.department_dao import get
 from dao.web.web_download_list_dao import get_download_id
 from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
+from routers.web_router.utils import make_route_permission_deps
 from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user, generate_file_path
 
@@ -58,7 +59,17 @@ async def validate_avg_report_input(
     return True, None
 
 
-@web_jinja_router.get("/report_avg", response_class=HTMLResponse)
+avg_time_report_router = APIRouter(
+    prefix="/report_avg",
+    dependencies=[Depends(make_route_permission_deps('report_avg'))],
+    tags=["Отчет по среднему времени ответа"],
+)
+
+
+@avg_time_report_router.get(
+    "",
+    response_class=HTMLResponse
+)
 async def report_avg(
     request: Request,
     user: str = Depends(require_user),
@@ -79,7 +90,7 @@ async def report_avg(
     )
 
 
-@web_jinja_router.post("/report_avg")
+@avg_time_report_router.post("")
 async def report_avg_form(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -148,3 +159,6 @@ async def report_avg_form(
         controller.run
     )
     return RedirectResponse(f"/web/download", status_code=303)
+
+
+web_jinja_router.include_router(avg_time_report_router)

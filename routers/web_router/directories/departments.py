@@ -12,7 +12,7 @@ from utils.utils import require_user
 @web_jinja_router.get(
     "/department_directory",
     response_class=HTMLResponse,
-    dependencies=[Depends(make_route_permission_deps("department_directory"))]
+    dependencies=[Depends(make_route_permission_deps('department_directory'))]
 )
 async def department_directory(
         request: Request,

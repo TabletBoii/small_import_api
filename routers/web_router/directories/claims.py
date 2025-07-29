@@ -2,7 +2,7 @@ import json
 import os
 from typing import Optional, Dict, List
 
-from fastapi import Depends, Form, BackgroundTasks
+from fastapi import Depends, Form, BackgroundTasks, APIRouter
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
@@ -142,10 +142,16 @@ async def validate_avg_report_input(
     return True, None
 
 
-@web_jinja_router.get(
-    "/directory_claims",
-    response_class=HTMLResponse,
-    dependencies=[Depends(make_route_permission_deps("directory_claims"))]
+claims_router = APIRouter(
+    prefix="/directory_claims",
+    dependencies=[Depends(make_route_permission_deps('directory_claims'))],
+    tags=["Справочник заявок"],
+)
+
+
+@claims_router.get(
+    "",
+    response_class=HTMLResponse
 )
 async def directory_claims(
     request: Request,
@@ -172,7 +178,7 @@ async def directory_claims(
     )
 
 
-@web_jinja_router.post("/directory_claims")
+@claims_router.post("")
 async def directory_claims_form(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -268,3 +274,5 @@ async def directory_claims_form(
         controller.streaming_run
     )
     return RedirectResponse(f"/web/download", status_code=303)
+
+web_jinja_router.include_router(claims_router)

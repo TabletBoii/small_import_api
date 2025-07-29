@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import List, Dict
 
-from fastapi import Depends, Form, Query
+from fastapi import Depends, Form, Query, APIRouter
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
 from dao.samo.country_dao import get_country_name_offset
 from dao.samo.partner_dao import get_partner_name_offset
 from database.sessions import KOMPAS_SESSION_FACTORY
+from routers.web_router.utils import make_route_permission_deps
 from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user
 
@@ -66,7 +67,17 @@ async def validate_avg_report_input(
     return True, None
 
 
-@web_jinja_router.get("/report_dmc", response_class=HTMLResponse)
+dmc_report_router = APIRouter(
+    prefix="/report_dmc",
+    dependencies=[Depends(make_route_permission_deps('report_dmc'))],
+    tags=["Отчет по партнерам DMC"],
+)
+
+
+@dmc_report_router.get(
+    "",
+    response_class=HTMLResponse
+)
 async def report_dmc(
     request: Request,
     user: str = Depends(require_user)
@@ -87,7 +98,7 @@ async def report_dmc(
     )
 
 
-@web_jinja_router.post("/report_dmc")
+@dmc_report_router.post("")
 async def report_dmc_form(
     request: Request,
     date_from_p1: str = Form(...),
@@ -145,7 +156,7 @@ async def report_dmc_form(
     # )
 
 
-@web_jinja_router.get("/report_dmc/partner/items")
+@dmc_report_router.get("/partner/items")
 async def report_dmc_partner_filter(
     q: str = Query("", title="Поисковый запрос"),
     skip: int = Query(0, ge=0),
@@ -164,7 +175,7 @@ async def report_dmc_partner_filter(
     }
 
 
-@web_jinja_router.get("/report_dmc/country/items")
+@dmc_report_router.get("/country/items")
 async def report_dmc_country_filter(
     q: str = Query("", title="Поисковый запрос"),
     skip: int = Query(0, ge=0),
@@ -180,3 +191,6 @@ async def report_dmc_country_filter(
     return {
         "items": [{"id": i.inc, "name": i.name} for i in items],
     }
+
+
+web_jinja_router.include_router(dmc_report_router)

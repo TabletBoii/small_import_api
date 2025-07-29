@@ -17,10 +17,20 @@ async def get_user_by_id(session: AsyncSession, user_id: int) -> WebUserModel:
     return result.scalars().first()
 
 
-async def create_user(session: AsyncSession, user: WebUserModel) -> None:
-    async with session.begin():
-        session.add(user)
+async def is_user_exists_by_microsoft_oid(session: AsyncSession, microsoft_oid: str) -> bool:
+    stmt = select(WebUserModel).where(WebUserModel.microsoft_oid == microsoft_oid)
 
+    result = await session.execute(stmt)
+    user_instance = result.scalars().first()
+
+    if user_instance:
+        return True
+    return False
+
+
+async def create_user(session: AsyncSession, user: WebUserModel) -> None:
+    session.add(user)
+    await session.flush()
     await session.refresh(user)
 
 

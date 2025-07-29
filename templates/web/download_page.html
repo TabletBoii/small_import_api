@@ -26,7 +26,7 @@
   const expandedDownloads = new Set();
   const expandedErrors     = new Set();
   async function fetchDownloads() {
-    const resp = await fetch("/web/get_downloads");
+    const resp = await fetch("/web/download/get_downloads");
     const items = await resp.json();
     items.sort((a, b) => b.id - a.id);
     const tbody = document.querySelector("#downloads-table tbody");
@@ -151,7 +151,7 @@
       const tdAction = document.createElement("td");
       if (!d.in_process && !d.has_error) {
         const btn = document.createElement("a");
-        btn.href = `/web/download_report/${d.id}`;
+        btn.href = `/web/download/${d.id}`;
         btn.textContent = d.is_downloaded ? "Скачать ещё раз" : "Скачать";
         btn.className = "btn";
         tdAction.append(btn);

@@ -1,18 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Embedded Power BI Report{% endblock %}
+{% block title %}Embedded PowerBI Report{% endblock %}
 {% block content %}
   <div id="reportContainer" style="height:90vh"></div>
 {% endblock %}
 {% block scripts %}
   <script>
     async function loadReport() {
-      const resp = await fetch("/web/power_bi_base/embed-params");
+      const routeParam = '{{ data }}';
+      const resp = await fetch(`/web/power_bi_base/embed-params/${routeParam}`);
       const { embedUrl, embedToken } = await resp.json();
       const pbiClient = window['powerbi-client'];
       const models = pbiClient.models;
-      console.log(embedUrl);
-      console.log(embedToken);
-      console.log(models);
       const config = {
         type: 'report',
         tokenType: models.TokenType.Embed,

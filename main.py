@@ -20,12 +20,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE, WEB_SESSION_FACTORY
 from sub_app.admin_app import admin_app
 from sub_app.web_app import web_app
+from utils.user_session_store import UserSessionStore
 
 sys.stdout.reconfigure(encoding='utf-8')
 
 env_status = os.getenv("APP_ENV", "dev")
 logging_path = f"logging.{env_status}.yaml"
-
 
 with open(logging_path, "r", encoding="utf-8") as f:
     config = yaml.safe_load(f)

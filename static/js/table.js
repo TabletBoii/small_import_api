@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   Object.entries(window.tableConfig || {}).forEach(([id, cfg]) => {
     const { headers, saveUrl } = cfg;
-    console.log(id)
-    console.log(cfg)
 
     const table   = document.getElementById(id);
     const saveBtn = document.getElementById(`save-btn-${id}`);

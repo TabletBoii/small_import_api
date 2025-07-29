@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from fastapi import Depends
+from fastapi import Depends, APIRouter
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse
@@ -15,7 +15,13 @@ from routers.web_router.web import web_jinja_router, templates
 from utils.utils import require_user
 
 
-@web_jinja_router.get("/download", response_class=HTMLResponse)
+download_router = APIRouter(
+    prefix="/download",
+    tags=["Загрузка"],
+)
+
+
+@download_router.get("", response_class=HTMLResponse)
 async def download(
     request: Request,
     user: str = Depends(require_user),
@@ -30,7 +36,7 @@ async def download(
     )
 
 
-@web_jinja_router.get("/get_downloads", response_model=List[DownloadItem])
+@download_router.get("/get_downloads", response_model=List[DownloadItem])
 async def get_downloads(
     user: str = Depends(require_user),
 ):
@@ -40,7 +46,7 @@ async def get_downloads(
     return download_list
 
 
-@web_jinja_router.get("/download_report/{download_id}")
+@download_router.get("/{download_id}")
 async def download_report(
     download_id: int,
     user: str = Depends(require_user),
@@ -59,3 +65,6 @@ async def download_report(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename=os.path.basename(download_item.file_path),
     )
+
+
+web_jinja_router.include_router(download_router)
