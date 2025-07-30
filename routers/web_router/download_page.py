@@ -55,13 +55,16 @@ async def download_report(
     async with WEB_SESSION_FACTORY() as session:
         download_item = await get_download_by_id(session, download_id)
         user_instance = await get_user_by_username(session, user)
+
+        if not download_item or download_item.user_id != user_instance.inc:
+            raise HTTPException(404, "Не найдено")
+
         download_item.is_downloaded = True
         await session.commit()
-    if not download_item or download_item.user_id != user_instance.inc:
-        raise HTTPException(404, "Не найдено")
+        file_path = download_item.file_path
 
     return FileResponse(
-        download_item.file_path,
+        file_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename=os.path.basename(download_item.file_path),
     )

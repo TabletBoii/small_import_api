@@ -41,9 +41,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const tr = document.createElement('tr');
         tr.setAttribute('data-index', rowCount++);
         tr.innerHTML = headers
-          .map(h => `<td><input type="text" name="${h}" value="${record[h] ?? ''}"></td>`)
+          .map((h, idx) => {
+            return h === 'inc' || h === 'id' ? `<td style="display: none;">
+                      <input
+                        type="text"
+                        name="${h}"
+                        value="0"
+                      >
+                    </td>` : `<td>
+                      <input
+                        type="text"
+                        name="${h}"
+                        value="${record[h] ?? ''}"
+                      >
+                    </td>`;
+          })
           .join('')
-          + `<td><button type="button" class="btn delete-row">Удалить</button></td>`;
+          + `<td>
+               <button type="button" class="btn delete-row">Удалить</button>
+             </td>`;
         tbody.appendChild(tr);
       });
       e.target.value = '';

@@ -9,6 +9,8 @@ logs
 log.log
 logs.log
 
+logs*
+
 files
 
 sessions
