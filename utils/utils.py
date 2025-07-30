@@ -87,6 +87,7 @@ def require_user(request: Request):
             detail="Redirect to login",
             headers={"Location": "/web/login"}
         )
+
     return request.session["user"]
 
 

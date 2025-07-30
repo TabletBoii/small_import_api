@@ -3,7 +3,7 @@ import sys
 
 from fastapi import Request, Depends, APIRouter
 from fastapi.templating import Jinja2Templates
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, RedirectResponse
 
 from dao.web.web_role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
@@ -29,6 +29,14 @@ def make_user_permission_deps(page_type: int):
         return allowed
 
     return user_permission_deps
+
+
+@web_jinja_router.get("/")
+async def web_home(
+        request: Request,
+        user: str = Depends(require_user)
+):
+    return RedirectResponse(url="/web/home", status_code=302)
 
 
 @web_jinja_router.get("/home")

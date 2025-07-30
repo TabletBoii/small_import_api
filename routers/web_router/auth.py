@@ -1,3 +1,6 @@
+import time
+from datetime import datetime, timedelta
+
 from fastapi import Request, Form, APIRouter
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
@@ -8,11 +11,7 @@ from models.web.web_user_model import WebUserModel
 from routers.web_router.web import web_jinja_router, templates
 from sub_app.msal_app import msal_app
 from utils.hashing import Hasher
-
-SCOPE = [
-    "email",
-    "https://graph.microsoft.com/User.Read"
-]
+from utils.msal_scopes import AUTH_SCOPE
 
 auth_router = APIRouter(
     prefix="/login",
@@ -44,7 +43,7 @@ async def validate_input(username: str, password: str) -> [bool, str | None]:
 
 def build_auth_url(request: Request) -> str:
     return msal_app.get_authorization_request_url(
-        scopes=SCOPE,
+        scopes=AUTH_SCOPE,
         redirect_uri=str(request.url_for("auth_callback"))
     )
 
@@ -55,7 +54,7 @@ def exchange_code_for_token(request: Request) -> dict:
         raise HTTPException(400, "Code not found in callback")
     result = msal_app.acquire_token_by_authorization_code(
         code=code,
-        scopes=SCOPE,
+        scopes=AUTH_SCOPE,
         redirect_uri=str(request.url_for("auth_callback"))
     )
     if "access_token" not in result:
@@ -115,8 +114,13 @@ async def login_via_microsoft(
 async def auth_callback(request: Request):
     token_result = exchange_code_for_token(request)
 
-    session_store = request.app.state.session_store
+    id_token = token_result.get("id_token")
+    access_token = token_result["access_token"]
+    refresh_token = token_result["refresh_token"]
+    expires_in = token_result.get("expires_in")
 
+    expires_at = time.time() + int(expires_in)
+    session_store = request.app.state.session_store
     claims = token_result.get("id_token_claims", {})
     microsoft_oid = claims.get("oid")
     email = claims.get("preferred_username") or claims.get("email")
@@ -125,16 +129,18 @@ async def auth_callback(request: Request):
 
     session_id = session_store.create(
         email=email,
-        id_token=token_result.get("id_token"),
-        access_token=token_result["access_token"],
-        expires_at=token_result.get("expires_in"),
+        id_token=id_token,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_at=expires_at
     )
     response = RedirectResponse(url="/web/home", status_code=302)
+    expires = (datetime.now() + timedelta(days=7))
     response.set_cookie(
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=3600,
+        expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         path="/"
     )
     request.session["user"] = email

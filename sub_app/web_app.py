@@ -1,12 +1,14 @@
 from fastapi import FastAPI
+from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import Request
+from starlette.responses import RedirectResponse, JSONResponse
 
 from middlewares.webauth_middleware import WebAuthMiddleware
 from routers.web_router.web import web_jinja_router
 from utils.user_session_store import UserSessionStore
 from utils.utils import get_data
-
 
 web_middleware_list = [
     Middleware(
@@ -25,3 +27,13 @@ web_app.state.session_store = UserSessionStore(folder="sessions")
 web_app.include_router(
     web_jinja_router
 )
+
+
+@web_app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 404:
+        return RedirectResponse(url="/web/home", status_code=302)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )

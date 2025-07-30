@@ -83,7 +83,8 @@ pbi_router = APIRouter(
 
 @pbi_router.get("/embed-params/{route_param}")
 async def embed_params(
-    route_param: str
+    route_param: str,
+    user: str = Depends(require_user)
 ):
     return await get_embed_params(route_param)
 
