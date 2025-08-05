@@ -23,7 +23,8 @@ field_names = {
     'claim$confirmeddate': 'Дата подтверждения/неподтверждения',
     'confimredstatus$name': 'Статус',
     'partner$inc': 'ID партнера',
-    'partner$category$color': 'Подсветка партнера'
+    'partner$category$color': 'Подсветка партнера',
+    'usn_manager$name': 'Имя ведущего менеджера'
 }
 
 

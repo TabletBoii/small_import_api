@@ -5,7 +5,7 @@ from fastapi import Request, Depends, APIRouter
 from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse, RedirectResponse
 
-from dao.web.web_role_dao import get_user_permissions
+from dao.web.role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
 from enums.user_resource_permission_enum import UserPermissionResourceTypeEnum
 

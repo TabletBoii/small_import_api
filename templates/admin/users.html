@@ -1,0 +1,18 @@
+{% extends 'admin_base.html' %}
+{% import "macros/table_macros.html" as table_macros %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+  {{ table_macros.render_table(
+        headers,
+        users_list,
+        edit_url='users',
+        delete_url='users',
+        modal_fields=[
+            {'name': 'name', 'label': 'Username'},
+            {'name': 'microsoft_email', 'label': 'Email', 'type': 'email'},
+            {'name': 'microsoft_oid', 'label': 'Microsoft ID'},
+            {'name': 'description', 'label': 'Описание', 'element': 'textarea'}
+        ]
+     ) }}
+{% endblock %}

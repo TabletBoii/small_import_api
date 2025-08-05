@@ -1,0 +1,59 @@
+{% macro render_table(headers, rows, dropdown_rows={}, edit_url='', delete_url='', modal_fields=[]) %}
+{% import 'macros/delete_modal_window.html' as delete_ui %}
+{% import 'macros/edit_modal_window.html' as edit_ui %}
+  <table class="admin-table">
+    <thead>
+      <tr>
+        {% for key in headers %}
+          <th>{{ key }}</th>
+        {% endfor %}
+        <th>Actions</th>
+
+      </tr>
+    </thead>
+    <tbody>
+
+      {% set row_header = rows[0].keys()%}
+      {% for row in rows %}
+        <tr>
+          {% for key in row_header %}
+            <td id="{{ key }}">{{ row[key] }}</td>
+          {% endfor %}
+          <td>
+            <a
+              href="javascript:void(0);"
+              onclick='openModal("editModal", "/admin/{{edit_url}}/edit/{{ row["inc"] }}", {{ row | tojson }})'
+              type="button"
+              class="btn"
+            >
+              ✏️
+            </a>
+            <a
+              href="javascript:void(0);"
+              onclick='openModal("deleteModal", "/admin/{{delete_url}}/delete/{{ row["inc"] }}", {{ row | tojson }})'
+              type="button"
+              class="btn"
+            >
+              🗑️
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+
+
+
+    </tbody>
+  </table>
+  {{
+    edit_ui.edit_modal_form(
+      id="editModal",
+      fields=modal_fields,
+      dropdown_rows=dropdown_rows
+    )
+  }}
+  {{
+    delete_ui.delete_modal_form(
+      id="deleteModal"
+    )
+  }}
+{% endmacro %}

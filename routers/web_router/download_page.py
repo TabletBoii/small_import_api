@@ -6,8 +6,8 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse
 
-from dao.web.web_dao import get_user_by_username
-from dao.web.web_download_list_dao import get_download_list_by_username, get_pydantic_download_list_by_username, \
+from dao.web.web_user_dao import get_user_by_username
+from dao.web.download_list_dao import get_download_list_by_username, get_pydantic_download_list_by_username, \
     get_download_by_id
 from database.sessions import WEB_SESSION_FACTORY
 from pydantic_models.web_models import DownloadItem

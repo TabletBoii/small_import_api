@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.web.web import AdminAuth
+from models.web.admin_user_model import AdminAuth
 
 
 async def get_admin_by_username(session: AsyncSession, username: str) -> AdminAuth:
@@ -11,7 +11,7 @@ async def get_admin_by_username(session: AsyncSession, username: str) -> AdminAu
 
 
 async def create_admin_user(session: AsyncSession, admin_user: AdminAuth):
-    async with session.begin():
-        session.add(admin_user)
-
+    session.add(admin_user)
+    await session.flush()
     await session.refresh(admin_user)
+    await session.commit()

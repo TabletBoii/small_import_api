@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from controllers.abstract_file_generator_controller import AbstractFileGeneratorController
 from dao.samo.claim_procedure import ClaimProcedure
-from dao.web.web_download_list_dao import change_progress_on_done
+from dao.web.download_list_dao import change_progress_on_done
 from database.sessions import WEB_SESSION_FACTORY
 from utils.file_export.excel_export import ExportExcel
 from utils.file_export.excel_export_streaming import StreamingExcelExporter

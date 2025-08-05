@@ -1,9 +1,10 @@
-from fastapi import Request, Form, Depends, HTTPException, APIRouter
+from fastapi import Request, Form
 from fastapi.responses import RedirectResponse
 
-from dao.admin_dao import get_admin_by_username
+from dao.web.admin_user_dao import get_admin_by_username
 from database.sessions import WEB_SESSION_FACTORY
-from routers.admin_router.admin import admin_jinja_router, templates
+from routers.admin_router.admin import admin_jinja_router
+from routers.templates import admin_templates
 from utils.hashing import Hasher
 
 
@@ -28,7 +29,7 @@ async def validate_input(username: str, password: str) -> [bool, str | None]:
 
 @admin_jinja_router.get("/login")
 async def login_get(request: Request):
-    return templates.TemplateResponse("admin/admin_login.html", {"request": request})
+    return admin_templates.TemplateResponse("admin_login.html", {"request": request})
 
 
 @admin_jinja_router.post("/login")
@@ -39,8 +40,8 @@ async def login_post(
 ):
     validation_result = await validate_input(username, password)
     if not validation_result[0]:
-        return templates.TemplateResponse(
-            "admin/admin_login.html",
+        return admin_templates.TemplateResponse(
+            "admin_login.html",
             {"request": request, "error": f"{validation_result[1]}"},
             status_code=401
         )

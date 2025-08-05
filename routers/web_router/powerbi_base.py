@@ -7,8 +7,8 @@ from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
-from dao.web.web_pbi_report_data_dao import get_pbi_report_data_by_resource_name
-from dao.web.web_role_dao import get_user_permissions
+from dao.web.pbi_report_data_dao import get_pbi_report_data_by_resource_name
+from dao.web.role_dao import get_user_permissions
 from database.sessions import WEB_SESSION_FACTORY
 from routers.web_router.web import web_jinja_router, templates
 from sub_app.msal_app import msal_app

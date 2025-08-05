@@ -5,7 +5,7 @@ from fastapi import Request, Form, APIRouter
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
 
-from dao.web.web_dao import get_user_by_username, is_user_exists_by_microsoft_oid, create_user
+from dao.web.web_user_dao import create_user, get_user_by_username, is_user_exists_by_microsoft_oid
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_user_model import WebUserModel
 from routers.web_router.web import web_jinja_router, templates

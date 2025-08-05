@@ -1,7 +1,7 @@
 import functools
 from abc import ABC, abstractmethod
 
-from dao.web.web_download_list_dao import change_progress_on_done
+from dao.web.download_list_dao import change_progress_on_done
 from database.sessions import WEB_SESSION_FACTORY
 
 

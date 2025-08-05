@@ -4,7 +4,7 @@ from fastapi import Depends, Body, APIRouter
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from dao.web.web_direction_list import get_all, delete_by_inc, update_by_inc, create
+from dao.web.direction_list_dao import get_all, delete_by_inc, update_by_inc, create
 from database.sessions import WEB_SESSION_FACTORY
 from pydantic_models.web_models import Direction
 from routers.web_router.utils import make_route_permission_deps

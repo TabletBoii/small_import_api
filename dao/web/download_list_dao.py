@@ -1,7 +1,8 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dao.web.web_dao import get_user_by_username, get_web_resource_by_name
+from dao.web.web_user_dao import get_user_by_username
+from dao.web.resource_dao import get_web_resource_by_name
 from models.web.web_download_list_model import WebDownloadListModel
 from models.web.web_resource_model import WebResourceModel
 from models.web.web_user_model import WebUserModel

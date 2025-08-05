@@ -11,7 +11,7 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
             if path.startswith(("/admin/login", "/admin/logout", "/static", "/favicon.ico")):
                 return await call_next(request)
 
-            if not request.session.get("user"):
+            if not request.session.get("admin"):
                 return RedirectResponse(url="/admin/login", status_code=302)
 
         return await call_next(request)

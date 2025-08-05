@@ -1,0 +1,19 @@
+{% extends 'admin_base.html' %}
+{% import "macros/table_macros.html" as table_macros %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+  {{ table_macros.render_table(
+        headers,
+        resources_list,
+        edit_url='resources',
+        delete_url='resources',
+        dropdown_rows=dropdown_field_dict,
+        modal_fields=[
+            {'name': 'name', 'label': 'Название'},
+            {'name': 'type', 'label': 'Тип'},
+            {'name': 'name_cirill', 'label': 'Название(кир.)'},
+            {'name': 'description', 'label': 'Описание', 'element': 'textarea'}
+        ]
+     ) }}
+{% endblock %}

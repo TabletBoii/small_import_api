@@ -1,10 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'admin_base.html' %}
+{% block title %}Главная{% endblock %}
 
-</body>
-</html>
+{% block admin_content %}
+  <div class="card-container">
+    <div class="card">
+      <h2>Users</h2>
+      <p>1,234</p>
+    </div>
+    <div class="card">
+      <h2>Sales</h2>
+      <p>$5,678</p>
+    </div>
+    <div class="card">
+      <h2>Visits</h2>
+      <p>9,012</p>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Jane Doe</td>
+        <td>jane@example.com</td>
+        <td>Admin</td>
+        <td>Active</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>John Smith</td>
+        <td>john@example.com</td>
+        <td>User</td>
+        <td>Inactive</td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,10 +1,7 @@
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String
-from database.base import Base
 
-from sqlalchemy import (
-    Integer,
-)
+from database.base import Base
 
 
 class AdminAuth(Base):

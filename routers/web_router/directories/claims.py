@@ -8,8 +8,9 @@ from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from controllers.web.directories.ClaimDirectoryController import ClaimDirectoryController
 from dao.samo.claim_procedure import title_alias_dict
-from dao.web.web_dao import get_user_by_username, get_web_resource_by_name
-from dao.web.web_download_list_dao import add_download, get_download_id
+from dao.web.web_user_dao import get_user_by_username
+from dao.web.resource_dao import get_web_resource_by_name
+from dao.web.download_list_dao import add_download, get_download_id
 from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
 from models.web.web_download_list_model import WebDownloadListModel
 from routers.web_router.utils import make_route_permission_deps

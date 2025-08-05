@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dao.web.web_dao import get_web_resource_by_name
+from dao.web.resource_dao import get_web_resource_by_name
 from models.web.web_pbi_report_data_model import WebPbiReportDataModel
 
 

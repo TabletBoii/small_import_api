@@ -9,7 +9,7 @@ from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
 from dao.samo.department_dao import get
-from dao.web.web_download_list_dao import get_download_id
+from dao.web.download_list_dao import get_download_id
 from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
 from routers.web_router.utils import make_route_permission_deps
 from routers.web_router.web import web_jinja_router, templates

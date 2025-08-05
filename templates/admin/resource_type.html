@@ -1,0 +1,15 @@
+{% extends 'admin_base.html' %}
+{% import "macros/table_macros.html" as table_macros %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+  {{ table_macros.render_table(
+        headers,
+        resource_type_list,
+        edit_url='resource_type',
+        delete_url='resource_type',
+        modal_fields=[
+            {'name': 'name', 'label': 'Название'}
+        ]
+     ) }}
+{% endblock %}

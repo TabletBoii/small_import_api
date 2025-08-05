@@ -1,0 +1,35 @@
+{% macro edit_modal_form(id="modal", title="Edit Item", fields=[], dropdown_rows={}, action_url="", method="post") %}
+<div id="{{ id }}" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('{{ id }}')">&times;</span>
+    <h2>{{ title }}</h2>
+    <form id="{{ id }}-form" action="{{ action_url }}" method="{{ method }}">
+      {% for field in fields %}
+        <label for="{{ id }}-{{ field.name }}">{{ field.label or field.name }}:</label>
+        {% if field.element == 'textarea' %}
+          <textarea
+            name="{{ field.name }}"
+            id="{{ id }}-{{ field.name }}"
+          >
+          </textarea>
+        {% elif dropdown_rows and dropdown_rows[field.name] %}
+          <select name="{{ field.name }}" id="{{ field.id }}">
+            {% for id, name in dropdown_rows[field.name].items() %}
+              <option value="{{ id }}" {% if name == dropdown_rows[field.name][id] %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <input
+            type="{{ field.type or 'text' }}"
+            name="{{ field.name }}"
+            id="{{ id }}-{{ field.name }}"
+            value="{{ field.value or '' }}"
+          />
+        {% endif %}
+
+      {% endfor %}
+      <button type="submit">Save</button>
+    </form>
+  </div>
+</div>
+{% endmacro %}

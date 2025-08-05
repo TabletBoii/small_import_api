@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+      <meta charset="UTF-8">
+      <title>{% block title %}Мой сайт{% endblock %}</title>
+      <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+      <base href="{{ request.base_url }}">
+
+      <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='admin_panel.css') }}"
+      />
+      <script src="https://kit.fontawesome.com/74b9f45d18.js" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+      <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+      <script src="/static/js/custom_toast.js"></script>
+      <script src="/static/js/modalWindow.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.0/dist/powerbi.js"></script>
+    </head>
+
+    <body>
+      <div class="container">
+        <aside class="sidebar" id="sidebar">
+          <div class="logo"><span>Admin</span></div>
+          <nav>
+            <a href="#"><i class="icon">🏠</i><span class="label">Дашборд</span></a>
+            <a href="/admin/users"><i class="icon">👥</i><span class="label">Пользователи</span></a>
+            <a href="/admin/resources"><i class="icon">📊</i><span class="label">Ресурсы</span></a>
+            <a href="/admin/resource_type"><i class="icon">⚙️</i><span class="label">Типы ресурсов</span></a>
+          </nav>
+        </aside>
+        <div class="main">
+          <header class="header">
+            <button id="sidebarToggle">☰</button>
+            <h1>Dashboard</h1>
+            <input class="search" type="text" placeholder="Search...">
+          </header>
+
+          <div class="content">
+            {% block admin_content %}{% endblock %}
+          </div>
+          <script>
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            toggleBtn.addEventListener('click', () => {
+              sidebar.classList.toggle('collapsed');
+            });
+          </script>
+        </div>
+      </div>
+    </body>
+</html>
