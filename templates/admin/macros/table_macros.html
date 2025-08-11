@@ -1,6 +1,15 @@
-{% macro render_table(headers, rows, dropdown_rows={}, edit_url='', delete_url='', modal_fields=[]) %}
-{% import 'macros/delete_modal_window.html' as delete_ui %}
-{% import 'macros/edit_modal_window.html' as edit_ui %}
+{% macro render_table(headers, rows, dropdown_rows={}, edit_url='', delete_url='', create_url='', modal_item_name='', modal_fields=[], entity_fields={}, item_keys=[], action_macro=None) %}
+{% import 'macros/modal_window.html' as ui %}
+  {% if create_url == '' %}
+  {% else %}
+  <button
+    class="btn-create"
+    onclick='openModal("createModal", "/admin/{{create_url}}/create")'
+  >
+    + Создать
+  </button>
+  {% endif %}
+
   <table class="admin-table">
     <thead>
       <tr>
@@ -13,47 +22,74 @@
     </thead>
     <tbody>
 
-      {% set row_header = rows[0].keys()%}
-      {% for row in rows %}
-        <tr>
-          {% for key in row_header %}
-            <td id="{{ key }}">{{ row[key] }}</td>
-          {% endfor %}
-          <td>
-            <a
-              href="javascript:void(0);"
-              onclick='openModal("editModal", "/admin/{{edit_url}}/edit/{{ row["inc"] }}", {{ row | tojson }})'
-              type="button"
-              class="btn"
-            >
-              ✏️
-            </a>
-            <a
-              href="javascript:void(0);"
-              onclick='openModal("deleteModal", "/admin/{{delete_url}}/delete/{{ row["inc"] }}", {{ row | tojson }})'
-              type="button"
-              class="btn"
-            >
-              🗑️
-            </a>
-          </td>
-        </tr>
-      {% endfor %}
-
-
-
+      {% if rows %}
+        {% set row_header = rows[0].keys()%}
+        {% for row in rows %}
+          <tr>
+            {% for key in row_header %}
+              <td id="{{ key }}">{{ row[key] }}</td>
+            {% endfor %}
+              {% if not action_macro %}
+                {% set default_actions %}
+                    <a
+                      href="javascript:void(0);"
+                      onclick='openModal("editModal", "/admin/{{edit_url}}/edit/{{ row["inc"] }}", {{ row | tojson }})'
+                      type="button"
+                      class="btn"
+                    >
+                      ✏️
+                    </a>
+                    <a
+                      href="javascript:void(0);"
+                      onclick='openModal("deleteModal", "/admin/{{delete_url}}/delete/{{ row["inc"] }}", {{ row | tojson }}, {{ item_keys | tojson }})'
+                      type="button"
+                      class="btn"
+                    >
+                      🗑️
+                    </a>
+                {% endset %}
+                <td>{{ default_actions | safe }}</td>
+              {% else %}
+                <td>{{ action_macro(row) }}</td>
+              {% endif %}
+          </tr>
+        {% endfor %}
+      {% else %}
+        <td colspan="{{headers | length}}">
+          Новых запросов еще не поступало
+        </td>
+      {% endif %}
     </tbody>
   </table>
   {{
-    edit_ui.edit_modal_form(
+    ui.modal_form(
+      modal_type="create_edit",
       id="editModal",
       fields=modal_fields,
-      dropdown_rows=dropdown_rows
+      dropdown_rows=dropdown_rows,
+      title="Изменить",
+      modal_item_name=modal_item_name
     )
   }}
   {{
-    delete_ui.delete_modal_form(
-      id="deleteModal"
+    ui.modal_form(
+      modal_type="create_edit",
+      id="createModal",
+      fields=modal_fields,
+      entity_fields=entity_fields,
+      dropdown_rows=dropdown_rows,
+      title="Создать",
+      modal_item_name=modal_item_name
+    )
+  }}
+
+  {{
+    ui.modal_form(
+      modal_type="delete",
+      id="deleteModal",
+      method="get",
+      title="Удалить",
+      modal_item_name=modal_item_name
     )
   }}
 {% endmacro %}

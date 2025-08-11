@@ -8,6 +8,12 @@
         users_list,
         edit_url='users',
         delete_url='users',
+        create_url='users',
+        entity_fields=entity_fields,
+        modal_item_name='Пользователь',
+        item_keys=[
+            "name"
+        ],
         modal_fields=[
             {'name': 'name', 'label': 'Username'},
             {'name': 'microsoft_email', 'label': 'Email', 'type': 'email'},

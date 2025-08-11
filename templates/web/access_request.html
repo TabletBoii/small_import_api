@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Мои загрузки{% endblock %}
+{% import 'macros/modal_window.html' as ui %}
+{% import 'macros/table.html' as table_ui %}
+
+{% block content %}
+    <h2 style="margin: 15px 0px 15px 10px;">
+        Выберите ресурс
+    </h2>
+    <hr/>
+    <div class="centered-page">
+        <div class="reduced-content">
+            <div>
+                <h3 style="margin-top: 10px;">Ваши запросы</h3>
+                {{ table_ui.render_table(
+                   "users_access_requests",
+                   users_access_requests,
+                   headers,
+                   informational_table=True,
+                   has_actions=False
+                 ) }}
+            </div>
+            {% for resource_type, resource in resource_dict.items() %}
+                <div class="collapsible">
+                  <div class="collapsible-header" data-target="main-container-{{resource_type}}">
+                    <span class="arrow">▶</span> {{ resource_type }}
+                  </div>
+                  <div id="main-container-{{resource_type}}" class="collapsible-content checkbox-list">
+                    <div class="table-row table-header">
+                      <div class="col col-name">Название</div>
+                      <div class="col col-info">Тип</div>
+                      <div class="col col-name">Название(кир.)</div>
+                      <div class="col col-name">Описание</div>
+                      <div class="col col-action">Действие</div>
+                    </div>
+                    {% for field in resource %}
+                        <div class="table-row" id="{{ field.inc }}">
+                            <span class="col col-name">{{ field.name }}</span>
+                            <span class="col col-info">{{ field.type }}</span>
+                            <span class="col col-info">{{ field.name_cirill }}</span>
+                            <span class="col col-info">{{ field.description }}</span>
+                            <div class="col col-action">
+                              <button
+                                  class="request-btn"
+                                  id="make-request-{{ field.inc }}"
+                                  onclick='openModal("requestModal", "/web/access_request/{{field.inc}}", {{field | tojson}})'
+                              >
+                                  Запросить
+                              </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                  </div>
+                </div>
+            {% endfor %}
+
+            {{
+                ui.modal_form(
+                  modal_type="create_edit",
+                  id="requestModal",
+                  fields=[
+                    {'name': 'name_cirill', 'label': 'Название', 'element': 'div'},
+                    {'name': 'request_description', 'label': 'Опишите, зачем вам нужен доступ', 'element': 'textarea'}
+                  ],
+                  title="Запрос на предоставление доступа",
+                  modal_item_name=modal_item_name
+                )
+            }}
+        </div>
+    </div>
+
+
+<style>
+    .table-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .table-header {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+
+    .col {
+      padding: 4px 8px;
+    }
+
+    .col-name {
+      flex: 2; /* шире для названия */
+    }
+
+    .col-info {
+      flex: 3; /* место для описания */
+    }
+
+    .col-action {
+      flex: 1;
+      text-align: right;
+    }
+
+    .request-btn {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    .request-btn:hover {
+      background-color: #45a049;
+    }
+</style>
+<script>
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const target = document.getElementById(header.dataset.target);
+        target.classList.toggle('show');
+        header.classList.toggle('open');
+      });
+    });
+</script>
+{% endblock %}

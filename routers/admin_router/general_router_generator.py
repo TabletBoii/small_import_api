@@ -4,7 +4,7 @@ from starlette.responses import RedirectResponse
 from typing import Type, Callable, List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dao.general.admin_dao import get_all, update_by_id, delete_by_id
+from dao.general.admin_dao import get_all, update_by_id, delete_by_id, create
 from database.sessions import WEB_SESSION_FACTORY
 from routers.templates import admin_templates
 from utils.utils import row_to_dict
@@ -48,6 +48,7 @@ def generate_crud_router(
                 }
         return {
             f"{model_name}_list": result_list,
+            "entity_fields": model.__field_aliases__,
             "headers": table_headers
         }
 
@@ -65,6 +66,9 @@ def generate_crud_router(
     ):
         form = await request.form()
         data_to_update = dict(form)
+        for key, value in data_to_update.items():
+            if "is" in key or "has" in key:
+                data_to_update[key] = bool(int(value))
         async with WEB_SESSION_FACTORY() as session:
             await update_by_id(session, model, item_id, data_to_update)
         return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
@@ -78,4 +82,19 @@ def generate_crud_router(
             await delete_by_id(session, model, item_id)
         return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
 
+    @router.post("/create")
+    async def create_item(
+            request: Request
+    ):
+        form = dict(await request.form())
+        for key, value in form.items():
+            if "is" in key or "has" in key:
+                form[key] = bool(value)
+        data_to_create = model(**form)
+        async with WEB_SESSION_FACTORY() as session:
+            await create(session, data_to_create)
+        return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+
     return router
+
+

@@ -193,7 +193,6 @@ function initFilterMenu(table, colIdx, menu) {
   sortAsc.addEventListener('click', () => sortTable(table, colIdx, 'asc'));
   sortDesc.addEventListener('click', () => sortTable(table, colIdx, 'desc'));
 
-  // собираем уникальные значения из текущей таблицы
   const values = Array.from(table.querySelectorAll('tbody tr'))
     .map(tr => tr.cells[colIdx].querySelector('input').value)
     .filter((v,i,a) => a.indexOf(v)===i)
@@ -212,7 +211,7 @@ function initFilterMenu(table, colIdx, menu) {
     row.append(cb, ' ', lbl);
     row.style.padding = '2px';
     menu.append(row);
-    cb.addEventListener('change', () => applyFilter(table, colIdx));
+    cb.addEventListener('change', () => applyFilter(table));
   });
 
   search.addEventListener('input', () => {
@@ -229,18 +228,48 @@ function initFilterMenu(table, colIdx, menu) {
     menu.querySelectorAll('input[type=checkbox]').forEach(cb => {
       if (cb !== allCb) cb.checked = checked;
     });
-    applyFilter(table, colIdx);
+    applyFilter(table);
   });
 }
 
-function applyFilter(table, colIdx) {
-  const menu = table.querySelector(`.th-with-menu[data-col-index="${colIdx}"] .filter-menu`);
-  const checked = Array.from(menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx}):checked`))
-                       .map(c => c.value);
-  table.querySelectorAll('tbody tr').forEach(tr => {
-    const cell = tr.cells[colIdx].querySelector('input').value;
-    tr.style.display = checked.includes(cell) ? '' : 'none';
+function applyFilter(table) {
+  const activeFilters = {};
+
+  table.querySelectorAll('.th-with-menu').forEach(th => {
+    const colIdx = +th.dataset.colIndex;
+    const menu = th.querySelector('.filter-menu');
+    const checked = Array.from(menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx}):checked`))
+                         .map(cb => cb.value);
+    if (checked.length) {
+      activeFilters[colIdx] = checked;
+    }
   });
+
+  table.querySelectorAll('tbody tr').forEach(tr => {
+    let visible = true;
+    for (const [colIdx, allowedValues] of Object.entries(activeFilters)) {
+      const cellVal = tr.cells[colIdx].querySelector('input').value;
+      if (!allowedValues.includes(cellVal)) {
+        visible = false;
+        break;
+      }
+    }
+    tr.style.display = visible ? '' : 'none';
+  });
+
+  table.querySelectorAll('.th-with-menu').forEach(th => {
+      const colIdx = +th.dataset.colIndex;
+      const menu = th.querySelector('.filter-menu');
+      const allOptions = menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx})`);
+      const checkedOptions = menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx}):checked`);
+      const icon = th.querySelector('.menu-btn');
+
+      if (checkedOptions.length === allOptions.length) {
+        icon.textContent = '☰';
+      } else {
+        icon.textContent = '🔍';
+      }
+    });
 }
 
 function sortTable(table, colIdx, direction) {
@@ -255,4 +284,21 @@ function sortTable(table, colIdx, direction) {
         : vb.localeCompare(va, 'ru', { numeric: true });
     })
     .forEach(r => tbody.appendChild(r));
+}
+
+function resetAllFilters(tableId) {
+  const table = document.getElementById(tableId);
+
+  table.querySelectorAll('.th-with-menu').forEach(th => {
+    const colIdx = +th.dataset.colIndex;
+    const menu = th.querySelector('.filter-menu');
+    const allCb = menu.querySelector(`#select-all-${colIdx}`);
+    if (allCb) allCb.checked = true;
+
+    menu.querySelectorAll(`input[type=checkbox]:not(#select-all-${colIdx})`).forEach(cb => {
+      cb.checked = true;
+    });
+  });
+
+  applyFilter(table);
 }

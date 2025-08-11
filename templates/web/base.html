@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="/static/js/custom_toast.js"></script>
+  <script src="/static/js/modalWindow.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.0/dist/powerbi.js"></script>
 </head>
 <body>
@@ -39,6 +40,10 @@
           <a href="{{ url_for('power_bi') }}"
              class="home_header_item {% if request.url.path == '/web/power_bi' %}active{% endif %}">
              Отчеты PowerBI
+          </a>
+          <a href="{{ url_for('access_request') }}"
+             class="home_header_item {% if request.url.path == '/web/access_request' %}active{% endif %}">
+             Запрос Доступа
           </a>
 
         </li>

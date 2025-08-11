@@ -46,7 +46,9 @@ body {
   opacity: 0;
 }
 .sidebar nav {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .sidebar nav a {
   padding: 15px 20px;
@@ -67,6 +69,11 @@ body {
 }
 .sidebar.collapsed nav a .label {
   display: none;
+}
+
+.sidebar nav a:last-child {
+  margin-top: auto;
+  border-top: 1px solid #ddd;
 }
 
 
@@ -144,6 +151,65 @@ table th {
   width: 400px;
   position: relative;
 }
+
+.modal-content form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="email"],
+.modal-content form input[type="number"],
+.modal-content form input[type="password"],
+.modal-content form select,
+.modal-content form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.modal-content form input:focus,
+.modal-content form select:focus,
+.modal-content form textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
+}
+
+.modal-content form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-content form input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+.modal-content form button {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content form button:hover {
+    background-color: #45a049;
+}
+
 .close {
   color: #aaa;
   position: absolute;
@@ -155,6 +221,66 @@ table th {
 
 .btn {
     text-decoration: none;
+
+}
+
+.btn.success,
+.btn.reject {
+  display: inline-block;
+  text-align: center;
+  background: transparent;
+  color: #fff;
+  width: 110px;
+  border: 1px solid;
+  padding: 0.3rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.btn.success {
+  border-color: #197d0a;
+  background: #197d0a;
+}
+
+.btn.success:hover {
+  color: #197d0a;
+  background: #fff;
+}
+
+.btn.reject {
+  border-color: #d11a2a;
+  background: #d11a2a;
+}
+
+.btn.reject:hover {
+  color: #d11a2a;
+  background: #fff;
+}
+
+.btn-create {
+    float: right;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-create:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-create:active {
+    transform: translateY(0px);
+    background-color: #3e8e41;
 }
 
 @media (max-width: 768px) {
@@ -173,4 +299,13 @@ textarea {
     padding: 10px;
     font-size: 16px;
     resize: vertical;
+}
+
+.badge {
+  background-color: red;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 10px;
+  padding: 2px 6px;
+  margin-left: 5px;
 }

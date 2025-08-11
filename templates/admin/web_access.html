@@ -1,0 +1,24 @@
+{% extends 'admin_base.html' %}
+{% import "macros/table_macros.html" as table_macros %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+  {{ table_macros.render_table(
+        headers,
+        web_access_list,
+        edit_url='access',
+        delete_url='access',
+        create_url='access',
+        modal_item_name='Доступ',
+        item_keys=[
+            "user_inc",
+            "web_resource_inc"
+        ],
+        dropdown_rows=dropdown_field_dict,
+        modal_fields=[
+            {'name': 'user_inc', 'label': 'Пользователь'},
+            {'name': 'web_resource_inc', 'label': 'Ресурс'},
+            {'name': 'has_access', 'label': 'Доступ', 'type': 'checkbox'}
+        ]
+     ) }}
+{% endblock %}

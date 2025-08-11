@@ -1,0 +1,51 @@
+{% macro modal_form(modal_type, id="modal", title="Create Item", fields=[], entity_fields={}, dropdown_rows={}, modal_item_name="", action_url="", method="post") %}
+<div id="{{ id }}" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('{{ id }}')">&times;</span>
+    <h2>{{ title }}</h2>
+    <form id="{{ id }}-form" action="{{ action_url }}" method="{{ method }}" onsubmit="prepareCheckboxValue()">
+      {% if modal_type == "create_edit" %}
+        {% for field in fields %}
+          <label for="{{ id }}-{{ field.name }}">{{ field.label or field.name }}:</label>
+          {% if field.element == 'textarea' %}
+            <textarea
+              name="{{ field.name }}"
+              id="{{ id }}-{{ field.name }}"
+            ></textarea>
+          {% elif dropdown_rows and dropdown_rows[field.name] %}
+            <select name="{{ field.name }}" id="{{ field.id }}">
+              {% for id, name in dropdown_rows[field.name].items() %}
+                <option value="{{ id }}" {% if name == dropdown_rows[field.name][id] %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          {% else %}
+            {% if field.type == 'checkbox' %}
+                <input
+                  type="text"
+                  name="{{ field.name }}"
+                  id="{{ id }}-{{ field.name }}"
+                  value="{{ field.value or '' }}"
+                />
+            {% else %}
+              <input
+                type="{{ field.type or 'text' }}"
+                name="{{ field.name }}"
+                id="{{ id }}-{{ field.name }}"
+                value="{{ field.value or '' }}"
+              />
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        <button type="submit">Apply</button>
+      {% elif modal_type == "delete" %}
+        <div>
+          {{modal_item_name}} <span id="{{ id }}-item"></span> будет удален. Уверены?
+        </div>
+        <button type="submit">Да</button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+
+{% endmacro %}

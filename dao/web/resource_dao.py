@@ -11,12 +11,12 @@ async def get_web_resource_by_name(session: AsyncSession, web_resource_name: str
     return result.scalars().first()
 
 
-async def get_resource_list(session: AsyncSession):
+async def get_resource_list(session: AsyncSession, get_cyrillic_type=None):
     stmt = (
         select(
             WebResourceModel.inc,
             WebResourceModel.name,
-            WebResourceTypeModel.name.label("type"),
+            WebResourceTypeModel.name.label("type") if get_cyrillic_type is None else WebResourceTypeModel.name_cirill.label("type"),
             WebResourceModel.name_cirill,
             WebResourceModel.description,
         )

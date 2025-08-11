@@ -8,8 +8,14 @@
         resource_type_list,
         edit_url='resource_type',
         delete_url='resource_type',
+        modal_item_name='Тип Ресурса',
+        item_keys=[
+            "name"
+        ],
+        create_url='resource_type',
         modal_fields=[
-            {'name': 'name', 'label': 'Название'}
+            {'name': 'name', 'label': 'Название'},
+            {'name': 'name_cirill', 'label': 'Название(кир.)'},
         ]
      ) }}
 {% endblock %}

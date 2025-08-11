@@ -50,7 +50,7 @@ async def login_post(
     return RedirectResponse(url="/admin/", status_code=302)
 
 
-# @jinja_router.get("/logout")
-# async def logout(request: Request):
-#     request.session.clear()
-#     return RedirectResponse(url="/login", status_code=302)
+@admin_jinja_router.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/admin/login", status_code=302)

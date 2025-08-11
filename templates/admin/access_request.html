@@ -1,0 +1,17 @@
+{% extends 'admin_base.html' %}
+{% block title %}Главная{% endblock %}
+{% import "macros/table_macros.html" as table_macros %}
+{% import 'macros/access_dynamic_actions_macros.html' as action_macros %}
+
+{% block admin_content %}
+
+    {{ table_macros.render_table(
+        headers,
+        pending_access_request_list,
+        action_macro=action_macros.dynamic_actions,
+        modal_item_name='Доступ',
+        modal_fields=[
+            {'name': 'rejection_reason', 'label': 'Причина отказа', 'element': 'textarea'}
+        ]
+    ) }}
+{% endblock %}

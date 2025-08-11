@@ -6,6 +6,15 @@ from database.base import Base
 
 class WebResourceModel(Base):
     __tablename__ = "web_resource"
+
+    __field_aliases__ = {
+        "inc": "ID",
+        "name": "Название",
+        "type": "Тип",
+        "name_cirill": "Название(кир.)",
+        "description": "Описание"
+    }
+
     inc: Mapped[int] = mapped_column(Integer, primary_key=True, name="inc")
     name: Mapped[str] = mapped_column(String(50), name="name")
     type: Mapped[int] = mapped_column(Integer, name="type")

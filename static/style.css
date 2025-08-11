@@ -226,6 +226,7 @@ input[type="date"] {
 .btn-add-row-fixed {
   position: fixed;
   bottom: 20px;
+  border: none;
   right: 0;
   width: 120px;
   transform: translateX(calc(100% - 20px));
@@ -239,6 +240,26 @@ input[type="date"] {
   background: var(--primary);
   color: var(--white);
 }
+
+.btn-reset-filters {
+  position: fixed;
+  background: #f39c12;
+  border: none;
+  bottom: 100px;
+  right: 0;
+  width: 120px;
+  transform: translateX(calc(100% - 20px));
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar-trigger:hover + .btn-reset-filters,
+.btn-reset-filters:hover {
+  transform: translateX(0);
+  background: #f39c12;
+  color: var(--white);
+}
+
 
 .excel {
     background: #1D6F42;
@@ -306,7 +327,7 @@ input[type="date"] {
 }
 
 .collapsible-content.show {
-    display: flex;
+    display: block;
 }
 
 .collapsible-header.open .arrow {
@@ -539,4 +560,99 @@ input[type="date"] {
   font-size: 1rem;
   line-height: 1.4;
   max-width: 320px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  position: relative;
+}
+
+.modal-content form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="email"],
+.modal-content form input[type="number"],
+.modal-content form input[type="password"],
+.modal-content form select,
+.modal-content form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.modal-content form input:focus,
+.modal-content form select:focus,
+.modal-content form textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
+}
+
+.modal-content form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-content form input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+.modal-content form button {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content form button:hover {
+    background-color: #45a049;
+}
+
+.close {
+  color: #aaa;
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.centered-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+.reduced-content {
+  max-width: 1200px;
+  width: 100%;
 }

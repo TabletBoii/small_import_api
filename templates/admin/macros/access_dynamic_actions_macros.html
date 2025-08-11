@@ -1,0 +1,15 @@
+{% macro dynamic_actions(row) %}
+  <a
+    href="/admin/access_request/confirm/{{ row['inc'] }}"
+    class="btn success"
+  >
+    Подтвердить
+  </a>
+  <a
+    href="javascript:void(0);"
+    onclick='openModal("editModal", "/admin/access_request/reject/{{ row["inc"] }}")'
+    class="btn reject"
+  >
+    Отклонить
+  </a>
+{% endmacro %}
