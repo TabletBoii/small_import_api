@@ -1,0 +1,23 @@
+{% extends 'admin_base.html' %}
+{% import "macros/table_macros.html" as table_macros %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+  {{ table_macros.render_table(
+        headers,
+        pbi_resource_list,
+        edit_url='pbi_resource',
+        delete_url='pbi_resource',
+        create_url='pbi_resource',
+        modal_item_name='Ресурс PowerBI',
+        item_keys=[
+            "name"
+        ],
+        dropdown_rows=dropdown_field_dict,
+        modal_fields=[
+            {'name': 'workspace_id', 'label': 'ID рабочей области'},
+            {'name': 'report_id', 'label': 'ID отчета'},
+            {'name': 'resource_id', 'label': 'Ресурс'}
+        ]
+     ) }}
+{% endblock %}

@@ -120,10 +120,29 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.table-btn-block {
+    width: 100%;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
 }
+
+.table-wrapper {
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.admin-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--secondary-color);
+    color: var(--text-color);
+    z-index: 1;
+}
+
 table th, table td {
   padding: 12px;
   border-bottom: 1px solid #ddd;

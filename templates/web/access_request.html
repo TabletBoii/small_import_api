@@ -41,13 +41,17 @@
                             <span class="col col-info">{{ field.name_cirill }}</span>
                             <span class="col col-info">{{ field.description }}</span>
                             <div class="col col-action">
-                              <button
+                              {% if field.has_access %}
+                                У вас есть доступ
+                              {% else %}
+                                <button
                                   class="request-btn"
                                   id="make-request-{{ field.inc }}"
                                   onclick='openModal("requestModal", "/web/access_request/{{field.inc}}", {{field | tojson}})'
-                              >
+                                >
                                   Запросить
-                              </button>
+                                </button>
+                              {% endif %}
                             </div>
                         </div>
                     {% endfor %}

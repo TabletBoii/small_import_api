@@ -41,6 +41,7 @@ def generate_crud_router(
                         await get_all(session, value[0], value[1])
                     } for (key, value) in dropdown_field_dict.items()
                 }
+                print(result_list)
                 return {
                     f"{model_name}_list": result_list,
                     "dropdown_field_dict": resulted_dropdown_field_dict,

@@ -7,6 +7,7 @@ from starlette.templating import Jinja2Templates
 
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_access_request_model import WebAccessRequestModel
+from models.web.web_pbi_report_data_model import WebPbiReportDataModel
 from models.web.web_resource_access_model import WebResourceAccessModel
 from models.web.web_resource_model import WebResourceModel
 from models.web.web_resource_type_model import WebResourceTypeModel
@@ -33,6 +34,35 @@ resource_type_router = generate_crud_router(
         WebResourceTypeModel.name_cirill
     ),
 )
+
+pbi_resource_router = generate_crud_router(
+    model=WebPbiReportDataModel,
+    url_prefix="/pbi_resource",
+    table_headers=["ID", "ID рабочей области", "ID отчета", "Ресурс"],
+    model_name="pbi_resource",
+    model_header_names=[
+        "id",
+        "workspace_id",
+        "report_id",
+        "resource_id"
+    ],
+    get_custom_query=select(
+        WebPbiReportDataModel.id,
+        WebPbiReportDataModel.workspace_id,
+        WebPbiReportDataModel.report_id,
+        WebResourceModel.name_cirill.label("resource_id")
+    ).join(
+            WebResourceModel,
+            WebResourceModel.inc == WebPbiReportDataModel.resource_id
+    ),
+    dropdown_field_dict={
+        "resource_id": [
+            WebResourceModel,
+            select(WebResourceModel.inc, WebResourceModel.name_cirill.label("name"))
+        ]
+    },
+)
+
 user_router = generate_crud_router(
     model=WebUserModel,
     url_prefix="/users",
@@ -141,6 +171,7 @@ access_router = generate_crud_router(
 )
 
 
+admin_jinja_router.include_router(pbi_resource_router)
 admin_jinja_router.include_router(resource_router)
 admin_jinja_router.include_router(resource_type_router)
 admin_jinja_router.include_router(user_router)

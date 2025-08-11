@@ -1,8 +1,10 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, literal
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from models.web.web_resource_access_model import WebResourceAccessModel
 from models.web.web_resource_model import WebResourceModel
 from models.web.web_resource_type_model import WebResourceTypeModel
+from models.web.web_user_model import WebUserModel
 
 
 async def get_web_resource_by_name(session: AsyncSession, web_resource_name: str):
@@ -24,6 +26,38 @@ async def get_resource_list(session: AsyncSession, get_cyrillic_type=None):
             WebResourceTypeModel,
             WebResourceTypeModel.inc == WebResourceModel.type
         )
+    )
+    result = await session.execute(stmt)
+    return result.all()
+
+
+async def get_resource_list_with_user_access(session: AsyncSession, username: str):
+    stmt = (
+        select(
+            WebResourceModel.inc,
+            WebResourceModel.name,
+            WebResourceTypeModel.name_cirill.label("type"),
+            WebResourceModel.name_cirill,
+            WebResourceModel.description,
+            WebResourceAccessModel.has_access,
+        )
+        .join(
+            WebResourceTypeModel,
+            WebResourceTypeModel.inc == WebResourceModel.type,
+            isouter=True
+        )
+        .join(
+            WebUserModel,
+            literal(True),
+            isouter=False
+        )
+        .join(
+            WebResourceAccessModel,
+            (WebResourceAccessModel.web_resource_inc == WebResourceModel.inc) &
+            (WebResourceAccessModel.user_inc == WebUserModel.inc),
+            isouter=True
+        )
+        .where(WebUserModel.name == username)
     )
     result = await session.execute(stmt)
     return result.all()

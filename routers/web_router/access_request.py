@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse
 
 from dao.web.access_request_dao import create, access_requests_by_username
-from dao.web.resource_dao import get_resource_list, get_resource_type_list
+from dao.web.resource_dao import get_resource_list, get_resource_type_list, get_resource_list_with_user_access
 from dao.web.web_user_dao import get_user_by_username
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_access_request_model import WebAccessRequestModel
@@ -22,10 +22,11 @@ access_request_router = APIRouter(
 async def get_form_context(user: str) -> dict[str, dict[Any, list[Any]]]:
 
     async with WEB_SESSION_FACTORY() as session:
-        resource_list = await get_resource_list(session, get_cyrillic_type=True)
+        resource_list = await get_resource_list_with_user_access(session, user)
         resource_type_list = [d.name_cirill for d in await get_resource_type_list(session)]
         users_access_requests = await access_requests_by_username(session, user)
     resulted_resource_list = []
+    print(resource_list)
     for resource in resource_list:
         resulted_resource_list.append({
             "inc": resource[0],
@@ -33,15 +34,16 @@ async def get_form_context(user: str) -> dict[str, dict[Any, list[Any]]]:
             "type": resource[2],
             "name_cirill": resource[3],
             "description": resource[4],
+            "has_access": resource[5]
         })
-
+    print(resulted_resource_list)
     resource_dict = {}
     for resource_type in resource_type_list:
         resource_dict[resource_type] = []
         for resource in resulted_resource_list:
             if resource.get("type") == resource_type:
                 resource_dict[resource_type].append(resource)
-    print(users_access_requests)
+    print(resource_dict)
     return {
         "resource_dict":  resource_dict,
         "users_access_requests": users_access_requests,
