@@ -1,4 +1,4 @@
-{% macro render_table(id, table_data, table_keys, save_url='', informational_table=False, has_actions=True) %}
+{% macro render_table(id, table_data, table_keys, else_msg='', save_url='', informational_table=False, has_actions=True) %}
   {% if table_data %}
     {% set headers = table_data[0].keys() | list %}
     <div class="btn_block">
@@ -95,6 +95,6 @@
       };
     </script>
   {% else %}
-    <p>Данных нет.</p>
+    <p style="margin-bottom: 15px;">{% if else_msg == '' %}Данных нет.{% else %} {{ else_msg }} {% endif %}</p>
   {% endif %}
 {% endmacro %}

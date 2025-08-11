@@ -5,7 +5,7 @@
 
 {% block content %}
     <h2 style="margin: 15px 0px 15px 10px;">
-        Выберите ресурс
+        Выберите ресурс для запроса доступа
     </h2>
     <hr/>
     <div class="centered-page">
@@ -17,6 +17,7 @@
                    users_access_requests,
                    headers,
                    informational_table=True,
+                   else_msg='Доступы не были запрошены',
                    has_actions=False
                  ) }}
             </div>
@@ -79,7 +80,7 @@
     }
 
     .table-header {
-      background-color: #f0f0f0;
+      background-color: #ff9933;
       font-weight: bold;
     }
 

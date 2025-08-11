@@ -307,16 +307,20 @@ input[type="date"] {
   gap: 1rem;
 }
 
-.collapsible-header {
-    cursor: pointer;
-    padding: 0.5em;
-    background: #f0f0f0;
-}
-
 .arrow {
     display: inline-block;
     transform: rotate(0);
     transition: transform 0.2s ease;
+}
+
+.collapsible {
+    margin-bottom: 15px;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    padding: 0.5em;
+    background: #ffcc00;
 }
 
 .collapsible-content {
