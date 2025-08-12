@@ -37,6 +37,8 @@ async def validate_input(username: str, password: str) -> [bool, str | None]:
             return False, "Invalid credentials"
         elif not Hasher.verify_password(password, user.hashed_password):
             return False, "Invalid credentials"
+        elif not user.is_activated:
+            return False, "Account has been deactivated"
         else:
             return True, None
 

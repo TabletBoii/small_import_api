@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.base import Base
@@ -22,3 +22,4 @@ class WebUserModel(Base):
     description: Mapped[str | None] = mapped_column(String(200), name="description", nullable=True)
     microsoft_email: Mapped[str] = mapped_column(String(100), name="microsoft_email", unique=True, nullable=True)
     microsoft_oid: Mapped[str] = mapped_column(String(100), name="microsoft_oid", unique=True, nullable=True)
+    is_activated: Mapped[bool] = mapped_column(Boolean, name="is_activated", default=True)

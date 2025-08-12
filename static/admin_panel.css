@@ -81,7 +81,6 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;
 }
 .header {
   background: var(--secondary-color);
@@ -159,9 +158,9 @@ table th {
   z-index: 1001;
   left: 0; top: 0;
   width: 100%; height: 100%;
-  overflow: auto;
   background-color: rgba(0,0,0,0.4);
 }
+
 .modal-content {
   background-color: #fefefe;
   margin: 10% auto;
@@ -169,6 +168,7 @@ table th {
   border-radius: 8px;
   width: 400px;
   position: relative;
+
 }
 
 .modal-content form label {
@@ -177,6 +177,17 @@ table th {
     margin-top: 12px;
     margin-bottom: 5px;
     color: #333;
+}
+
+.slicer-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    max-height: 34px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
 }
 
 .modal-content form input[type="text"],
@@ -270,6 +281,7 @@ table th {
 .btn.reject {
   border-color: #d11a2a;
   background: #d11a2a;
+  cursor: pointer;
 }
 
 .btn.reject:hover {

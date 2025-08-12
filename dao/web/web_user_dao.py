@@ -16,6 +16,12 @@ async def get_user_list(session: AsyncSession):
     return result.all()
 
 
+async def is_user_activated(session: AsyncSession, user):
+    stmt = select(WebUserModel.is_activated).where(WebUserModel.name == user)
+    result = await session.execute(stmt)
+    return result.first()
+
+
 async def create_user(session: AsyncSession, user: WebUserModel) -> None:
     session.add(user)
     await session.flush()

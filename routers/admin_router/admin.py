@@ -71,21 +71,24 @@ user_router = generate_crud_router(
         "Username",
         "Microsoft ID",
         "Microsoft Email",
-        "Описание"
+        "Описание",
+        "Активирован"
     ],
     model_header_names=[
         "inc",
         "name",
         "microsoft_oid",
         "microsoft_email",
-        "description"
+        "description",
+        "is_activated"
     ],
     get_custom_query=select(
         WebUserModel.inc,
         WebUserModel.name,
         WebUserModel.microsoft_oid,
         WebUserModel.microsoft_email,
-        WebUserModel.description
+        WebUserModel.description,
+        WebUserModel.is_activated
     ),
     model_name="users"
 )
@@ -177,6 +180,9 @@ admin_jinja_router.include_router(resource_type_router)
 admin_jinja_router.include_router(user_router)
 admin_jinja_router.include_router(access_router)
 
+#
+# async def home_page_ctx():
+
 
 @admin_jinja_router.get("/")
 async def home(
@@ -184,7 +190,9 @@ async def home(
 ):
     return admin_templates.TemplateResponse(
         "admin.html",
-        {"request": request}
+        {
+            "request": request
+        }
     )
 
 

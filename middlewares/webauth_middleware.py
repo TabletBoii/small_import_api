@@ -5,6 +5,8 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
+from dao.web.web_user_dao import is_user_activated
+from database.sessions import WEB_SESSION_FACTORY
 from sub_app.msal_app import msal_app
 from utils.msal_scopes import AUTH_SCOPE
 
@@ -18,6 +20,14 @@ class WebAuthMiddleware(BaseHTTPMiddleware):
         if path.startswith("/web"):
             if path.startswith(("/web/login", "/web/logout", "/static", "/favicon.ico")):
                 return await call_next(request)
+            if request.session.get("user"):
+                async with WEB_SESSION_FACTORY() as session:
+                    is_user_activated_item = await is_user_activated(session, request.session.get("user"))
+                    is_user_activated_value = is_user_activated_item[0]
+                    if not is_user_activated_value:
+                        request.session.clear()
+                        request.cookies.clear()
+                        return RedirectResponse(url="/web/login", status_code=302)
 
             if session_id:
                 msal_session_data = session_store.read(session_id)

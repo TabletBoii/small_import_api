@@ -1,102 +1,324 @@
-{% macro render_table(headers, rows, dropdown_rows={}, edit_url='', delete_url='', create_url='', modal_item_name='', modal_fields=[], entity_fields={}, item_keys=[], action_macro=None) %}
+{% macro render_table(
+  headers,
+  rows,
+  dropdown_rows={},
+  edit_url='',
+  delete_url='',
+  create_url='',
+  modal_item_name='',
+  modal_fields=[],
+  entity_fields={},
+  item_keys=[],
+  action_macro=None,
+  enable_filters=True,
+  columns=None,
+  column_filters={}
+) %}
 {% import 'macros/modal_window.html' as ui %}
-  {% if create_url == '' %}
+
+{% set table_id = "tbl_" ~ (modal_item_name|default("grid")) ~ "_" ~ (range(1, 999999)|random) %}
+{% set slicer_id = "slicer_" ~ (modal_item_name|default("grid")) ~ "_" ~ (range(1, 999999)|random) %}
+
+{# нормализуем columns #}
+{% if not columns %}
+  {% if rows and rows|length > 0 %}
+    {% set _keys = rows[0].keys() %}
+    {% set columns = [] %}
+    {% for k in _keys %}
+      {% set _ = columns.append({'key': k, 'label': headers[loop.index0] if headers and (loop.index0 < headers|length) else k }) %}
+    {% endfor %}
   {% else %}
-  <div style="display: block;">
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-    <button
-      class="btn-create"
-      onclick='openModal("createModal", "/admin/{{create_url}}/create")'
-    >
-      + Создать
-    </button>
-  </div>
-
+    {% set columns = [] %}
+    {% for h in headers %}
+      {% set _ = columns.append({'key': h, 'label': h}) %}
+    {% endfor %}
   {% endif %}
-    <div class="table-wrapper">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            {% for key in headers %}
-              <th>{{ key }}</th>
-            {% endfor %}
-            <th>Actions</th>
+{% endif %}
 
-          </tr>
-        </thead>
-        <tbody>
+<div style="display:block;">
 
-          {% if rows %}
-            {% set row_header = rows[0].keys()%}
-            {% for row in rows %}
-              <tr>
-                {% for key in row_header %}
-                  <td id="{{ key }}">{{ row[key] }}</td>
-                {% endfor %}
-                  {% if not action_macro %}
-                    {% set default_actions %}
-                        <a
-                          href="javascript:void(0);"
-                          onclick='openModal("editModal", "/admin/{{edit_url}}/edit/{{ row["inc"] }}", {{ row | tojson }})'
-                          type="button"
-                          class="btn"
-                        >
-                          ✏️
-                        </a>
-                        <a
-                          href="javascript:void(0);"
-                          onclick='openModal("deleteModal", "/admin/{{delete_url}}/delete/{{ row["inc"] }}", {{ row | tojson }}, {{ item_keys | tojson }})'
-                          type="button"
-                          class="btn"
-                        >
-                          🗑️
-                        </a>
-                    {% endset %}
-                    <td>{{ default_actions | safe }}</td>
-                  {% else %}
-                    <td>{{ action_macro(row) }}</td>
-                  {% endif %}
-              </tr>
+  {% if create_url %}
+    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+      <button class="btn-create" onclick='openModal("createModal", "/admin/{{create_url}}/create")'>+ Создать</button>
+    </div>
+  {% endif %}
+
+  {% if enable_filters %}
+  <div id="{{ slicer_id }}" class="slicers"
+       style="display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin-bottom:12px;">
+    {% for col in columns %}
+      {% set cfg = column_filters.get(col.key, {}) %}
+      {% set ftype = cfg.get('type', 'text') %}
+      <div class="slicer" data-key="{{ col.key }}" style="min-width:180px;">
+        <label style="display:block; font-size:12px; color:#666; margin-bottom:4px;">{{ col.label }}</label>
+
+        {% if ftype == 'text' %}
+          <input type="text" class="slicer-input" data-type="text" placeholder="Поиск…"
+                 style="width:100%; box-sizing:border-box;">
+
+        {% elif ftype == 'select' %}
+          <select class="slicer-input" data-type="select" style="width:100%;">
+            <option value="">— все —</option>
+            {% for opt in cfg.get('options', []) %}
+              <option value="{{ opt }}">{{ opt }}</option>
             {% endfor %}
-          {% else %}
-            <td colspan="{{headers | length}}">
-              Новых запросов еще не поступало
-            </td>
-          {% endif %}
-        </tbody>
-      </table>
+          </select>
+
+        {% elif ftype == 'multiselect' %}
+          <select multiple class="slicer-input" data-type="multiselect"
+                  style="width:100%; min-height:84px;">
+            {% for opt in cfg.get('options', []) %}
+              <option value="{{ opt }}">{{ opt }}</option>
+            {% endfor %}
+          </select>
+
+        {% elif ftype == 'range' %}
+          <div style="display:flex; gap:6px;">
+            <input type="number" class="slicer-input" data-type="range-min" placeholder="Мин" style="width:50%;">
+            <input type="number" class="slicer-input" data-type="range-max" placeholder="Макс" style="width:50%;">
+          </div>
+
+        {% elif ftype == 'boolean' %}
+          <select class="slicer-input" data-type="boolean" style="width:100%;">
+            <option value="">— все —</option>
+            <option value="1">Да</option>
+            <option value="0">Нет</option>
+          </select>
+
+        {% elif ftype == 'date' %}
+          <div style="display:flex; gap:6px;">
+            <input type="date" class="slicer-input" data-type="date-min" style="width:50%;">
+            <input type="date" class="slicer-input" data-type="date-max" style="width:50%;">
+          </div>
+
+        {% else %}
+          <input type="text" class="slicer-input" data-type="text" placeholder="Поиск…" style="width:100%;">
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <div style="display:flex; gap:8px; margin-left:auto;">
+      <button type="button" class="btn reject" data-clear-slicers>Сброс</button>
     </div>
   </div>
+  {% endif %}
 
-  {{
-    ui.modal_form(
-      modal_type="create_edit",
-      id="editModal",
-      fields=modal_fields,
-      dropdown_rows=dropdown_rows,
-      title="Изменить",
-      modal_item_name=modal_item_name
-    )
-  }}
-  {{
-    ui.modal_form(
-      modal_type="create_edit",
-      id="createModal",
-      fields=modal_fields,
-      entity_fields=entity_fields,
-      dropdown_rows=dropdown_rows,
-      title="Создать",
-      modal_item_name=modal_item_name
-    )
-  }}
+  <div class="table-wrapper">
+    <table class="admin-table" id="{{ table_id }}">
+      <thead>
+        <tr>
+          {% for col in columns %}
+            <th>{{ col.label }}</th>
+          {% endfor %}
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows %}
+          {% for row in rows %}
+            <tr>
+              {% for col in columns %}
+                {% set v = row[col.key] %}
+                <td data-key="{{ col.key }}" data-val="{{ v }}">{{ v }}</td>
+              {% endfor %}
+              {% if not action_macro %}
+                {% set default_actions %}
+                  <a href="javascript:void(0);"
+                     onclick='openModal("editModal", "/admin/{{edit_url}}/edit/{{ row["inc"] }}", {{ row | tojson }})'
+                     type="button" class="btn">✏️</a>
+                  <a href="javascript:void(0);"
+                     onclick='openModal("deleteModal", "/admin/{{delete_url}}/delete/{{ row["inc"] }}", {{ row | tojson }}, {{ item_keys | tojson }})'
+                     type="button" class="btn">🗑️</a>
+                {% endset %}
+                <td>{{ default_actions | safe }}</td>
+              {% else %}
+                <td>{{ action_macro(row) }}</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="{{ columns|length + 1 }}">Новых запросов еще не поступало</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
-  {{
-    ui.modal_form(
-      modal_type="delete",
-      id="deleteModal",
-      method="get",
-      title="Удалить",
-      modal_item_name=modal_item_name
-    )
-  }}
+{{ ui.modal_form(modal_type="create_edit", id="editModal",
+    fields=modal_fields, dropdown_rows=dropdown_rows, title="Изменить", modal_item_name=modal_item_name) }}
+
+{{ ui.modal_form(modal_type="create_edit", id="createModal",
+    fields=modal_fields, entity_fields=entity_fields, dropdown_rows=dropdown_rows,
+    title="Создать", modal_item_name=modal_item_name) }}
+
+{{ ui.modal_form(modal_type="delete", id="deleteModal",
+    method="get", title="Удалить", modal_item_name=modal_item_name) }}
+
+{% if enable_filters %}
+<script>
+(function(){
+  const table = document.getElementById('{{ table_id }}');
+  const slicers = document.getElementById('{{ slicer_id }}');
+  if (!table || !slicers) return;
+
+  const tbody = table.querySelector('tbody');
+  const clearBtn = slicers.querySelector('[data-clear-slicers]');
+
+  function norm(s){ return (s??'').toString().toLowerCase().trim(); }
+  function toNum(v){
+    const n = Number((v??'').toString().replace(',','.'));
+    return Number.isFinite(n) ? n : null;
+  }
+  function toDate(v){
+    if (!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function getSlicerValues(){
+    const values = {};
+    slicers.querySelectorAll('.slicer').forEach(block => {
+      const key = block.dataset.key;
+      const inputs = block.querySelectorAll('.slicer-input');
+      if (!key || !inputs.length) return;
+
+      const type = inputs[0].dataset.type;
+      if (type === 'text'){
+        values[key] = {type, q: norm(inputs[0].value)};
+      } else if (type === 'select'){
+        values[key] = {type, v: inputs[0].value};
+      } else if (type === 'multiselect'){
+        const sel = Array.from(inputs[0].selectedOptions).map(o => o.value);
+        values[key] = {type, arr: sel};
+      } else if (type === 'range-min' || type === 'range-max'){
+        const min = toNum(block.querySelector('[data-type="range-min"]')?.value);
+        const max = toNum(block.querySelector('[data-type="range-max"]')?.value);
+        values[key] = {type: 'range', min, max};
+      } else if (type === 'boolean'){
+        values[key] = {type, v: inputs[0].value};
+      } else if (type === 'date-min' || type === 'date-max'){
+        const dmin = toDate(block.querySelector('[data-type="date-min"]')?.value);
+        const dmax = toDate(block.querySelector('[data-type="date-max"]')?.value);
+        values[key] = {type:'date', min:dmin, max:dmax};
+      }
+    });
+    return values;
+  }
+
+  function passFilter(cellText, raw, f){
+    const txt = (cellText??'').toString();
+    if (!f) return true;
+
+    if (f.type === 'text'){
+      if (!f.q) return true; return norm(txt).includes(f.q);
+    }
+    if (f.type === 'select'){
+      if (!f.v) return true; return (txt === f.v);
+    }
+    if (f.type === 'multiselect'){
+      if (!f.arr || !f.arr.length) return true; return f.arr.includes(txt);
+    }
+    if (f.type === 'range'){
+      const n = toNum(txt);
+      if (n === null) return false;
+      if (f.min !== null && n < f.min) return false;
+      if (f.max !== null && n > f.max) return false;
+      return true;
+    }
+    if (f.type === 'boolean'){
+      if (!f.v) return true;
+      const v = norm(txt);
+      const asBool = (v === '1' || v === 'true' || v === 'да' || v === 'yes' || v === 'on');
+      return (f.v === '1') ? asBool : !asBool;
+    }
+    if (f.type === 'date'){
+      const d = toDate(txt);
+      if (!d) return false;
+      if (f.min && d < f.min) return false;
+      if (f.max && d > f.max) return false;
+      return true;
+    }
+    return true;
+  }
+
+  function apply(){
+    const filters = getSlicerValues();
+    Array.from(tbody.rows).forEach(tr => {
+      let ok = true;
+      for (const key in filters){
+        const f = filters[key];
+        const td = tr.querySelector('td[data-key="'+key+'"]');
+        const val = td ? td.textContent : '';
+        if (!passFilter(val, td?.dataset.val, f)){ ok = false; break; }
+      }
+      tr.style.display = ok ? '' : 'none';
+    });
+  }
+
+  function debounce(fn, delay){
+    let t; return function(){ clearTimeout(t); t = setTimeout(()=>fn.apply(this, arguments), delay); }
+  }
+  const applyDebounced = debounce(apply, 150);
+
+  function clearAll(){
+    slicers.querySelectorAll('.slicer-input').forEach(el => {
+      if (el.tagName === 'SELECT'){
+        if (el.multiple) Array.from(el.options).forEach(o => o.selected = false);
+        else el.value = '';
+      } else el.value = '';
+    });
+    Array.from(tbody.rows).forEach(tr => tr.style.display = '');
+  }
+
+  // auto-apply: text -> input (debounced), select/multiselect -> change, number/date -> input
+  slicers.querySelectorAll('.slicer').forEach(block => {
+    const inputs = block.querySelectorAll('.slicer-input');
+    inputs.forEach(inp => {
+      const type = inp.dataset.type;
+      if (type === 'text'){
+        inp.addEventListener('input', applyDebounced);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+      } else if (type === 'select' || type === 'multiselect' || type === 'boolean'){
+        inp.addEventListener('change', apply);
+      } else if (type === 'range-min' || type === 'range-max' || type === 'date-min' || type === 'date-max'){
+        inp.addEventListener('input', applyDebounced);
+        inp.addEventListener('change', apply);
+      }
+    });
+  });
+
+  clearBtn && clearBtn.addEventListener('click', clearAll);
+
+  // autogenerate options for select/multiselect if not provided
+  slicers.querySelectorAll('.slicer').forEach(block => {
+    const key = block.dataset.key;
+    const first = block.querySelector('.slicer-input');
+    if (!first) return;
+    const type = first.dataset.type;
+    if (type === 'select' || type === 'multiselect'){
+      const sel = first;
+      if (sel.options.length === 0 || (sel.options.length === 1 && !sel.multiple)){
+        const values = new Set();
+        Array.from(tbody.querySelectorAll('td[data-key="'+key+'"]')).forEach(td => {
+          const t = td.textContent.trim();
+          if (t) values.add(t);
+        });
+        if (!sel.multiple){
+          const optAll = document.createElement('option');
+          optAll.value = ''; optAll.textContent = '— все —';
+          sel.appendChild(optAll);
+        }
+        Array.from(values).sort().forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v; opt.textContent = v;
+          sel.appendChild(opt);
+        });
+      }
+    }
+  });
+})();
+</script>
+{% endif %}
 {% endmacro %}

@@ -18,7 +18,13 @@
             {'name': 'name', 'label': 'Username'},
             {'name': 'microsoft_email', 'label': 'Email', 'type': 'email'},
             {'name': 'microsoft_oid', 'label': 'Microsoft ID'},
-            {'name': 'description', 'label': 'Описание', 'element': 'textarea'}
-        ]
+            {'name': 'description', 'label': 'Описание', 'element': 'textarea'},
+            {'name': 'is_activated', 'label': 'Активирован(true, false, 1, 0, истина, ложь, да, нет)'},
+        ],
+        column_filters={
+            'name': {'type':'select'},
+            'is_activated': {'type':'boolean'},
+            'microsoft_email': {'type':'select'}
+        }
      ) }}
 {% endblock %}

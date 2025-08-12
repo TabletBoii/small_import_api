@@ -69,7 +69,12 @@ def generate_crud_router(
         data_to_update = dict(form)
         for key, value in data_to_update.items():
             if "is" in key or "has" in key:
-                data_to_update[key] = bool(int(value))
+                if value.lower() in ["true", "да", "истина"]:
+                    data_to_update[key] = True
+                elif value.lower() in ["false", "нет", "ложь"]:
+                    data_to_update[key] = False
+                else:
+                    data_to_update[key] = bool(int(value))
         async with WEB_SESSION_FACTORY() as session:
             await update_by_id(session, model, item_id, data_to_update)
         return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
@@ -90,7 +95,12 @@ def generate_crud_router(
         form = dict(await request.form())
         for key, value in form.items():
             if "is" in key or "has" in key:
-                form[key] = bool(value)
+                if value.lower() in ["true", "да", "истина"]:
+                    form[key] = True
+                elif value.lower() in ["false", "нет", "ложь"]:
+                    form[key] = False
+                else:
+                    form[key] = bool(int(value))
         data_to_create = model(**form)
         async with WEB_SESSION_FACTORY() as session:
             await create(session, data_to_create)
