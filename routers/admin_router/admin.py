@@ -41,13 +41,13 @@ pbi_resource_router = generate_crud_router(
     table_headers=["ID", "ID рабочей области", "ID отчета", "Ресурс"],
     model_name="pbi_resource",
     model_header_names=[
-        "id",
+        "inc",
         "workspace_id",
         "report_id",
         "resource_id"
     ],
     get_custom_query=select(
-        WebPbiReportDataModel.id,
+        WebPbiReportDataModel.id.label("inc"),
         WebPbiReportDataModel.workspace_id,
         WebPbiReportDataModel.report_id,
         WebResourceModel.name_cirill.label("resource_id")

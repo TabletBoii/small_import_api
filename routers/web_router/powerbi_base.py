@@ -15,8 +15,6 @@ from sub_app.msal_app import msal_app
 from utils.msal_token_provider import PBITokenProvider
 from utils.utils import require_user
 
-WORKSPACE_ID = os.getenv("PBI_WORKSPACE_ID")
-REPORT_ID = os.getenv("PBI_REPORT_ID")
 
 pbi_token_provider = PBITokenProvider(
     app=msal_app,

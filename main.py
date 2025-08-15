@@ -17,7 +17,7 @@ from routers.api_router import api_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE, WEB_SESSION_FACTORY
+from database.sessions import KOMPAS_ENGINE, PLAN_ENGINE, WEB_SESSION_FACTORY, WEB_ENGINE
 from sub_app.admin_app import admin_app
 from sub_app.web_app import web_app
 from utils.user_session_store import UserSessionStore
@@ -50,20 +50,23 @@ app.mount("/web", web_app)
 app.include_router(api_router)
 
 
+# При выключении сервера закрываются все подключения к базам данных
 @app.on_event("shutdown")
 async def shutdown_event():
     print("Application closes")
     await KOMPAS_ENGINE.dispose()
     await PLAN_ENGINE.dispose()
+    await WEB_ENGINE.dispose()
 
 
+# При запуске сервера все запущенные до выключения загрузки будут аннулированы
 @app.on_event("startup")
 async def mark_interrupted_downloads():
-    async with WEB_SESSION_FACTORY() as session:  # AsyncSession
+    async with WEB_SESSION_FACTORY() as session:
         # обновляем все, у которых in_process=True
         await session.execute(
             update(WebDownloadListModel)
-            .where(WebDownloadListModel.in_process == True)
+            .where(WebDownloadListModel.in_process is True)
             .values(
                 in_process=False,
                 has_error=True,
