@@ -76,9 +76,6 @@ body {
   border-top: 1px solid #ddd;
 }
 
-
-
-
 .main {
   flex: 1;
   display: flex;
@@ -314,6 +311,11 @@ table th {
 .btn-create:active {
     transform: translateY(0px);
     background-color: #3e8e41;
+}
+
+.btn-inactive {
+    pointer-events: none;
+    background: gray !important;
 }
 
 @media (max-width: 768px) {

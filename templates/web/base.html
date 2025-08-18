@@ -50,6 +50,46 @@
       </ul>
     </nav>
   </header>
+  {% block page_notice %}{% endblock %}
+
+  <style>
+    .floating-note{
+      position: fixed; top: 12px; right: 12px; z-index: 2000;
+      display: flex; align-items: flex-start; gap: 10px;
+      max-width: min(560px, 92vw);
+      padding: 10px 12px; border-radius: 10px;
+      background: #f5faff; color: #0b4b76; border: 1px solid #cfe8ff;
+      box-shadow: 0 10px 20px rgba(0,0,0,.06);
+      transition: transform .25s ease;
+      transform: translateX(0);
+      cursor: default;
+    }
+    .floating-note .icon{ font-size: 18px; line-height: 1; margin-top: 2px; }
+    .floating-note .text{ line-height: 1.35; }
+    .floating-note.collapsed{ transform: translateX(calc(100% - 28px)); }
+    .floating-note:hover{ transform: translateX(0); }
+    .floating-note:focus-within{ transform: translateX(0); }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const notes = document.querySelectorAll('.js-page-note');
+      if (!notes.length) return;
+
+      notes.forEach((note) => {
+        const delay = parseInt(note.dataset.delay || '3000', 10);
+        let timer = setTimeout(() => note.classList.add('collapsed'), delay);
+
+        note.addEventListener('mouseenter', () => {
+          clearTimeout(timer);
+          note.classList.remove('collapsed');
+        });
+        note.addEventListener('mouseleave', () => {
+          timer = setTimeout(() => note.classList.add('collapsed'), 1500);
+        });
+      });
+    });
+  </script>
 
 
   <main class="container">
@@ -58,6 +98,28 @@
       <script src="{{ url_for('static', path='js/table.js') }}"></script>
     {% endblock %}
   </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      const map = [['ok','success'], ['err','error'], ['warn','warning'], ['info','info']];
+      let changed = false;
+
+      for (const [key, type] of map) {
+        const values = params.getAll(key);   // поддерживает ?ok=...&ok=...
+        if (values.length) {
+          values.forEach(v => showToast(v, type));
+          params.delete(key);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        const q = params.toString();
+        const newUrl = `${location.pathname}${q ? '?' + q : ''}${location.hash}`;
+        history.replaceState({}, '', newUrl);
+      }
+    });
+  </script>
 
 </body>
 </html>

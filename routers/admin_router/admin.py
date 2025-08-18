@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, FastAPI
-from sqlalchemy import text, select, func
+from sqlalchemy import text, select, func, and_
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
@@ -58,7 +58,16 @@ pbi_resource_router = generate_crud_router(
     dropdown_field_dict={
         "resource_id": [
             WebResourceModel,
-            select(WebResourceModel.inc, WebResourceModel.name_cirill.label("name"))
+            (
+                select(WebResourceModel.inc, WebResourceModel.name_cirill.label("name"))
+                .outerjoin(
+                    WebPbiReportDataModel,
+                    and_(
+                        WebPbiReportDataModel.resource_id == WebResourceModel.inc
+                    )
+                )
+                .where(WebPbiReportDataModel.resource_id.is_(None)).where(WebResourceModel.type == 3)
+            )
         ]
     },
 )

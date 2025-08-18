@@ -4,6 +4,8 @@
     <span class="close" onclick="closeModal('{{ id }}')">&times;</span>
     <h2>{{ title }}</h2>
     <form id="{{ id }}-form" action="{{ action_url }}" method="{{ method }}" onsubmit="prepareCheckboxValue()">
+      {% set ns = namespace(disable=false) %}
+
       {% if modal_type == "create_edit" %}
         <div style="max-height: 500px; overflow-y: auto;">
           {% for field in fields %}
@@ -13,12 +15,24 @@
                 name="{{ field.name }}"
                 id="{{ id }}-{{ field.name }}"
               ></textarea>
-            {% elif dropdown_rows and dropdown_rows[field.name] %}
-              <select name="{{ field.name }}" id="{{ field.id }}">
-                {% for id, name in dropdown_rows[field.name].items() %}
-                  <option value="{{ id }}" {% if name == dropdown_rows[field.name][id] %}selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-              </select>
+
+            {% elif field.name in dropdown_rows %}
+              {% if dropdown_rows[field.name].keys() | length > 0 %}
+                <select name="{{ field.name }}" id="{{ field.id }}">
+                  {% for id, name in dropdown_rows[field.name].items() %}
+                    <option value="{{ id }}" {% if name == dropdown_rows[field.name][id] %}selected{% endif %}>{{ name }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <input
+                  type="{{ 'text' }}"
+                  name="{{ field.name }}"
+                  id="{{ id }}-{{ field.name }}"
+                  value="{{ field.value or '' }}"
+                  readonly
+                />
+                {% set ns.disable = true %}
+              {% endif %}
             {% else %}
               {% if field.type == 'checkbox' %}
                   <input
@@ -38,7 +52,16 @@
             {% endif %}
           {% endfor %}
         </div>
-        <button type="submit">Apply</button>
+        {% if ns.disable and 'edit' not in id.lower() %}
+          <div>
+            Недостаточно данных для сохранения
+          </div>
+          <button type="submit" class="btn-inactive" disabled aria-disabled="true" title="Нет доступных значений в выпадающем списке">
+            Apply
+          </button>
+        {% else %}
+          <button type="submit">Apply</button>
+        {% endif %}
       {% elif modal_type == "delete" %}
         <div>
           {{modal_item_name}} <span id="{{ id }}-item"></span> будет удален. Уверены?

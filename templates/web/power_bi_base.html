@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Embedded PowerBI Report{% endblock %}
 {% block content %}
+  {% block page_notice %}
+    <div class="floating-note js-page-note" role="note" aria-live="polite" tabindex="-1">
+      <span class="icon" aria-hidden="true">ℹ️</span>
+      <span class="text">
+        Отчёты работают в промежутке с <b>09:00–20:00</b> по Казахстанскому времени
+        <small>(Asia/Almaty, UTC+5)</small>.
+      </span>
+    </div>
+  {% endblock %}
   <div id="reportContainer" style="height:90vh"></div>
+
 {% endblock %}
 {% block scripts %}
   <script>
@@ -25,4 +35,5 @@
     }
     loadReport().catch(console.error);
   </script>
+
 {% endblock %}

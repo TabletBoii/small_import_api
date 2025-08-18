@@ -118,6 +118,10 @@ async def report_dmc_form(
         countryFilter_input,
         partnerFilter_input
     )
+    print(date_from_p1)
+    print(date_till_p1)
+    print(date_from_p2)
+    print(date_till_p2)
     print(countryFilter_input)
     print(partnerFilter_input)
     if not validation_result[0]:

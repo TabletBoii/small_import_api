@@ -5,6 +5,7 @@
   --header-text: #fff;
   --text:    #000;
   --white: #fff;
+  --gray: #D8D8D8;
 }
 
 a {
@@ -140,6 +141,15 @@ section {
   border-radius:8px;
   padding:1.25rem;
   box-shadow:0 2px 4px rgba(0,0,0,.05);
+}
+
+.item-card:hover {
+    background: var(--gray);
+}
+
+.item-card:active {
+    background: #f5fbff;
+    border: 1px solid gray;
 }
 
 .item-card h2{

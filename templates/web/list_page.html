@@ -9,16 +9,15 @@
 
     {% if shown %}
       {% for resource_name, allowed, label, desc in shown %}
-        <article class="item-card">
-          <h2>
-            {% if route_name %}
-              <a href="{{ url_for(route_name, route_param=resource_name) }}">{{ label }}</a>
-            {% else %}
-              <a href="{{ url_for(resource_name) }}">{{ label }}</a>
-            {% endif %}
-          </h2>
-          <p>{{ desc }}</p>
-        </article>
+        {% set href = url_for(route_name, route_param=resource_name) if route_name
+                    else url_for(resource_name) %}
+
+        <a href="{{ href }}" class="item-card-link">
+          <article class="item-card">
+            <h2>{{ label }}</h2>
+            <p>{{ desc }}</p>
+          </article>
+        </a>
       {% endfor %}
     {% else %}
       <div class="empty‑state">

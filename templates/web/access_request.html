@@ -1,132 +1,349 @@
 {% extends "base.html" %}
-{% block title %}Мои загрузки{% endblock %}
+{% block title %}Запрос доступа{% endblock %}
 {% import 'macros/modal_window.html' as ui %}
 {% import 'macros/table.html' as table_ui %}
 
+{% set rq = request if request is defined else none %}
+{% set q = (rq.query_params.get('q') if rq else (q | default(''))) %}
+{% set q_lower = (q | default('') | lower) %}
+{% set open_all = ((rq.query_params.get('open') == 'all') if rq else (open_all | default(false))) %}
+
 {% block content %}
-    <h2 style="margin: 15px 0px 15px 10px;">
-        Выберите ресурс для запроса доступа
-    </h2>
-    <hr/>
-    <div class="centered-page">
-        <div class="reduced-content">
-            <div>
-                <h3 style="margin-top: 10px;">Ваши запросы</h3>
-                {{ table_ui.render_table(
-                   "users_access_requests",
-                   users_access_requests,
-                   headers,
-                   informational_table=True,
-                   else_msg='Доступы не были запрошены',
-                   has_actions=False
-                 ) }}
+<main class="page">
+  <input type="checkbox" id="requestsToggle" class="drawer-toggle" hidden>
+  <div class="page-head">
+    <h2>Выберите ресурс для запроса доступа</h2>
+
+
+    <form method="get" class="head-tools" role="search" aria-label="Поиск по ресурсам">
+        <span class="qmark" tabindex="0" data-tip="Для работы фильтра разверните все вкладки и нажмите Enter">?</span>
+      <div class="input-with-icon">
+        <span class="icon" aria-hidden="true">🔎</span>
+        <input name="q" class="input" type="search" value="{{ q }}" placeholder="Поиск по названию, типу или описанию">
+      </div>
+      <div class="split">
+        <button class="btn" name="open" value="all" type="submit">Развернуть всё</button>
+        <button class="btn ghost" name="open" value="close" type="submit">Свернуть всё</button>
+      </div>
+    </form>
+<label for="requestsToggle" class="btn ghost">Ваши запросы</label>
+
+  </div>
+
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="req-title" tabindex="-1">
+    <div class="drawer-head">
+      <h3 id="req-title">Ваши запросы</h3>
+      <label for="requestsToggle" class="btn ghost close-drawer" aria-label="Закрыть">✕</label>
+    </div>
+    <div class="drawer-body">
+      {{ table_ui.render_table(
+         "users_access_requests",
+         users_access_requests,
+         headers,
+         informational_table=True,
+         else_msg='Доступы не были запрошены',
+         has_actions=False
+       ) }}
+    </div>
+  </aside>
+  <label for="requestsToggle" class="backdrop" aria-hidden="true"></label>
+
+
+  {% for resource_type, resource in resource_dict.items() %}
+
+
+    {% set ns = namespace(count=0) %}
+    {% for field in resource %}
+      {% set hay = ((field.name or '') ~ ' ' ~ (field.name_cirill or '') ~ ' ' ~ (field.type or '') ~ ' ' ~ (field.description or '')) | lower %}
+      {% if not q or (q_lower in hay) %}
+        {% set ns.count = ns.count + 1 %}
+      {% endif %}
+    {% endfor %}
+
+    <details class="accordion" {% if open_all %}open{% endif %}>
+      <summary class="accordion-summary">
+        <span class="chevron" aria-hidden="true"></span>
+        <span class="label">{{ resource_type }}</span>
+        <span class="chip">{{ ns.count }}</span>
+      </summary>
+
+      <div class="panel" role="region" aria-label="{{ resource_type }}">
+        <div class="table-wrapper">
+          <div class="table-row table-header">
+            <div class="col col-name">Название</div>
+            <div class="col col-info">Тип</div>
+            <div class="col col-name">Название (кирилл.)</div>
+            <div class="col col-info">Описание</div>
+            <div class="col col-action">Действие</div>
+          </div>
+
+          {% if ns.count == 0 %}
+            <div class="empty-state">
+              <div class="empty-illustration">🔍</div>
+              <div class="empty-text">По вашему запросу ничего не найдено</div>
             </div>
-            {% for resource_type, resource in resource_dict.items() %}
-                <div class="collapsible">
-                  <div class="collapsible-header" data-target="main-container-{{resource_type}}">
-                    <span class="arrow">▶</span> {{ resource_type }}
+          {% else %}
+            {% for field in resource %}
+              {% set hay = ((field.name or '') ~ ' ' ~ (field.name_cirill or '') ~ ' ' ~ (field.type or '') ~ ' ' ~ (field.description or '')) | lower %}
+              {% if not q or (q_lower in hay) %}
+                <div class="table-row" id="{{ field.inc }}">
+                  <div class="col col-name" title="{{ field.name }}">
+                    <span class="mono">{{ field.name }}</span>
                   </div>
-                  <div id="main-container-{{resource_type}}" class="collapsible-content checkbox-list">
-                    <div class="table-row table-header">
-                      <div class="col col-name">Название</div>
-                      <div class="col col-info">Тип</div>
-                      <div class="col col-name">Название(кир.)</div>
-                      <div class="col col-name">Описание</div>
-                      <div class="col col-action">Действие</div>
-                    </div>
-                    {% for field in resource %}
-                        <div class="table-row" id="{{ field.inc }}">
-                            <span class="col col-name">{{ field.name }}</span>
-                            <span class="col col-info">{{ field.type }}</span>
-                            <span class="col col-info">{{ field.name_cirill }}</span>
-                            <span class="col col-info">{{ field.description }}</span>
-                            <div class="col col-action">
-                              {% if field.has_access %}
-                                У вас есть доступ
-                              {% else %}
-                                <button
-                                  class="request-btn"
-                                  id="make-request-{{ field.inc }}"
-                                  onclick='openModal("requestModal", "/web/access_request/{{field.inc}}", {{field | tojson}})'
-                                >
-                                  Запросить
-                                </button>
-                              {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
+                  <div class="col col-info">{{ field.type }}</div>
+                  <div class="col col-name">{{ field.name_cirill }}</div>
+                  <div class="col col-info ellipsis" title="{{ field.description }}">{{ field.description }}</div>
+                  <div class="col col-action">
+                    {% if field.has_access %}
+                      <span class="badge badge-success" title="У вас есть доступ">Доступ есть</span>
+                    {% elif field.requested %}
+                      <span class="badge badge-warning" title="Запрос в обработке">В обработке</span>
+                    {% else %}
+                      <button
+                        class="btn request-btn"
+                        id="make-request-{{ field.inc }}"
+                        onclick='openModal("requestModal", "/web/access_request/{{field.inc}}", {{field | tojson}})'>
+                        Запросить
+                      </button>
+                    {% endif %}
                   </div>
                 </div>
+              {% endif %}
             {% endfor %}
-
-            {{
-                ui.modal_form(
-                  modal_type="create_edit",
-                  id="requestModal",
-                  fields=[
-                    {'name': 'name_cirill', 'label': 'Название', 'element': 'div'},
-                    {'name': 'request_description', 'label': 'Опишите, зачем вам нужен доступ', 'element': 'textarea'}
-                  ],
-                  title="Запрос на предоставление доступа",
-                  modal_item_name=modal_item_name
-                )
-            }}
+          {% endif %}
         </div>
-    </div>
+      </div>
+    </details>
+  {% endfor %}
 
+  {{
+    ui.modal_form(
+      modal_type="create_edit",
+      id="requestModal",
+      fields=[
+        {'name': 'name_cirill', 'label': 'Название', 'element': 'div'},
+        {'name': 'request_description', 'label': 'Опишите, зачем вам нужен доступ', 'element': 'textarea'}
+      ],
+      title="Запрос на предоставление доступа",
+      modal_item_name=modal_item_name
+    )
+  }}
+</main>
 
 <style>
-    .table-row {
-      display: flex;
-      align-items: center;
-      padding: 8px 12px;
-      border-bottom: 1px solid #ddd;
+    :root{
+      --ui-bg:#f7f8fa; --ui-card:#fff; --ui-border:#e5e7eb; --ui-text:#111827; --ui-muted:#6b7280;
+      --ui-accent:#1abc9c; --ui-accent-2:#0ea5e9; --ui-success:#197d0a; --ui-warn:#b45309;
+      --radius:10px; --shadow:0 10px 20px rgba(0,0,0,.05), 0 2px 6px rgba(0,0,0,.04);
     }
 
-    .table-header {
-      background-color: #ff9933;
-      font-weight: bold;
+    .table-wrapper {
+        width: 98.6%;
     }
 
-    .col {
-      padding: 4px 8px;
+    .qmark{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:18px; height:18px; border-radius:50%;
+      border:1.5px solid var(--ui-accent-2); color:var(--ui-accent-2); background:#fff;
+      font:700 12px/1 system-ui, Segoe UI, Roboto, Arial; cursor:help; position:relative; user-select:none;
+    }
+    .qmark:focus-visible{
+      outline:2px solid var(--ui-accent-2); outline-offset:2px;
+    }
+    .qmark::after{
+      content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 8px);
+      transform:translate(-50%,-6px);
+      background:#111827; color:#fff; padding:8px 10px; border-radius:8px;
+      box-shadow:0 10px 20px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.08);
+      opacity:0; visibility:hidden; transition:opacity .15s ease, transform .15s ease; z-index:1100;
+      white-space:normal; max-width:320px; min-width:150px;
+    }
+    .qmark::before{
+      content:""; position:absolute; left:50%; bottom:calc(100% + 2px); transform:translateX(-50%);
+      border:6px solid transparent; border-top-color:#111827; opacity:0; visibility:hidden; transition:opacity .15s ease;
+    }
+    .qmark:hover::after, .qmark:focus-visible::after, .qmark:hover::before, .qmark:focus-visible::before{
+      opacity:1; visibility:visible; transform:translate(-50%,0);
+    }
+    .qmark[data-pos="right"]::after{
+      left:calc(100% + 10px); bottom:auto; top:50%; transform:translate(0,-50%);
+    }
+    .qmark[data-pos="right"]::before{
+      left:calc(100% + 2px); bottom:auto; top:50%; transform:translateY(-50%);
+      border:6px solid transparent; border-left-color:#111827;
+    }
+    .qmark[data-pos="left"]::after{
+      left:auto; right:calc(100% + 10px); bottom:auto; top:50%; transform:translate(0,-50%);
+    }
+    .qmark[data-pos="left"]::before{
+      left:auto; right:calc(100% + 2px); bottom:auto; top:50%; transform:translateY(-50%);
+      border:6px solid transparent; border-right-color:#111827;
+    }
+    .qmark[data-pos="bottom"]::after{
+      top:calc(100% + 8px); bottom:auto; left:50%; transform:translate(-50%,6px);
+    }
+    .qmark[data-pos="bottom"]::before{
+      top:calc(100% + 2px); bottom:auto; left:50%; transform:translateX(-50%);
+      border:6px solid transparent; border-bottom-color:#111827;
     }
 
-    .col-name {
-      flex: 2; /* шире для названия */
+    .page{
+      padding:10px 16px 28px;
+    }
+    .page-head{
+      display:flex; align-items:end; gap:12px; justify-content:space-between; flex-wrap:wrap; margin:6px 0 14px;
+    }
+    .page-head header{
+      background:#fff;
+    }
+    .page-head h2{
+      margin:0; color:var(--ui-text); padding-bottom:10px;
+    }
+    .head-tools{
+      display:flex; gap:10px; align-items:center; right:0;
+    }
+    .input-with-icon{
+      position:relative; display:flex; align-items:center; background:var(--ui-card);
+      border:1px solid var(--ui-border); border-radius:var(--radius); box-shadow:var(--shadow);
+    }
+    .input-with-icon .icon{
+      padding-left:10px; color:var(--ui-muted);
+    }
+    .input-with-icon .input{
+      border:0; outline:0; padding:10px 12px; width:320px; background:transparent;
+    }
+    .split{
+      display:flex; gap:8px;
+    }
+    .btn{
+      background:var(--ui-accent); color:#fff; border:1px solid var(--ui-accent); border-radius:8px;
+      padding:8px 12px; font:500 14px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      cursor:pointer; transition:.18s ease;
+    }
+    .btn:hover{
+      filter:brightness(0.95); transform:translateY(-1px);
+    }
+    .btn:active{
+      transform:translateY(0);
+    }
+    .btn.ghost{
+      background:#fff; color:var(--ui-text); border-color:var(--ui-border);
+    }
+    .btn.ghost:hover{
+      background:#f3f4f6;
     }
 
-    .col-info {
-      flex: 3; /* место для описания */
+    .access-card{
+      display:block; background:var(--ui-card); border:1px solid var(--ui-border);
+      border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:16px;
+    }
+    .card-head{
+      display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--ui-border);
+    }
+    .card-body{
+      padding:12px 14px;
     }
 
-    .col-action {
-      flex: 1;
-      text-align: right;
+    details.accordion{
+      background:var(--ui-card); border:1px solid var(--ui-border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:12px;
+    }
+    summary.accordion-summary{
+      list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:center; gap:10px;
+    }
+    summary.accordion-summary::-webkit-details-marker{
+      display:none;
+    }
+    .chevron{
+      --s:10px; width:0; height:0; border-left:var(--s) solid var(--ui-muted); border-top:var(--s) solid transparent; border-bottom:var(--s) solid transparent;
+      transform:rotate(0); transition:.2s ease;
+    }
+    details[open] .chevron{
+      transform:rotate(90deg); border-left-color:var(--ui-accent-2);
+    }
+    .label{
+      font-weight:600; color:var(--ui-text);
+    }
+    .chip{
+      margin-left:auto; background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; padding:2px 8px; font-size:12px; border-radius:999px;
     }
 
-    .request-btn {
-      background-color: #4CAF50;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      font-size: 0.9em;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.3s;
+    .panel{
+      padding:6px 0 10px;
+    }
+    .table-wrapper{
+      padding:0 12px 12px; max-height:520px; overflow:auto;
+    }
+    .table-row{
+      display:grid; grid-template-columns:2fr 1fr 2fr 3fr 1fr; gap:8px; padding:10px 8px; align-items:center; border-bottom:1px solid var(--ui-border);
+    }
+    .table-header{
+      position:sticky; top:0; background:#f3f4f6; z-index:1; font-weight:600; color:var(--ui-text);
+    }
+    .col{
+      min-width:0;
+    }
+    .ellipsis{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .mono{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     }
 
-    .request-btn:hover {
-      background-color: #45a049;
+    .badge{
+      display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid transparent; white-space:nowrap;
+    }
+    .badge-success{
+      background:#e8f7ec; color:#197d0a; border-color:#bfe7c7;
+    }
+    .badge-warning{
+      background:#fff6e6; color:#925d12; border-color:#f3d19c;
+    }
+
+    .empty-state{
+      display:flex; gap:8px; align-items:center; justify-content:center; color:var(--ui-muted);
+      border-top:1px dashed var(--ui-border); padding:16px;
+    }
+    .empty-illustration{
+      font-size:20px;
+    }
+
+    .drawer{
+      position:fixed; top:0; right:0; height:100vh; width:min(860px, 92vw);
+      background:var(--ui-card); border-left:1px solid var(--ui-border); box-shadow:-8px 0 24px rgba(0,0,0,.06);
+      transform:translateX(100%); transition:transform .25s ease; z-index:1001; display:flex; flex-direction:column;
+    }
+    .drawer-head{
+      display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid var(--ui-border);
+    }
+    .drawer-body{
+      padding:12px 14px; overflow:auto; height:100%;
+    }
+    .backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.35); opacity:0; visibility:hidden; transition:.2s ease; z-index:1000;
+    }
+    .drawer-toggle:checked ~ .drawer{
+      transform:translateX(0);
+    }
+    .drawer-toggle:checked ~ .backdrop{
+      opacity:1; visibility:visible;
+    }
+    .close-drawer{
+      min-width:auto; padding:6px 10px;
+    }
+
+    @media (max-width:900px){
+      .table-row{ grid-template-columns:1.2fr .8fr 1.2fr 2fr .8fr; }
+      .input-with-icon .input{ width:240px; }
+    }
+    @media (max-width:640px){
+      .page{ padding:8px; }
+      .head-tools{ width:100%; justify-content:space-between; }
+      .input-with-icon{ flex:1; }
+      .split{ display:none; }
+      .table-row{ grid-template-columns:1fr 1fr; grid-auto-rows:auto; }
+      .table-header{ display:none; }
+      .col-action{ grid-column:1 / -1; text-align:right; }
+      .drawer{ width:100%; }
     }
 </style>
-<script>
-    document.querySelectorAll('.collapsible-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const target = document.getElementById(header.dataset.target);
-        target.classList.toggle('show');
-        header.classList.toggle('open');
-      });
-    });
-</script>
 {% endblock %}

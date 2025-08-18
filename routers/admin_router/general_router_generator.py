@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Request, Depends, Form
 from sqlalchemy import TextClause
 from starlette.responses import RedirectResponse
@@ -65,46 +67,62 @@ def generate_crud_router(
             request: Request,
             item_id: int
     ):
-        form = await request.form()
-        data_to_update = dict(form)
-        for key, value in data_to_update.items():
-            if "is" in key or "has" in key:
-                if value.lower() in ["true", "да", "истина"]:
-                    data_to_update[key] = True
-                elif value.lower() in ["false", "нет", "ложь"]:
-                    data_to_update[key] = False
-                else:
-                    data_to_update[key] = bool(int(value))
-        async with WEB_SESSION_FACTORY() as session:
-            await update_by_id(session, model, item_id, data_to_update)
-        return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+        try:
+            form = await request.form()
+            data_to_update = dict(form)
+            for key, value in data_to_update.items():
+                if "is" in key or "has" in key:
+                    if value.lower() in ["true", "да", "истина"]:
+                        data_to_update[key] = True
+                    elif value.lower() in ["false", "нет", "ложь"]:
+                        data_to_update[key] = False
+                    else:
+                        data_to_update[key] = bool(int(value))
+            async with WEB_SESSION_FACTORY() as session:
+                await update_by_id(session, model, item_id, data_to_update)
+            ok = urlencode({"ok": "Изменено"})
+            return RedirectResponse(url=f"/admin{url_prefix}?{ok}", status_code=302)
+        except Exception as e:
+            print(e)
+            err = urlencode({"err": "Не удалось сохранить изменения."})
+            return RedirectResponse(url=f"/admin{url_prefix}?{err}", status_code=303)
 
     @router.get("/delete/{item_id}")
     async def delete_item(
             request: Request,
             item_id: int
     ):
-        async with WEB_SESSION_FACTORY() as session:
-            await delete_by_id(session, model, item_id)
-        return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+        try:
+            async with WEB_SESSION_FACTORY() as session:
+                await delete_by_id(session, model, item_id)
+            return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+        except Exception as e:
+            print(e)
+            err = urlencode({"err": "Неизвестная ошибка"})
+            return RedirectResponse(url=f"/admin{url_prefix}?{err}", status_code=303)
 
     @router.post("/create")
     async def create_item(
             request: Request
     ):
-        form = dict(await request.form())
-        for key, value in form.items():
-            if "is" in key or "has" in key:
-                if value.lower() in ["true", "да", "истина"]:
-                    form[key] = True
-                elif value.lower() in ["false", "нет", "ложь"]:
-                    form[key] = False
-                else:
-                    form[key] = bool(int(value))
-        data_to_create = model(**form)
-        async with WEB_SESSION_FACTORY() as session:
-            await create(session, data_to_create)
-        return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+        try:
+            form = dict(await request.form())
+            for key, value in form.items():
+                if "is" in key or "has" in key:
+                    if value.lower() in ["true", "да", "истина"]:
+                        form[key] = True
+                    elif value.lower() in ["false", "нет", "ложь"]:
+                        form[key] = False
+                    else:
+                        form[key] = bool(int(value))
+            data_to_create = model(**form)
+            async with WEB_SESSION_FACTORY() as session:
+                await create(session, data_to_create)
+            return RedirectResponse(url=f"/admin{url_prefix}", status_code=302)
+        except Exception as e:
+            print(e)
+            err = urlencode({"err": "Неизвестная ошибка"})
+            return RedirectResponse(url=f"/admin{url_prefix}?{err}", status_code=303)
 
     return router
 

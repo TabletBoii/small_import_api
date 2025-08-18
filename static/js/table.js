@@ -155,12 +155,6 @@ function initFilterMenu(table, colIdx, menu) {
   const separator1 = document.createElement('hr');
   const separator2 = document.createElement('hr');
 
-  const search = document.createElement('input');
-  search.type = 'text';
-  search.placeholder = 'Поиск…';
-  search.style.width = '100%';
-  search.style.margin = '0.5rem 0';
-
   const allDiv = document.createElement('div');
   allDiv.style.padding = '3px';
 
@@ -173,6 +167,13 @@ function initFilterMenu(table, colIdx, menu) {
   allLbl.htmlFor = allCb.id;
   allLbl.textContent = 'Выбрать все';
   allDiv.append(allCb, ' ', allLbl);
+
+  const search = document.createElement('input');
+  search.type = 'text';
+  search.placeholder = 'Поиск…';
+  search.style.width = '100%';
+  search.style.margin = '0.5rem 0';
+
 
   const sortAsc = document.createElement('div');
   const sortDesc = document.createElement('div');
@@ -188,7 +189,7 @@ function initFilterMenu(table, colIdx, menu) {
   sortDesc.classList.add('filter-table-sort-btn')
 
 
-  menu.append(separator, sortAsc, sortDesc, separator1, search, separator, allDiv, separator2);
+  menu.append(separator, sortAsc, sortDesc, separator1, allDiv, separator, search, separator2);
 
   sortAsc.addEventListener('click', () => sortTable(table, colIdx, 'asc'));
   sortDesc.addEventListener('click', () => sortTable(table, colIdx, 'desc'));
@@ -219,7 +220,7 @@ function initFilterMenu(table, colIdx, menu) {
     menu.querySelectorAll('div').forEach(div => {
       const label = div.querySelector('label');
       if (!label) return;
-      div.style.display = label.textContent.toLowerCase().includes(term) ? '' : 'none';
+      div.style.display = label.textContent.toLowerCase().includes(term) || label.textContent.toLowerCase() === 'выбрать все' ? '' : 'none';
     });
   });
 

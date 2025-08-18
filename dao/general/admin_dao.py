@@ -28,6 +28,9 @@ async def delete_by_id(session: AsyncSession, model: Type, item_id: int):
 
 
 async def update_by_id(session: AsyncSession, model: Type, item_id: int, data: dict):
+    for key, value in data.items():
+        if value == '':
+            data[key] = None
     if 'inc' in model.__table__.columns:
         stmt = update(model).where(model.inc == item_id).values(**data)
     else:

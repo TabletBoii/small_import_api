@@ -120,6 +120,7 @@ async def directory_direction_form(
         to_insert = new_records
 
         to_update = []
+
         for d in payload:
             if d.inc != 0:
                 existing = existing_by_inc.get(d.inc)
@@ -128,11 +129,13 @@ async def directory_direction_form(
                 elif key_of(d) != key_of(existing):
                     to_update.append(d)
 
+        print(to_update)
+
         if len(to_delete) != 0:
             await delete_by_inc(session=session, inc_list_to_delete=to_delete)
 
         if len(to_update) != 0:
-            await update_by_inc(session=session, inc_list_to_update=to_insert)
+            await update_by_inc(session=session, inc_list_to_update=to_update)
 
         if len(to_insert) != 0:
             await create(session=session, list_to_create=to_insert)

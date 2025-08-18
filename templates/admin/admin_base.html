@@ -48,6 +48,7 @@
             {% block admin_content %}{% endblock %}
           </div>
           <script>
+
             const toggleBtn = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             toggleBtn.addEventListener('click', () => {
@@ -75,5 +76,27 @@
           </script>
         </div>
       </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const params = new URLSearchParams(location.search);
+          const map = [['ok','success'], ['err','error'], ['warn','warning'], ['info','info']];
+          let changed = false;
+
+          for (const [key, type] of map) {
+            const values = params.getAll(key);   // поддерживает ?ok=...&ok=...
+            if (values.length) {
+              values.forEach(v => showToast(v, type));
+              params.delete(key);
+              changed = true;
+            }
+          }
+
+          if (changed) {
+            const q = params.toString();
+            const newUrl = `${location.pathname}${q ? '?' + q : ''}${location.hash}`;
+            history.replaceState({}, '', newUrl);
+          }
+        });
+      </script>
     </body>
 </html>

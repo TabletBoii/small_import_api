@@ -3,6 +3,8 @@
 {% block title %}Главная{% endblock %}
 
 {% block admin_content %}
+
+
   {{ table_macros.render_table(
         headers,
         pbi_resource_list,
@@ -20,4 +22,5 @@
             {'name': 'resource_id', 'label': 'Ресурс'}
         ]
      ) }}
+
 {% endblock %}
