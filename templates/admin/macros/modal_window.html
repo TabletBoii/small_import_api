@@ -24,13 +24,6 @@
                   {% endfor %}
                 </select>
               {% else %}
-                <input
-                  type="{{ 'text' }}"
-                  name="{{ field.name }}"
-                  id="{{ id }}-{{ field.name }}"
-                  value="{{ field.value or '' }}"
-                  readonly
-                />
                 {% set ns.disable = true %}
               {% endif %}
             {% else %}

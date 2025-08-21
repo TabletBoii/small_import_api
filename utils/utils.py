@@ -11,7 +11,7 @@ from pandas import DataFrame
 from starlette.requests import Request
 
 from utils.constants import API_KEY, API_KEY_HEADER, security
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 
 
 def get_data(key: str) -> any:
@@ -120,3 +120,11 @@ def row_to_dict(row):
         d[column.name] = str(getattr(row, column.name))
 
     return d
+
+
+def _to_time_or_none(v: str | None) -> time | None:
+    if not v:
+        return None
+    s = v.strip()
+    hh, mm, *rest = s.split(':')
+    return time(int(hh), int(mm))

@@ -6,6 +6,7 @@ from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
 from database.sessions import WEB_SESSION_FACTORY
+from models.web.department_schedule_model import DepartmentScheduleModel
 from models.web.web_access_request_model import WebAccessRequestModel
 from models.web.web_pbi_report_data_model import WebPbiReportDataModel
 from models.web.web_resource_access_model import WebResourceAccessModel
@@ -67,7 +68,8 @@ pbi_resource_router = generate_crud_router(
                     )
                 )
                 .where(WebPbiReportDataModel.resource_id.is_(None)).where(WebResourceModel.type == 3)
-            )
+            ),
+            'WEB'
         ]
     },
 )
@@ -122,7 +124,7 @@ resource_router = generate_crud_router(
         select(
             WebResourceModel.inc,
             WebResourceModel.name,
-            WebResourceTypeModel.name.label("type"),
+            WebResourceTypeModel.name_cirill.label("type"),
             WebResourceModel.name_cirill,
             WebResourceModel.description,
         )
@@ -134,7 +136,8 @@ resource_router = generate_crud_router(
     dropdown_field_dict={
         "type": [
             WebResourceTypeModel,
-            select(WebResourceTypeModel.inc, WebResourceTypeModel.name)
+            select(WebResourceTypeModel.inc, WebResourceTypeModel.name_cirill.label('name')),
+            'WEB'
         ]
     },
     model_name="resources"
@@ -172,11 +175,13 @@ access_router = generate_crud_router(
     dropdown_field_dict={
         "user_inc": [
             WebUserModel,
-            select(WebUserModel.inc, WebUserModel.name)
+            select(WebUserModel.inc, WebUserModel.name),
+            'WEB'
         ],
         "web_resource_inc": [
             WebResourceModel,
-            select(WebResourceModel.inc, WebResourceModel.name)
+            select(WebResourceModel.inc, WebResourceModel.name),
+            'WEB'
         ]
     },
     model_name="web_access"
@@ -219,4 +224,5 @@ async def get_pending_count():
 ##################################
 from . import admin_auth
 from . import admin_access_request
+from . import admin_department_schedule
 ##################################

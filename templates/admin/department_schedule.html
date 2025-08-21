@@ -1,0 +1,111 @@
+{% extends 'admin_base.html' %}
+{% block title %}Главная{% endblock %}
+
+{% block admin_content %}
+
+    {% set days = [
+      ('mon','Пн'), ('tue','Вт'), ('wed','Ср'),
+      ('thu','Чт'), ('fri','Пт'), ('sat','Сб'), ('sun','Вс')
+    ] %}
+
+    <form method="post" action="{{ url_for('admin_save_schedule') }}">
+      <div class="table-wrapper">
+        <table class="schedule">
+          <thead>
+            <tr>
+              <th class="col-dept">Департамент</th>
+              {% for code, label in days %}
+                <th class="col-day">{{ label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for dept in departments %}
+              <tr>
+                <th class="dept">{{ dept.name }}</th>
+                {% for code, label in days %}
+                  {% set cell = (schedule.get(dept.inc, {}) or {}).get(code, {}) %}
+                  <td class="time-cell">
+                    <input
+                      type="time"
+                      class="time"
+                      name="schedule[{{ dept.inc }}][{{ code }}][start]"
+                      value="{{ cell.get('start','') }}"
+                      step="60"
+                      aria-label="Начало {{ label }}"
+                    >
+                    <span class="sep">—</span>
+                    <input
+                      type="time"
+                      class="time"
+                      name="schedule[{{ dept.inc }}][{{ code }}][end]"
+                      value="{{ cell.get('end','') }}"
+                      step="60"
+                      aria-label="Окончание {{ label }}"
+                    >
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn">Сохранить</button>
+      </div>
+    </form>
+  <style>
+    .table-wrapper{
+      overflow:auto;
+      position: relative;
+    }
+    .schedule{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border:1px solid #e5e7eb;
+    }
+    .schedule tbody tr{
+      content-visibility: auto;
+      contain-intrinsic-size: 56px;
+      contain: content;
+    }
+    .schedule thead th{
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    .schedule thead th::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0; height:1px;
+    }
+    .schedule th, .schedule td{padding:10px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align:middle}
+    .schedule tr:last-child th, .schedule tr:last-child td{border-bottom:none}
+    .col-dept{min-width:220px;}
+    .col-day{min-width:140px; text-align:center}
+    .dept{font-weight:500; }
+
+    .time-cell .sep{color:#9ca3af; user-select:none}
+    .time-cell .time{
+      width:100%;
+      padding:6px 8px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      font:14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+
+    .actions{margin-top:12px; display:flex; justify-content:flex-end}
+    .btn{background:#1abc9c; color:#fff; border:1px solid #14a389; padding:8px 14px; border-radius:8px; cursor:pointer}
+    .btn:hover{filter:brightness(.95)}
+    @media (max-width:900px){
+      .col-day{min-width:120px}
+    }
+    @media (max-width:640px){
+      .time-cell{grid-template-columns: 1fr; gap:6px}
+      .time-cell .sep{display:none}
+    }
+</style>
+{% endblock %}

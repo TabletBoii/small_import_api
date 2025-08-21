@@ -3,10 +3,11 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request, Depends, Form
 from sqlalchemy import TextClause
 from starlette.responses import RedirectResponse
-from typing import Type, Callable, List, Dict
+from typing import Type, Callable, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dao.general.admin_dao import get_all, update_by_id, delete_by_id, create
+from database.dependencies import get_web_session, get_kompas_session
 from database.sessions import WEB_SESSION_FACTORY
 from routers.templates import admin_templates
 from utils.utils import row_to_dict
@@ -23,36 +24,40 @@ def generate_crud_router(
 ) -> APIRouter:
     router = APIRouter(prefix=url_prefix, tags=[model_name])
 
-    async def get_form_context():
-        async with WEB_SESSION_FACTORY() as session:
-            if get_custom_query is not None:
-                records = await get_all(session, model, get_custom_query)
-            else:
-                records = await get_all(session, model)
-            result_list = []
-            for data in records:
-                data_dict = {}
-                for i in range(len(model_header_names)):
-                    data_dict[model_header_names[i]] = data[i]
-                result_list.append(data_dict)
-            if dropdown_field_dict is not None:
-                resulted_dropdown_field_dict = {
-                    key: {
-                        f"{d.inc}": d.name
-                        for d in
-                        await get_all(session, value[0], value[1])
-                    } for (key, value) in dropdown_field_dict.items()
-                }
-                print(result_list)
-                return {
-                    f"{model_name}_list": result_list,
-                    "dropdown_field_dict": resulted_dropdown_field_dict,
-                    "headers": table_headers
-                }
+    async def get_form_context(
+            web_sess: AsyncSession = Depends(get_web_session),
+            ddl_sess: AsyncSession = Depends(get_kompas_session),
+    ) -> Dict[str, Any]:
+        if get_custom_query is not None:
+            records = await get_all(web_sess, model, get_custom_query)
+        else:
+            records = await get_all(web_sess, model)
+
+        result_list: List[Dict[str, Any]] = []
+        for row in records:
+            d: Dict[str, Any] = {}
+            for i, col in enumerate(model_header_names):
+                d[col] = row[i]
+            result_list.append(d)
+
+        if dropdown_field_dict:
+            resulted_dropdown_field_dict = {
+                key: {
+                    f"{d.inc}": d.name
+                    for d in
+                    await get_all(ddl_sess if db_name == 'KOMPAS' else web_sess, dropdown_model, query)
+                } for key, (dropdown_model, query, db_name) in dropdown_field_dict.items()
+            }
+
+            return {
+                f"{model_name}_list": result_list,
+                "dropdown_field_dict": resulted_dropdown_field_dict,
+                "headers": table_headers,
+            }
+
         return {
             f"{model_name}_list": result_list,
-            "entity_fields": model.__field_aliases__,
-            "headers": table_headers
+            "headers": table_headers,
         }
 
     @router.get("")
@@ -70,6 +75,7 @@ def generate_crud_router(
         try:
             form = await request.form()
             data_to_update = dict(form)
+            print(data_to_update)
             for key, value in data_to_update.items():
                 if "is" in key or "has" in key:
                     if value.lower() in ["true", "да", "истина"]:

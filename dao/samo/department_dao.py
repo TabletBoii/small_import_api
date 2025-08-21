@@ -12,6 +12,13 @@ async def get(session: AsyncSession) -> Sequence[DepartmentModel]:
     return result.scalars().all()
 
 
+async def get_dict(session: AsyncSession) -> Sequence[DepartmentModel]:
+    stmt = select(DepartmentModel)
+    result = await session.execute(stmt)
+    department_instance_list = result.scalars().all()
+    return [department.to_dict() for department in department_instance_list]
+
+
 async def get_departments_by_name(session: AsyncSession, department_name_list: List[str]):
     stmt = select(DepartmentModel.inc).where(DepartmentModel.name.in_(department_name_list))
     result = await session.execute(stmt)
