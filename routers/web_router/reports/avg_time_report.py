@@ -151,7 +151,7 @@ async def report_avg_form(
     )
     controller.set_session(KOMPAS_SESSION_FACTORY)
 
-    await controller.run()
+    # excel_filepath = await controller.run()
 
     # if not os.path.exists(excel_filepath):
     #     return {"error": "File not found"}
@@ -159,9 +159,9 @@ async def report_avg_form(
     #     excel_filepath,
     #     filename="downloaded_file.xlsx"
     # )
-    # background_tasks.add_task(
-    #     controller.run
-    # )
+    background_tasks.add_task(
+        controller.run
+    )
     return RedirectResponse(f"/web/download", status_code=303)
 
 
