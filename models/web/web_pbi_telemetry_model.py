@@ -7,6 +7,8 @@ from models.base import Base
 class WebPbiTelemetryModel(Base):
     __tablename__ = "web_powerbi_telemetry"
 
+    __table_args__ = {'implicit_returning': False}
+
     inc: Mapped[int] = mapped_column(Integer, name="inc", primary_key=True)
     user_inc: Mapped[int] = mapped_column(Integer, name="user_inc")
     report_id: Mapped[int] = mapped_column(Integer, name="report_id")

@@ -9,6 +9,7 @@ from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from controllers.web.reports.WebAvgTimeReportController import WebAvgTimeReport
 from dao.samo.department_dao import get
+from dao.web.department_schedule_dao import get_distinct_department_inc
 from dao.web.download_list_dao import get_download_id
 from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
 from routers.web_router.utils import make_route_permission_deps
@@ -18,8 +19,11 @@ from utils.utils import require_user, generate_file_path
 
 async def get_form_context() -> Dict[str, List[str]]:
 
+    async with WEB_SESSION_FACTORY() as session:
+        distinct_department_inc = await get_distinct_department_inc(session)
+
     async with KOMPAS_SESSION_FACTORY() as session:
-        department_names_list = [d.name for d in await get(session)]
+        department_names_list = [d.name for d in await get(session) if d.inc in distinct_department_inc]
 
     report_types = [
         "AvgTimeReport",
@@ -147,7 +151,7 @@ async def report_avg_form(
     )
     controller.set_session(KOMPAS_SESSION_FACTORY)
 
-    # excel_filepath = await controller.run()
+    await controller.run()
 
     # if not os.path.exists(excel_filepath):
     #     return {"error": "File not found"}
@@ -155,9 +159,9 @@ async def report_avg_form(
     #     excel_filepath,
     #     filename="downloaded_file.xlsx"
     # )
-    background_tasks.add_task(
-        controller.run
-    )
+    # background_tasks.add_task(
+    #     controller.run
+    # )
     return RedirectResponse(f"/web/download", status_code=303)
 
 

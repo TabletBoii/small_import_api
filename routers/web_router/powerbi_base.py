@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 import os
 import requests
+import asyncio
+import httpx
 
 from fastapi import Depends, APIRouter
 from msal import ConfidentialClientApplication
@@ -16,9 +18,9 @@ from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_pbi_telemetry_model import WebPbiTelemetryModel
 from routers.web_router.web import web_jinja_router, templates
 from sub_app.msal_app import msal_app
+from utils.async_request_utils import safe_json_get
 from utils.msal_token_provider import PBITokenProvider
 from utils.utils import require_user
-
 
 BASE = "https://api.powerbi.com/v1.0/myorg"
 
@@ -78,33 +80,34 @@ async def get_embed_params(report_name: str):
     }
 
 
-async def get_dataset_schedule(report_name):
+async def get_dataset_details(report_name):
     access_token = pbi_token_provider.get_token()
 
-    h = {"Authorization": f"Bearer {access_token}"}
+    headers = {"Authorization": f"Bearer {access_token}"}
 
     async with WEB_SESSION_FACTORY() as session:
         pbi_report_data = await get_pbi_report_data_by_resource_name(session, report_name)
 
-    r = requests.get(f"{BASE}/groups/{pbi_report_data.workspace_id}/reports/{pbi_report_data.report_id}", headers=h)
-    r.raise_for_status()
-    rep = r.json()
-    dataset_id = rep.get("datasetId")
-    if not dataset_id:
-        raise RuntimeError("У отчёта нет datasetId (возможно, RDL/paginated) — расписание недоступно.")
+    group_id = pbi_report_data.workspace_id
+    report_id = pbi_report_data.report_id
 
-    s = requests.get(f"{BASE}/groups/{pbi_report_data.workspace_id}/datasets/{dataset_id}/refreshSchedule", headers=h)
-    if s.status_code == 404:
-        adm = requests.get(f"{BASE}/admin/datasets?$filter=id eq '{dataset_id}'", headers=h)
-        adm.raise_for_status()
-        items = adm.json().get("value", [])
-        if not items:
-            raise RuntimeError("Не удалось найти датасет через Admin API.")
-        real_group = items[0]["workspaceId"]
-        s = requests.get(f"{BASE}/groups/{real_group}/datasets/{dataset_id}/refreshSchedule", headers=h)
+    async with httpx.AsyncClient(base_url=BASE, headers=headers, timeout=30.0) as client:
 
-    s.raise_for_status()
-    return s.json()
+        dataset_data_response = await client.get(f"/groups/{group_id}/reports/{report_id}")
+        dataset_data_response.raise_for_status()
+        dataset_data_json = dataset_data_response.json()
+        dataset_id = dataset_data_json.get("datasetId")
+        if not dataset_id:
+            raise RuntimeError("У отчёта нет datasetId (возможно, paginated/RDL).")
+
+        schedule_task = safe_json_get(client, f"/groups/{group_id}/datasets/{dataset_id}/refreshSchedule")
+        refreshes_task = safe_json_get(client, f"/groups/{group_id}/datasets/{dataset_id}/refreshes?$top=1")
+
+        schedule_json, refreshes_json = await asyncio.gather(
+            schedule_task, refreshes_task
+        )
+
+        return schedule_json, refreshes_json
 
 
 pbi_router = APIRouter(
@@ -116,8 +119,8 @@ pbi_router = APIRouter(
 
 @pbi_router.get("/embed-params/{route_param}")
 async def embed_params(
-    route_param: str,
-    user: str = Depends(require_user)
+        route_param: str,
+        user: str = Depends(require_user)
 ):
     return await get_embed_params(route_param)
 
@@ -130,7 +133,9 @@ async def power_bi_base(
         route_param: str,
         user: str = Depends(require_user)
 ):
-    report_update_details = await get_dataset_schedule(route_param)
+    report_update_details, last_update_json = await get_dataset_details(route_param)
+    last_update_date = datetime.fromisoformat(last_update_json["value"][0]["endTime"].replace('Z', '+00:00')) + timedelta(hours=5)
+    last_update_status = last_update_json["value"][0]["status"]
     report_update_times = []
     for time in report_update_details["times"]:
         ua_time = datetime.strptime(time, "%H:%M") - timedelta(hours=2)
@@ -143,7 +148,9 @@ async def power_bi_base(
             "user": user,
             "data": route_param,
             "error": None,
-            "update_times": report_update_times
+            "update_times": report_update_times,
+            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M"),
+            "last_update_status": last_update_status,
         }
     )
 

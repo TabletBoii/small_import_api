@@ -13,6 +13,12 @@ async def get_department_schedule(session: AsyncSession) -> Sequence[dict]:
     return [department.to_dict() for department in department_schedule_instance_list]
 
 
+async def get_distinct_department_inc(session: AsyncSession):
+    stmt = select(DepartmentScheduleModel.department_inc.distinct())
+    result = await session.execute(stmt)
+    return result.scalars().all()
+
+
 async def insert_all(session: AsyncSession, department_schedule_data: list[DepartmentScheduleModel]):
     session.add_all(department_schedule_data)
     await session.commit()
@@ -53,22 +59,28 @@ MERGE dbo.department_schedule WITH (HOLDLOCK) AS t
 USING #Src AS s
   ON  t.department_inc = s.department_inc
   AND t.week_day       = s.week_day
+
 WHEN MATCHED
-     AND s.start_time IS NULL
-     AND s.end_time   IS NULL
+     AND (s.start_time IS NULL OR s.end_time IS NULL)
 THEN
   DELETE
+
 WHEN MATCHED
+     AND s.start_time IS NOT NULL
+     AND s.end_time   IS NOT NULL
 THEN
   UPDATE SET t.start_time = s.start_time,
              t.end_time   = s.end_time
+
 WHEN NOT MATCHED BY TARGET
-     AND (s.start_time IS NOT NULL OR s.end_time IS NOT NULL)
+     AND s.start_time IS NOT NULL
+     AND s.end_time   IS NOT NULL
 THEN
   INSERT (department_inc, week_day, start_time, end_time)
   VALUES (s.department_inc, s.week_day, s.start_time, s.end_time)
+
 WHEN NOT MATCHED BY SOURCE
-     AND t.department_inc IN (SELECT DISTINCT department_inc FROM #Src)
 THEN
   DELETE;
         """))
+        await session.execute(text("DROP TABLE #Src;"))

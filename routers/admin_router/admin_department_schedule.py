@@ -82,6 +82,7 @@ async def admin_save_schedule(
             en = _to_time_or_none(cell.get('end'))
             if st is None or en is None:
                 continue
+
             models.append(DepartmentScheduleModel(
                 department_inc=dept_id,
                 week_day=day_code,

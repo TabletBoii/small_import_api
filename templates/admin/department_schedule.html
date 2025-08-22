@@ -17,34 +17,62 @@
               {% for code, label in days %}
                 <th class="col-day">{{ label }}</th>
               {% endfor %}
+              <th class="col-actions">Действия</th>
             </tr>
           </thead>
           <tbody>
             {% for dept in departments %}
               <tr>
                 <th class="dept">{{ dept.name }}</th>
+
                 {% for code, label in days %}
                   {% set cell = (schedule.get(dept.inc, {}) or {}).get(code, {}) %}
                   <td class="time-cell">
-                    <input
-                      type="time"
-                      class="time"
-                      name="schedule[{{ dept.inc }}][{{ code }}][start]"
-                      value="{{ cell.get('start','') }}"
-                      step="60"
-                      aria-label="Начало {{ label }}"
-                    >
+                    <div class="time-wrap">
+                      <input
+                        type="time"
+                        class="time"
+                        name="schedule[{{ dept.inc }}][{{ code }}][start]"
+                        value="{{ cell.get('start','') }}"
+                        step="60"
+                        aria-label="Начало {{ label }}"
+                        data-day="{{ code }}" data-kind="start"
+                      >
+                      <div class="time-tools">
+                        <button type="button" class="icon-btn" data-act="clear"  title="Очистить">✖</button>
+                        <button type="button" class="icon-btn" data-act="copy"   title="Копировать">⧉</button>
+                        <button type="button" class="icon-btn" data-act="paste"  title="Вставить">📋</button>
+                      </div>
+                    </div>
+
                     <span class="sep">—</span>
-                    <input
-                      type="time"
-                      class="time"
-                      name="schedule[{{ dept.inc }}][{{ code }}][end]"
-                      value="{{ cell.get('end','') }}"
-                      step="60"
-                      aria-label="Окончание {{ label }}"
-                    >
+
+                    <div class="time-wrap">
+                      <input
+                        type="time"
+                        class="time"
+                        name="schedule[{{ dept.inc }}][{{ code }}][end]"
+                        value="{{ cell.get('end','') }}"
+                        step="60"
+                        aria-label="Окончание {{ label }}"
+                        data-day="{{ code }}" data-kind="end"
+                      >
+                      <div class="time-tools">
+                        <button type="button" class="icon-btn" data-act="clear"  title="Очистить">✖</button>
+                        <button type="button" class="icon-btn" data-act="copy"   title="Копировать">⧉</button>
+                        <button type="button" class="icon-btn" data-act="paste"  title="Вставить">📋</button>
+                      </div>
+                    </div>
                   </td>
                 {% endfor %}
+
+                {# Кнопки для всей строки #}
+                <td class="row-actions">
+                  <div class="row-actions-col">
+                    <button type="button" class="btn small row-copy">Скопировать</button>
+                    <button type="button" class="btn ghost small row-paste">Вставить</button>
+                  </div>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -97,6 +125,39 @@
       font:14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
 
+    .time-cell{align-items:center; gap:8px}
+    .time-wrap{display:flex; align-items:center; gap:6px; flex:1 1 0}
+    .time-wrap .time{flex:1 1 auto; width:auto}
+    .time-tools{display:flex; gap:4px}
+
+    .col-actions{ width: 180px; text-align: right; }
+    td.row-actions{ padding: 8px; position: relative; }
+
+    .row-actions-col{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn.small{padding:6px 10px; font-size:12px}
+    .btn.ghost{background:#fff; color:#111827; border-color:#e5e7eb}
+    .btn.ghost:hover{background:#f3f4f6}
+
+    .icon-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:26px; height:26px; border-radius:6px; cursor:pointer;
+      border:1px solid #d1d5db; background:#fff; font-size:13px; line-height:1;
+      transition:transform .06s ease, background .15s ease, border-color .15s ease;
+    }
+    .icon-btn:hover{background:#f3f4f6; border-color:#cbd5e1}
+    .icon-btn:active{transform:translateY(1px)}
+    .icon-btn[data-act="copy"] { color: var(--ui-accent-2, #0ea5e9); }
+    .icon-btn[data-act="paste"]{ color: var(--ui-accent,   #1abc9c); }
+    .icon-btn[data-act="clear"]{ color: #b42318; }
+
+
     .actions{margin-top:12px; display:flex; justify-content:flex-end}
     .btn{background:#1abc9c; color:#fff; border:1px solid #14a389; padding:8px 14px; border-radius:8px; cursor:pointer}
     .btn:hover{filter:brightness(.95)}
@@ -108,4 +169,67 @@
       .time-cell .sep{display:none}
     }
 </style>
+<script>
+  (function(){
+    let timeClipboard = "";
+    let rowScheduleClipboard = null;
+
+    document.addEventListener('click', function(e){
+      const btn = e.target.closest('button');
+      if (!btn) return;
+
+      if (btn.classList.contains('icon-btn')) {
+        const wrap  = btn.closest('.time-wrap');
+        const input = wrap && wrap.querySelector('input[type="time"]');
+        if (!input) return;
+        const act = btn.dataset.act;
+        if (act === 'clear') { input.value = ''; return; }
+        if (act === 'copy')  { timeClipboard = input.value || ''; return; }
+        if (act === 'paste') { if (timeClipboard) input.value = timeClipboard; return; }
+        return;
+      }
+
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const collectRow = (tr) => {
+        const out = {};
+        tr.querySelectorAll('td.time-cell').forEach(td => {
+          const start = td.querySelector('input[data-kind="start"]');
+          const end   = td.querySelector('input[data-kind="end"]');
+          const day   = (start || end)?.dataset.day;
+          if (!day) return;
+          out[day] = { start: start?.value || '', end: end?.value || '' };
+        });
+        return out;
+      };
+
+      const applyRow = (tr, clip) => {
+        if (!clip) return;
+        tr.querySelectorAll('td.time-cell').forEach(td => {
+          const start = td.querySelector('input[data-kind="start"]');
+          const end   = td.querySelector('input[data-kind="end"]');
+          const day   = (start || end)?.dataset.day;
+          if (!day || !(day in clip)) return;
+          if (start) start.value = clip[day].start || '';
+          if (end)   end.value   = clip[day].end   || '';
+        });
+      };
+
+      if (btn.classList.contains('row-copy')) {
+        rowScheduleClipboard = collectRow(row);
+        row.classList.add('copied');
+        setTimeout(()=>row.classList.remove('copied'), 300);
+        return;
+      }
+
+      if (btn.classList.contains('row-paste')) {
+        applyRow(row, rowScheduleClipboard);
+        row.classList.add('pasted');
+        setTimeout(()=>row.classList.remove('pasted'), 300);
+        return;
+      }
+    }, false);
+  })();
+</script>
 {% endblock %}

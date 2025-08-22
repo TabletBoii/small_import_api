@@ -11,29 +11,19 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from controllers.abstract_file_generator_controller import AbstractFileGeneratorController
 from dao.samo import message_dao, usnames_dao
 from dao.samo.department_dao import get_departments_by_name, get_department_name_by_id
-from database.sessions import KOMPAS_SESSION_FACTORY
+from dao.web.department_schedule_dao import get_department_schedule
+from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
 from dataclasses_custom.schedule import WorkingHours
 from utils.file_export.excel_export import ExportExcel
 
-department_schedule = {
-    13: [
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(10, 17),
-        WorkingHours(10, 16)
-    ],
-    11: [
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(9, 21),
-        WorkingHours(10, 17),
-        WorkingHours(10, 16)
-    ]
+week_days_by_number = {
+    "mon": 0,
+    "tue": 1,
+    "wed": 2,
+    "thu": 3,
+    "fri": 4,
+    "sat": 5,
+    "sun": 6
 }
 
 
@@ -116,6 +106,22 @@ class WebAvgTimeReport(AbstractFileGeneratorController):
                 name_pattern=self.name_pattern
             )
 
+        async with WEB_SESSION_FACTORY() as session:
+            department_schedule_dict = await get_department_schedule(session)
+        department_schedule = {}
+        for schedule in department_schedule_dict:
+            department_schedule[schedule["department_inc"]] = [0, 0, 0, 0, 0, 0, 0]
+
+        for schedule in department_schedule_dict:
+            department_schedule[schedule["department_inc"]][week_days_by_number[schedule["week_day"]]] = WorkingHours(
+                schedule["start_time"].hour,
+                schedule["end_time"].hour
+            )
+        print(department_schedule)
+        for key, value in department_schedule.items():
+            if value[6] == 0:
+                department_schedule[key].pop(6)
+
         resulted_collection: Dict[str, List[int, int, int]] = {}
         for dept_id, aggregated_message_dict_by_claim in self.raw_data_per_department.items():
             avg_time = timedelta()
@@ -155,34 +161,48 @@ class WebAvgTimeReport(AbstractFileGeneratorController):
                         employee_response_date: datetime = message[3]
                         client_msg_weekday = client_msg_date.weekday()
                         employee_msg_weekday = employee_response_date.weekday()
-
-                        if (department_schedule[dept_id][employee_msg_weekday].begin > employee_response_date.hour
-                                or employee_response_date.hour >= department_schedule[dept_id][
-                                    employee_msg_weekday].end):
-                            ...
-                            continue
-
-                        if client_msg_date.hour < department_schedule[dept_id][client_msg_weekday].begin:
-                            adate_diff = employee_response_date - datetime(
-                                year=client_msg_date.year,
-                                month=client_msg_date.month,
-                                day=client_msg_date.day,
-                                hour=department_schedule[dept_id][client_msg_weekday].begin,
-                                minute=0,
-                                second=0
-                            )
-                        elif client_msg_date.hour >= department_schedule[dept_id][client_msg_weekday].end:
+                        if len(department_schedule[dept_id]) == 6 and client_msg_weekday == 6:
                             next_day = client_msg_date + timedelta(days=1)
                             adate_diff = (employee_response_date
                                           - next_day.replace(
-                                        hour=department_schedule[dept_id][employee_msg_weekday].begin,
+                                        hour=department_schedule[dept_id][0].begin,
                                         minute=0,
                                         second=0,
                                         microsecond=0)
                                           )
                         else:
-                            adate_diff = employee_response_date - client_msg_date
-                            # TODO заявка 1275722, ID сообщений: 6456240, 6456332, 6458931
+                            if len(department_schedule[dept_id]) == 6 and employee_msg_weekday == 6:
+                                continue
+                            if (department_schedule[dept_id][employee_msg_weekday].begin > employee_response_date.hour
+                                    or employee_response_date.hour >= department_schedule[dept_id][
+                                        employee_msg_weekday].end):
+                                ...
+                                continue
+                            """
+                                ВАЖНО - исходя из нынешней логики, каждый отдел должен иметь как минимум 6 рабочих дней
+                            """
+
+                            if client_msg_date.hour < department_schedule[dept_id][client_msg_weekday].begin:
+                                adate_diff = employee_response_date - datetime(
+                                    year=client_msg_date.year,
+                                    month=client_msg_date.month,
+                                    day=client_msg_date.day,
+                                    hour=department_schedule[dept_id][client_msg_weekday].begin,
+                                    minute=0,
+                                    second=0
+                                )
+                            elif client_msg_date.hour >= department_schedule[dept_id][client_msg_weekday].end:
+                                next_day = client_msg_date + timedelta(days=1)
+                                adate_diff = (employee_response_date
+                                              - next_day.replace(
+                                            hour=department_schedule[dept_id][employee_msg_weekday].begin,
+                                            minute=0,
+                                            second=0,
+                                            microsecond=0)
+                                              )
+                            else:
+                                adate_diff = employee_response_date - client_msg_date
+                                # TODO заявка 1275722, ID сообщений: 6456240, 6456332, 6458931
                         if adate_diff >= timedelta(hours=4):
                             ...
                         else:
@@ -193,7 +213,7 @@ class WebAvgTimeReport(AbstractFileGeneratorController):
                     message_author_sequence_list.clear()
             async with self.session_factory() as session:
                 dept_name = await get_department_name_by_id(session, dept_id)
-            resulted_collection[dept_name] = [avg_time/avg_time_count, incoming_msg_count, outcoming_msg_count]
+            resulted_collection[dept_name] = [avg_time / avg_time_count if avg_time_count != 0 else 0, incoming_msg_count, outcoming_msg_count]
         return resulted_collection
 
     async def generate_excel_bytes(
