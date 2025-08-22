@@ -134,7 +134,12 @@ async def power_bi_base(
         user: str = Depends(require_user)
 ):
     report_update_details, last_update_json = await get_dataset_details(route_param)
-    last_update_date = datetime.fromisoformat(last_update_json["value"][0]["endTime"].replace('Z', '+00:00')) + timedelta(hours=5)
+    print(last_update_json)
+    last_update_date_value = last_update_json["value"][0].get("endTime", None)
+    if last_update_date_value is not None:
+        last_update_date = datetime.fromisoformat(last_update_date_value.replace('Z', '+00:00')) + timedelta(hours=5)
+    else:
+        last_update_date = 'Обновление'
     last_update_status = last_update_json["value"][0]["status"]
     report_update_times = []
     for time in report_update_details["times"]:
@@ -149,7 +154,7 @@ async def power_bi_base(
             "data": route_param,
             "error": None,
             "update_times": report_update_times,
-            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M"),
+            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M") if last_update_date != 'Обновление' else last_update_date,
             "last_update_status": last_update_status,
         }
     )
