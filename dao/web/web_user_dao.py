@@ -28,10 +28,13 @@ async def create_user(session: AsyncSession, user: WebUserModel) -> None:
     await session.refresh(user)
 
 
-async def get_user_by_username(session: AsyncSession, username: str) -> WebUserModel:
-    stmt = select(WebUserModel).where(WebUserModel.name == username)
-    result = await session.execute(stmt)
-    return result.scalars().first()
+async def get_user_by_username(session: AsyncSession, username: str) -> WebUserModel | None:
+    stmt = (
+        select(WebUserModel)
+        .where(WebUserModel.name == username)
+        .limit(1)
+    )
+    return await session.scalar(stmt)
 
 
 async def get_user_by_id(session: AsyncSession, user_id: int) -> WebUserModel:
