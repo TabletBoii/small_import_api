@@ -8,6 +8,7 @@ __pycache__
 logs
 log.log
 logs.log
+**/logs.log.????-??-??
 
 logs*
 
