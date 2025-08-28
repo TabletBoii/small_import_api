@@ -134,13 +134,21 @@ async def power_bi_base(
         user: str = Depends(require_user)
 ):
     report_update_details, last_update_json = await get_dataset_details(route_param)
-    print(last_update_json)
-    last_update_date_value = last_update_json["value"][0].get("endTime", None)
+    if len(last_update_json["value"]) == 0:
+        last_update_date_value = None
+    else:
+        last_update_date_value = last_update_json["value"][0].get("endTime", None)
+
     if last_update_date_value is not None:
         last_update_date = datetime.fromisoformat(last_update_date_value.replace('Z', '+00:00')) + timedelta(hours=5)
+        last_update_status = last_update_json["value"][0]["status"]
+    elif len(last_update_json["value"]) == 0 and last_update_date_value is None:
+        last_update_date = 'Не обновлено'
+        last_update_status = "Автоматическое обновление не настроено"
     else:
+        last_update_status = last_update_json["value"][0]["status"]
         last_update_date = 'Обновление'
-    last_update_status = last_update_json["value"][0]["status"]
+
     report_update_times = []
     for time in report_update_details["times"]:
         ua_time = datetime.strptime(time, "%H:%M") - timedelta(hours=2)
@@ -154,7 +162,7 @@ async def power_bi_base(
             "data": route_param,
             "error": None,
             "update_times": report_update_times,
-            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M") if last_update_date != 'Обновление' else last_update_date,
+            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M") if last_update_date not in ('Обновление','Не обновлено') else last_update_date,
             "last_update_status": last_update_status,
         }
     )
