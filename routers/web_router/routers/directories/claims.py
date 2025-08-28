@@ -1,21 +1,20 @@
 import json
-import os
 from typing import Optional, Dict, List
 
 from fastapi import Depends, Form, BackgroundTasks, APIRouter
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, FileResponse, RedirectResponse
+from starlette.responses import HTMLResponse, RedirectResponse
 
 from controllers.web.directories.ClaimDirectoryController import ClaimDirectoryController
 from dao.samo.claim_procedure import title_alias_dict
-from dao.web.web_user_dao import get_user_by_username
-from dao.web.resource_dao import get_web_resource_by_name
-from dao.web.download_list_dao import add_download, get_download_id
+from dao.web.download_list_dao import get_download_id
 from database.sessions import KOMPAS_SESSION_FACTORY, WEB_SESSION_FACTORY
-from models.web.web_download_list_model import WebDownloadListModel
+from routers.web_router.navigator.navigator_base import Navigator
+from routers.web_router.routers.directories.base import directories_router
 from routers.web_router.utils import make_route_permission_deps
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.web_base import templates, navigation
 from utils.utils import require_user, generate_file_path
+
 
 main_fields = [
     "Код заказчика",
@@ -144,14 +143,14 @@ async def validate_avg_report_input(
 
 
 claims_router = APIRouter(
-    prefix="/directory_claims",
+    prefix=navigation.directories.directory_claims.path,
     dependencies=[Depends(make_route_permission_deps('directory_claims'))],
     tags=["Справочник заявок"],
 )
 
 
 @claims_router.get(
-    "",
+    navigation.directories.directory_claims.template.path,
     response_class=HTMLResponse
 )
 async def directory_claims(
@@ -179,7 +178,7 @@ async def directory_claims(
     )
 
 
-@claims_router.post("")
+@claims_router.post(navigation.directories.directory_claims.form.path)
 async def directory_claims_form(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -275,5 +274,3 @@ async def directory_claims_form(
         controller.streaming_run
     )
     return RedirectResponse(f"/web/download", status_code=303)
-
-web_jinja_router.include_router(claims_router)

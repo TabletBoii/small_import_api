@@ -5,7 +5,7 @@
   <div class="center_container">
     <h1>Отчет: Среднее время ответа</h1>
 
-    <form method="post" action="/web/report_avg">
+    <form method="post" action="{{url_for(navigation.reports.avg_time_report.form.func_name)}}">
       <div class="form-group">
         <label for="start_date">Дата начала</label>
         <input

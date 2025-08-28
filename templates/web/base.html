@@ -19,29 +19,30 @@
   <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.0/dist/powerbi.js"></script>
 </head>
 <body>
+
   <header>
-    <div class="logo"><a href="{{ url_for('web_home') }}">KOMPAS</a></div>
+    <div class="logo"><a href="{{ url_for(navigation.home.func_name) }}">KOMPAS</a></div>
 
     <nav>
       <ul>
         <li>
-          <a href="{{ url_for('reports') }}"
+          <a href="{{ url_for(navigation.reports.func_name) }}"
              class="home_header_item {% if request.url.path == '/web/reports' %}active{% endif %}">
              Отчеты
           </a>
-          <a href="{{ url_for('directories') }}"
+          <a href="{{ url_for(navigation.directories.func_name) }}"
              class="home_header_item {% if request.url.path == '/web/directories' %}active{% endif %}">
              Справочники
           </a>
-          <a href="{{ url_for('download') }}"
+          <a href="{{ url_for(navigation.download.download_template.func_name) }}"
              class="home_header_item {% if request.url.path == '/web/download' %}active{% endif %}">
              Загрузки
           </a>
-          <a href="{{ url_for('power_bi') }}"
+          <a href="{{ url_for(navigation.powerbi_base.power_bi.func_name) }}"
              class="home_header_item {% if request.url.path == '/web/power_bi' %}active{% endif %}">
              Отчеты PowerBI
           </a>
-          <a href="{{ url_for('access_request') }}"
+          <a href="{{ url_for(navigation.access_request.template.func_name) }}"
              class="home_header_item {% if request.url.path == '/web/access_request' %}active{% endif %}">
              Запрос Доступа
           </a>

@@ -11,17 +11,18 @@ from dao.web.download_list_dao import get_download_list_by_username, get_pydanti
     get_download_by_id
 from database.sessions import WEB_SESSION_FACTORY
 from pydantic_models.web_models import DownloadItem
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.navigator.navigator_base import Navigator
+from routers.web_router.web_base import templates, navigation
 from utils.utils import require_user
 
 
 download_router = APIRouter(
-    prefix="/download",
+    prefix=navigation.download.path,
     tags=["Загрузка"],
 )
 
 
-@download_router.get("", response_class=HTMLResponse)
+@download_router.get(navigation.download.download_template.path, response_class=HTMLResponse)
 async def download(
     request: Request,
     user: str = Depends(require_user),
@@ -36,7 +37,7 @@ async def download(
     )
 
 
-@download_router.get("/get_downloads", response_model=List[DownloadItem])
+@download_router.get(navigation.download.get_downloads.path, response_model=List[DownloadItem])
 async def get_downloads(
     user: str = Depends(require_user),
 ):
@@ -46,7 +47,7 @@ async def get_downloads(
     return download_list
 
 
-@download_router.get("/{download_id}")
+@download_router.get(navigation.download.download_report.path)
 async def download_report(
     download_id: int,
     user: str = Depends(require_user),
@@ -68,6 +69,3 @@ async def download_report(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename=os.path.basename(download_item.file_path),
     )
-
-
-web_jinja_router.include_router(download_router)

@@ -1,11 +1,9 @@
 from datetime import datetime, timedelta
-import os
 import requests
 import asyncio
 import httpx
 
 from fastapi import Depends, APIRouter
-from msal import ConfidentialClientApplication
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -16,7 +14,8 @@ from dao.web.role_dao import get_user_permissions
 from dao.web.web_user_dao import get_user_by_username
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_pbi_telemetry_model import WebPbiTelemetryModel
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.routers.powerbi_reports.base import powerbi_router
+from routers.web_router.web_base import templates, navigation
 from sub_app.msal_app import msal_app
 from utils.async_request_utils import safe_json_get
 from utils.msal_token_provider import PBITokenProvider
@@ -111,13 +110,12 @@ async def get_dataset_details(report_name):
 
 
 pbi_router = APIRouter(
-    prefix="/power_bi_base",
-    dependencies=[Depends(power_bi_routes_permission_deps)],
-    tags=["Отчеты PowerBI"],
+    prefix=navigation.powerbi_base.power_bi_base_actions.path,
+    dependencies=[Depends(power_bi_routes_permission_deps)]
 )
 
 
-@pbi_router.get("/embed-params/{route_param}")
+@pbi_router.get(navigation.powerbi_base.power_bi_base_actions.embed_params.path)
 async def embed_params(
         route_param: str,
         user: str = Depends(require_user)
@@ -126,7 +124,7 @@ async def embed_params(
 
 
 @pbi_router.get(
-    "/{route_param}"
+    navigation.powerbi_base.power_bi_base_actions.power_bi_base_template.path
 )
 async def power_bi_base(
         request: Request,
@@ -134,13 +132,21 @@ async def power_bi_base(
         user: str = Depends(require_user)
 ):
     report_update_details, last_update_json = await get_dataset_details(route_param)
-    print(last_update_json)
-    last_update_date_value = last_update_json["value"][0].get("endTime", None)
+    if len(last_update_json["value"]) == 0:
+        last_update_date_value = None
+    else:
+        last_update_date_value = last_update_json["value"][0].get("endTime", None)
+
     if last_update_date_value is not None:
         last_update_date = datetime.fromisoformat(last_update_date_value.replace('Z', '+00:00')) + timedelta(hours=5)
+        last_update_status = last_update_json["value"][0]["status"]
+    elif len(last_update_json["value"]) == 0 and last_update_date_value is None:
+        last_update_date = 'Не обновлено'
+        last_update_status = "Автоматическое обновление не настроено"
     else:
+        last_update_status = last_update_json["value"][0]["status"]
         last_update_date = 'Обновление'
-    last_update_status = last_update_json["value"][0]["status"]
+
     report_update_times = []
     for time in report_update_details["times"]:
         ua_time = datetime.strptime(time, "%H:%M") - timedelta(hours=2)
@@ -154,13 +160,13 @@ async def power_bi_base(
             "data": route_param,
             "error": None,
             "update_times": report_update_times,
-            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M") if last_update_date != 'Обновление' else last_update_date,
+            "last_update_date": last_update_date.strftime("%Y-%m-%d %H:%M") if last_update_date not in ('Обновление','Не обновлено') else last_update_date,
             "last_update_status": last_update_status,
         }
     )
 
 
-@pbi_router.post("/telemetry/{route_param}")
+@pbi_router.post(navigation.powerbi_base.power_bi_base_actions.power_bi_telemetry.path)
 async def power_bi_telemetry(
         request: Request,
         route_param: str,
@@ -180,6 +186,3 @@ async def power_bi_telemetry(
             page_title=data_dict.get("pageTitle", None),
             create_date=create_date
         ))
-
-
-web_jinja_router.include_router(pbi_router)

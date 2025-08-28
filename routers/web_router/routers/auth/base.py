@@ -8,13 +8,14 @@ from starlette.exceptions import HTTPException
 from dao.web.web_user_dao import create_user, get_user_by_username, is_user_exists_by_microsoft_oid
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_user_model import WebUserModel
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.navigator.navigator_base import Navigator
+from routers.web_router.web_base import templates, navigation
 from sub_app.msal_app import msal_app
 from utils.hashing import Hasher
 from utils.msal_scopes import AUTH_SCOPE
 
 auth_router = APIRouter(
-    prefix="/login",
+    prefix=navigation.auth.path,
     tags=["Авторизация"],
 )
 
@@ -81,12 +82,12 @@ async def create_user_if_not_exists(microsoft_oid: str, username: str):
         await session.commit()
 
 
-@auth_router.get("")
+@auth_router.get(navigation.auth.template.path)
 async def login_get(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@auth_router.post("")
+@auth_router.post(navigation.auth.form.path)
 async def login_post(
         request: Request,
         username: str = Form(...),
@@ -104,7 +105,7 @@ async def login_post(
     return RedirectResponse(url="/web/home", status_code=302)
 
 
-@auth_router.get("/microsoft")
+@auth_router.get(navigation.auth.microsoft_login.path)
 async def login_via_microsoft(
         request: Request
 ):
@@ -112,7 +113,7 @@ async def login_via_microsoft(
     return RedirectResponse(auth_url)
 
 
-@auth_router.get("/aad/callback", name="auth_callback")
+@auth_router.get(navigation.auth.auth_callback.path, name="auth_callback")
 async def auth_callback(request: Request):
     token_result = exchange_code_for_token(request)
 
@@ -147,11 +148,3 @@ async def auth_callback(request: Request):
     )
     request.session["user"] = email
     return response
-
-
-web_jinja_router.include_router(auth_router)
-
-# @web_jinja_router.get("/logout")
-# async def logout(request: Request):
-#     request.session.clear()
-#     return RedirectResponse(url="/login", status_code=302)

@@ -6,7 +6,7 @@
   <div class="center_container">
     <h1>Отчет: DMC</h1>
 
-    <form method="post" action="/web/report_dmc">
+    <form method="post" action="{{url_for(navigation.reports.report_dmc.form.func_name)}}">
       <div class="form-group">
         <label for="start_date_p1">Дата начала (Период 1)</label>
         <input

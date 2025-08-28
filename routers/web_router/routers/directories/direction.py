@@ -7,8 +7,10 @@ from starlette.responses import HTMLResponse
 from dao.web.direction_list_dao import get_all, delete_by_inc, update_by_inc, create
 from database.sessions import WEB_SESSION_FACTORY
 from pydantic_models.web_models import Direction
+from routers.web_router.navigator.navigator_base import Navigator
+from routers.web_router.routers.directories.base import directories_router
 from routers.web_router.utils import make_route_permission_deps
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.web_base import templates, navigation
 from utils.utils import require_user
 
 table_keys = [
@@ -53,14 +55,14 @@ async def get_form_context():
 
 
 direction_router = APIRouter(
-    prefix="/directory_direction",
+    prefix=navigation.directories.directory_direction.path,
     dependencies=[Depends(make_route_permission_deps('directory_direction'))],
     tags=["Справочник направлений"],
 )
 
 
 @direction_router.get(
-    "",
+    navigation.directories.directory_direction.template.path,
     response_class=HTMLResponse
 )
 async def directory_direction(
@@ -80,7 +82,7 @@ async def directory_direction(
 
 
 @direction_router.post(
-    ""
+    navigation.directories.directory_direction.form.path
 )
 async def directory_direction_form(
         request: Request,
@@ -139,6 +141,3 @@ async def directory_direction_form(
 
         if len(to_insert) != 0:
             await create(session=session, list_to_create=to_insert)
-
-
-web_jinja_router.include_router(direction_router)

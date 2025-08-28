@@ -10,12 +10,13 @@ from dao.web.resource_dao import get_resource_list, get_resource_type_list, get_
 from dao.web.web_user_dao import get_user_by_username
 from database.sessions import WEB_SESSION_FACTORY
 from models.web.web_access_request_model import WebAccessRequestModel
-from routers.web_router.web import web_jinja_router, templates
+from routers.web_router.navigator.navigator_base import Navigator
+from routers.web_router.web_base import templates, navigation
 from utils.utils import require_user
 
 access_request_router = APIRouter(
-    prefix="/access_request",
-    tags=["Загрузка"],
+    prefix=navigation.access_request.path,
+    tags=["Запрос доступа"],
 )
 
 
@@ -58,7 +59,7 @@ async def get_form_context(user: str) -> dict[str, dict[Any, list[Any]]]:
     }
 
 
-@access_request_router.get("", response_class=HTMLResponse)
+@access_request_router.get(navigation.access_request.template.path, response_class=HTMLResponse)
 async def access_request(
         request: Request,
         user: str = Depends(require_user),
@@ -74,7 +75,7 @@ async def access_request(
     )
 
 
-@access_request_router.post("/{resource_id}")
+@access_request_router.post(navigation.access_request.form.path)
 async def make_request(
         request: Request,
         resource_id: int,
@@ -92,5 +93,3 @@ async def make_request(
         ))
 
     return RedirectResponse(f"/web/access_request", status_code=303)
-
-web_jinja_router.include_router(access_request_router)
