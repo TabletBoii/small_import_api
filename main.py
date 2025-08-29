@@ -27,9 +27,12 @@ sys.stdout.reconfigure(encoding='utf-8')
 env_status = os.getenv("APP_ENV", "dev")
 logging_path = f"logging.{env_status}.yaml"
 
-with open(logging_path, "r", encoding="utf-8") as f:
-    config = yaml.safe_load(f)
-logging.config.dictConfig(config)
+
+def setup_logging(path: str):
+    with open(path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    logging.config.dictConfig(cfg)
+
 
 middleware_list = [
     Middleware(
@@ -76,8 +79,12 @@ async def mark_interrupted_downloads():
         await session.commit()
 
 
+@app.on_event("startup")
+def _configure_logging():
+    setup_logging(logging_path)
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
-# TODO: Создать admin панель
 # TODO: Добавить в web загрузку при обработке отчета, справочника т.д.

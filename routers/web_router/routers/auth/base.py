@@ -30,11 +30,10 @@ async def validate_input(username: str, password: str) -> [bool, str | None]:
     else:
         ...
     async with WEB_SESSION_FACTORY() as session:
-        # TODO: проверить вход с пустым полем password пользователей, вошедших через microsoft
         user = await get_user_by_username(session, username)
-        if user.hashed_password == "":
-            return False, "Invalid credentials"
         if user is None:
+            return False, "Invalid credentials"
+        if user.hashed_password == "":
             return False, "Invalid credentials"
         elif not Hasher.verify_password(password, user.hashed_password):
             return False, "Invalid credentials"
